@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}研发管理信息系统{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+        <div class="head" id="A1">
+            <div style="text-align:center">
+                <h1><b>产品信息</b></h1>
+            </div>
+            <div class="list">
+                <ul>
+                    <li>
+                        <h2>产品货架信息</h2>
+                        <hr>
+                        <table border="2">
+                            <tr style="text-align:left">
+                                <th width="300px">产品名称</th>
+                                <th width="300px">代号</th>
+                                <th width="300px">版本</th>
+                                <th width="300px">发布日期</th>
+                            </tr>
+                            {% for pd in products %}
+                            <tr>
+                                <td>{{ pd["name"] }}</td>
+                                <td>{{ pd["code"] }}</td>
+                                <td>{{ pd["version"] }}</td>
+                                <td>{{ pd["release"] }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td><b>总计</b>（个）</td>
+                                <td>{{ pd_total }}</td>
+                            </tr>
+                        </table>
+                        <h2>产品交付信息</h2>
+                        <hr>
+                        <table border="2">
+                            <tr style="text-align:left">
+                                <th width="300px">项目名称</th>
+                                <th width="300px">代号</th>
+                                <th width="300px">版本</th>
+                                <th width="300px">安装地址</th>
+                                <th width="300px">交付日期</th>
+                            </tr>
+                            {% for dl in pd_delivers %}
+                            <tr>
+                                <td>{{ dl["name"] }}</b></td>
+                                <td>{{ dl["code"] }}</td>
+                                <td>{{ dl["version"] }}</td>
+                                <td>{{ dl["address"] }}</td>
+                                <td>{{ dl["date"] }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td><b>总计</b>（产品安装数）</td>
+                                <td>{{ dl_total }}</td>
+                            </tr>
+                        </table>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <br>
+        <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
+</div>
+{% endblock %}

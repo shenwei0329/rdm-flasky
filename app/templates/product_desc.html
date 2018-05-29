@@ -1,0 +1,54 @@
+                        <div>
+                            <a href="/static/images/{{ pd_code }}.pdf">下载报告</a>
+                            <hr/>
+                            <ul>
+                                <li><b>里程碑：</b>{{ pd_landmark }}</li>
+                                <li><b>当前阶段：</b>{{ pd_step }}</li>
+                                <li><b>任务总数：</b>{{ total_task }}</li>
+                                <li><b>任务完成率：</b>{{ ratio }}</li>
+                            </ul>
+                            <br/>
+                            <h3><b>个人数据统计：</b></h3>
+                            <hr/>
+                            <table border="2">
+                                <tr style="text-align:center">
+                                    <th width="300px" style="text-align:center">名称</th>
+                                    <th width="300px" style="text-align:center">完成率</th>
+                                    <th width="300px" style="text-align:center">工时消耗率</th>
+                                    <th width="300px" style="text-align:center">任务贡献率</th>
+                                    <th width="300px" style="text-align:center">质量系数</th>
+                                </tr>
+                                {% for _personal in personals %}
+                                <tr>
+                                    <td>{{ _personal['名称'] }}</td>
+                                    <td style="text-align:right">{{ "%0.2f" % _personal['完成率'] }}</td>
+                                    <td style="text-align:right">{{ "%0.2f" % _personal['消耗率'] }}</td>
+                                    <td style="text-align:right">{{ "%0.2f" % _personal['贡献率'] }}</td>
+                                    <td style="text-align:right">{{ "%0.2f" % _personal['质量系数'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                            <h3><b>执行情况：</b></h3>
+                            <hr/>
+                            <table border="0">
+                                <tr style="text-align:center">
+                                    <th style="text-align:center">
+                                        <b>目标执行情况</b>
+                                        <img src="static/images/{{ pd_code }}-issue-status-story.png" width="100%"></th>
+                                    <th style="text-align:center">
+                                        <b>任务执行情况</b>
+                                        <img src="static/images/{{ pd_code }}-issue-status-task.png" width="100%"></th>
+                                </tr>
+                            </table>
+                            <br/>
+                            <table border="0">
+                                <tr style="text-align:center">
+                                    <th style="text-align:center">
+                                        <b>任务燃尽图</b>
+                                        <img src="static/images/{{ pd_code }}-issue-burndown.png" width="100%"></th>
+                                    <th style="text-align:center">
+                                        <b>工时燃尽图</b>
+                                        <img src="static/images/{{ pd_code }}-time-issue-burndown.png" width="100%"></th>
+                                </tr>
+                            </table>
+                        </div>

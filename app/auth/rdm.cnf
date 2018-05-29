@@ -1,0 +1,26 @@
+# 2018.5.22 @ ChengDu
+# configuration for R&D management system
+#
+
+[LOG]
+path=/home/shenwei/log/jira_class_epic.log
+
+[DATE]
+#
+jira_scan_start_date=2018-3-1
+
+[DATABASE]
+mongodb=mongodb://root:chinacloud@172.16.60.2:27017/admin
+
+[MYSQL]
+host=172.16.60.2
+user=tk
+password=53ZkAuoDVc8nsrVG
+
+[JIRA]
+url=http://jira.chinacloud.com.cn
+user=shenwei
+password=sw64419
+
+#
+# Eof

@@ -1,0 +1,34 @@
+#
+
+.menu {
+    position:absolute;
+    top:120px;
+    left:40px;
+    padding:0;
+    margin:0;
+    list-style-type:none;
+    white-space:nowrap;
+}
+
+.menu li {
+    float:left;
+    min-width:100px;
+}
+
+* html .menu a {
+    width:100px;
+}
+
+.menu a span {
+    display:block;
+    color:#F911B2;
+    background:#FFF4FC;
+    border:solid #fff;
+    border-width:0 2px 2px 2px;
+    text-align:center;
+    padding:4px 16px;
+    cursor:pointer;
+    min-width:66px;
+}
+
+#

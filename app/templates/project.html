@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}研发管理信息系统{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+        <div class="head" id="A1">
+            <div style="text-align:center">
+                <h1><b>项目开发信息</b></h1>
+            </div>
+            <div class="list">
+                <ul>
+                    <dh>
+                        <h3><b>在建项目：</b></h3>
+                        <hr>
+                        <table border="2">
+                            <tr style="text-align:center">
+                                <th width="420px" style="text-align:center">名称</th>
+                                <th width="120px" style="text-align:center">项目经理</th>
+                                <th width="120px" style="text-align:center">合同</th>
+                                <th width="120px" style="text-align:center">启动</th>
+                                <th width="120px" style="text-align:center">需求</th>
+                                <th width="120px" style="text-align:center">设计</th>
+                                <th width="120px" style="text-align:center">开发</th>
+                                <th width="120px" style="text-align:center">交付</th>
+                                <th width="120px" style="text-align:center">运维</th>
+                            </tr>
+                            {% for pj in projects %}
+                            {% endfor %}
+                        </table>
+                        <br/>
+                        {% if user["role"] <= 2 %}
+                        <h3><b>争取项目：</b></h3>
+                        <hr>
+                        <table border="2">
+                            <tr style="text-align:center">
+                                <th width="120px" style="text-align:center">业务条线</th>
+                                <th width="300px" style="text-align:center">名称</th>
+                                <th width="120px" style="text-align:center">立项状态</th>
+                                <th width="120px" style="text-align:center">项目经理</th>
+                                <th width="120px" style="text-align:center">售前</th>
+                                <th width="120px" style="text-align:center">拟招标</th>
+                                <th width="120px" style="text-align:center">招标</th>
+                                <th width="120px" style="text-align:center">中标</th>
+                                <th width="220px" style="text-align:center">规模（万元）</th>
+                            </tr>
+                            {% for pj in pre_projects %}
+                            {% endfor %}
+                        </table>
+                        {% endif %}
+                    </dh>
+                </ul>
+            </div>
+        </div>
+        <br>
+        <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
+</div>
+{% endblock %}

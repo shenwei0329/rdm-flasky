@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}研发管理信息系统{% endblock %}
+
+{% block page_content %}
+
+<div class="page-header">
+        <div class="head" id="A1">
+            <div style="text-align:center">
+                <h1><b>产品研发信息</b></h1>
+            </div>
+            <div class="list">
+                <ul>
+                    <li>
+                        <h2><b>在研产品：</b></h2>
+                        <hr/>
+                        <table border="2">
+                            <tr style="text-align:center">
+                                <th width="500px">名称</th>
+                                <th width="150px">代号</th>
+                                <th width="150px">版本</th>
+                                <th width="200px">发布日期</th>
+                            </tr>
+                            {% for pd in products %}
+                            <tr>
+                                <td>{{ pd['name'] }}</td>
+                                <td>{{ pd['code'] }}</td>
+                                <td>{{ pd['version'] }}</td>
+                                <td>{{ pd['date'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </li>
+                    <li>
+                        <br/>
+                        <h4><b>选择：</b></h4>
+                        <ul class="menu">
+                            {% for pd in products %}
+                            <li><button type="button" value="{{ pd['code'] }}" onclick="btn_onclick(this.value)">
+                                {{ pd['code'] }}
+                                </button></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li>
+                        <br/>
+                        <hr/>
+                        <h3><b>项目详情：</b></h3>
+                        <div id="producting_list" style="display: none;">
+                        <br/>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <br>
+        <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
+</div>
+
+<script type="text/javascript">
+    function btn_onclick(value){
+        htmlobj=$.ajax({url:"/pd_select/"+value,async:false});
+        $("#producting_list").html(htmlobj.responseText);
+        $("#producting_list").show()
+    }
+</script>
+
+{% endblock %}
