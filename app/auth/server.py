@@ -9,24 +9,90 @@ import datetime
 import numpy as np
 from flask_login import current_user
 from ..models import Role
-
+import PersonalStat
 import logging
 
-databases = ['CPSJ', 'FAST', 'HUBBLE', 'ROOOOT', 'RDM', 'TESTCENTER', 'JX', 'GZ']
+pd_databases = ['CPSJ', 'FAST', 'HUBBLE', 'ROOOOT']
+pj_databases = ['JX', 'GZ', 'RDM']
+rdm_databases = ['RDM', 'TESTCENTER']
+
 month = [u'一月', u'二月', u'三月', u'四月', u'五月', u'六月', u'七月', u'八月', u'九月', u'十月', u'十一月', u'十二月']
 
+st_date = '2018-01-01'
+ed_date = '2018-12-31'
+pdPersonals = PersonalStat.Personal()
+pjPersonals = PersonalStat.Personal()
+rdmPersonals = PersonalStat.Personal()
+Personals = []
+
+
+def set_honor_context():
+    _pd_work_ind = pdPersonals.getWorkIndList()
+    _pj_work_ind = pjPersonals.getWorkIndList()
+    _rdm_work_ind = rdmPersonals.getWorkIndList()
+
+    _pd_count = int(float(len(_pd_work_ind))*0.2 + 0.5)
+    _pj_count = int(float(len(_pj_work_ind))*0.3 + 0.5)
+    _rdm_count = int(float(len(_rdm_work_ind))*0.2 + 0.5)
+
+    logging.log(logging.WARN, ">>> %s,%s,%s" % (type(_pd_work_ind), type(_pj_work_ind), type(_rdm_work_ind)))
+    logging.log(logging.WARN, ">>> %d,%d,%d" % (_pd_count, _pj_count, _rdm_count))
+
+    _personal = []
+    for _item in _pd_work_ind[:_pd_count]:
+        logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
+        _personal.append({'name': _item[0], 'quota': _item[1]})
+
+    for _item in _pj_work_ind[:_pj_count]:
+        if _item[0] in [u'谭颖卿', u'吴丹阳']:
+            continue
+        logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
+        _personal.append({'name': _item[0], 'quota': _item[1]})
+    for _item in _rdm_work_ind[:_rdm_count]:
+        logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
+        _personal.append({'name': _item[0], 'quota': _item[1]})
+
+    _context = dict(
+        personals01=_personal[:6],
+        personals02=_personal[6:12],
+        personals03=_personal[12:18],
+        personals04=_personal[18:],
+    )
+    return _context
 
 def set_pd_context():
 
-    pd = handler.get_product_shelves()
-    dl = handler.get_product_deliver()
+    _pd = handler.get_product_shelves()
+    _dl = handler.get_product_deliver()
     context = dict(
-        products=pd,
-        pd_total=len(pd),
-        pd_delivers=dl,
-        dl_total=len(dl)
+        products=_pd,
+        pd_total=len(_pd),
+        pd_delivers=_dl,
+        dl_total=len(_dl)
     )
     
+    return context
+
+
+def set_rdm_context():
+
+    global Personals, pdPersonals, pjPersonals, rdmPersonals
+
+    pj = []
+    _m = handler.get_material()
+    _count = _m.count()
+    for __m in _m:
+        if __m[u'项目名称'] not in pj:
+            pj.append(__m[u'项目名称'])
+
+    context = dict(
+        total=len(Personals),
+        total_task=pdPersonals.getTotalNumbOfTask() + pjPersonals.getTotalNumbOfTask() + rdmPersonals.getTotalNumbOfTask(),
+        total_worklog=pdPersonals.getTotalNumbOfWorkLog() + pjPersonals.getTotalNumbOfWorkLog() + rdmPersonals.getTotalNumbOfWorkLog(),
+        total_pj=len(pj),
+        total_material=_count
+    )
+
     return context
 
 
@@ -42,10 +108,32 @@ def set_pding_context():
 
 def set_context():
 
-    _today = datetime.date.today()
-    _st_date = '2018-01-01'
-    _ed_date = _today.strftime("%Y-%m-%d")
-    _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(_st_date, _ed_date)
+    global Personals, pdPersonals, pjPersonals, rdmPersonals, pd_databases, pj_databases, rdm_databases, st_date, ed_date, today
+
+    today = datetime.date.today()
+    ed_date = today.strftime("%Y-%m-%d")
+
+    pdPersonals.setDate(date={'st_date': st_date, 'ed_date': ed_date})
+    pjPersonals.setDate(date={'st_date': st_date, 'ed_date': ed_date})
+    rdmPersonals.setDate(date={'st_date': st_date, 'ed_date': ed_date})
+
+    for _db in pd_databases:
+        pdPersonals.scanProject(_db)
+    for _db in pj_databases:
+        pjPersonals.scanProject(_db)
+    for _db in rdm_databases:
+        rdmPersonals.scanProject(_db)
+
+    pdPersonals.calWorkInd()
+    pjPersonals.calWorkInd()
+    rdmPersonals.calWorkInd()
+
+    for _p in [pdPersonals, pjPersonals, rdmPersonals]:
+        for __p in _p.getNameList():
+            if __p not in Personals:
+                Personals.append(__p)
+
+    _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(st_date, ed_date)
     _act_user = 0
     for _v in _checkon_user:
         if _checkon_user[_v] > 0:
@@ -79,21 +167,21 @@ def set_context():
     }
 
     _date_scale = pd.date_range(start='2018-01-01 00:00:00',
-                                end='%s-%s-%s 23:59:59' % (_today.year, _today.month, _today.day),
+                                end='%s-%s-%s 23:59:59' % (today.year, today.month, today.day),
                                 freq='1D')
     pydate_array = _date_scale.to_pydatetime()
     date_only_array = np.vectorize(lambda s: s.strftime('%Y-%m-%d'))(pydate_array)
     _date_scale = pd.Series(date_only_array)
 
     # 资源统计信息
-    persion, date, _hr_month_date = handler.get_hr_stat(_st_date, _ed_date)
+    persion, date, _hr_month_date = handler.get_hr_stat(st_date, ed_date)
     _cost = 0
     for _p in persion:
         _cost += persion[_p]
 
     _persion_cost = _cost/3600
 
-    pd_count, pd_cost, pd_n_cost = handler.get_pd4pj_stat(_st_date, _ed_date)
+    pd_count, pd_cost, pd_n_cost = handler.get_pd4pj_stat(st_date, ed_date)
 
     hrStat = {
         "cost_time": _persion_cost,
@@ -107,7 +195,7 @@ def set_context():
         "pd_cost_time_total": pd_cost + pd_n_cost,
     }
 
-    count, done_count, persion, date, cost, g_stat = handler.get_task_stat(_st_date, _ed_date)
+    count, done_count, persion, date, cost, g_stat = handler.get_task_stat(st_date, ed_date)
 
     _persion = []
     _persion_max = 0
@@ -130,7 +218,7 @@ def set_context():
     # 任务统计
     taskStat = {
         "total": count,
-        "persion_count": len(persion),
+        "persion_count": len(Personals),
         "persion_ratio": "%0.2f" % (float(len(persion)*100)/float(_act_user)),
         "done": done_count,
         "cost_time": "%0.2f" % cost,
@@ -161,14 +249,14 @@ def set_context():
 
     }
 
-    _cost_loan, _trip_month_cost = handler.get_loan_stat(_st_date, _ed_date)
-    _cost_reim, _reim_month_cost = handler.get_reimbursement_stat(_st_date, _ed_date)
-    _cost_ticket, _addr_data, _month_date, _month_cost = handler.get_ticket_stat(_st_date, _ed_date)
-    _trip_addr_data, _trip_month_data = handler.get_trip_data(_st_date, _ed_date)
-    _reim_addr_data, _reim_month_data = handler.get_reim_data(_st_date, _ed_date)
+    _cost_loan, _trip_month_cost = handler.get_loan_stat(st_date, ed_date)
+    _cost_reim, _reim_month_cost = handler.get_reimbursement_stat(st_date, ed_date)
+    _cost_ticket, _addr_data, _month_date, _month_cost = handler.get_ticket_stat(st_date, ed_date)
+    _trip_addr_data, _trip_month_data = handler.get_trip_data(st_date, ed_date)
+    _reim_addr_data, _reim_month_data = handler.get_reim_data(st_date, ed_date)
     # 差旅统计信息
     tripStat = {
-        "total": handler.get_trip_count(_st_date, _ed_date),
+        "total": handler.get_trip_count(st_date, ed_date),
         "loan": "%0.2f" % (_cost_loan/10000.),
         "reim": "%0.2f" % (_cost_reim/10000.),
         "ticket": "%0.2f" % (_cost_ticket/10000.),
@@ -187,7 +275,7 @@ def set_context():
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     context = dict(
-        report={"started_at": _st_date, "ended_at": _ed_date},
+        report={"started_at": st_date, "ended_at": ed_date},
         user={"role": role.level},
         pjStat=pjStat,
         contractStat=contractStat,

@@ -303,7 +303,7 @@ def get_task_stat(st_date, ed_date):
 
     for pj in pd_list:
         mongo_db.connect_db(pj)
-        _rec = mongo_db.handler('issue', 'find', {"issue_type": u"任务",
+        _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
                                                   "$and": [{"created": {"$gte": "%s" % st_date}},
                                                            {"created": {"$lt": "%s" % ed_date}}]})
         for _r in _rec:
@@ -328,7 +328,7 @@ def get_task_stat(st_date, ed_date):
 
     for pj in pj_list:
         mongo_db.connect_db(pj)
-        _rec = mongo_db.handler('issue', 'find', {"issue_type": u"任务",
+        _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
                                                   "$and": [{"created": {"$gte": "%s" % st_date}},
                                                            {"created": {"$lt": "%s" % ed_date}}]})
         for _r in _rec:
@@ -353,7 +353,7 @@ def get_task_stat(st_date, ed_date):
 
     for pj in rdm_list:
         mongo_db.connect_db(pj)
-        _rec = mongo_db.handler('issue', 'find', {"issue_type": u"任务",
+        _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
                                                   "$and": [{"created": {"$gte": "%s" % st_date}},
                                                            {"created": {"$lt": "%s" % ed_date}}]})
         for _r in _rec:
@@ -696,4 +696,32 @@ def get_personal_stat(pd_code):
         personal.append(_p)
 
     return personal
+
+
+def get_project_info(table):
+
+    projects = []
+    mongo_db.connect_db('ext_system')
+    _pjs = mongo_db.handler(table, 'find', {})
+
+    for _p in _pjs:
+        projects.append(_p)
+
+    return projects
+
+
+def get_sum(values, field):
+
+    _sum = 0.
+    for _v in values:
+        if dict(_v).has_key(field) and str(_v[field]).replace('.', '').isdigit():
+            _sum += float(_v[field])
+
+    return "%0.2f" % _sum
+
+
+def get_material():
+
+    mongo_db.connect_db('ext_system')
+    return mongo_db.handler('material', 'find', {})
 

@@ -11,9 +11,18 @@
             <div class="list">
                 <ul>
                     <dh>
-                        <h2><b>注册人员：</b></h2>
+                        <h2><b>注册人员：</b>{{ total }}（人）</h2>
                         <hr>
                         <h2><b>基础数据：</b></h2>
+                        <ul><h3>任务统计</h3>
+                            <li><h4>任务总数：{{ total_task }}（个）</h4></li>
+                            <li><h4>工作日志记录总数：{{ total_worklog }}（条）</h4></li>
+                        </ul>
+                        <br/>
+                        <ul><h3>项目成果存档统计</h3>
+                            <li><h4>参与归档的项目数：{{ total_pj }}（个）</h4></li>
+                            <li><h4>项目成果数：{{ total_material }}（项）</h4></li>
+                        </ul>
                         <hr>
                     </dh>
                 </ul>

@@ -36,10 +36,17 @@ def index():
 
 @main.route('/rdm')
 def rdm():
+    global my_context, set_time
+
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    return render_template('rdm.html')
+    if my_context is None:
+        my_context = server.set_context()
+        set_time = datetime.datetime.now()
+
+    _context = server.set_rdm_context()
+    return render_template('rdm.html', **_context)
 
 
 @main.route('/product')
@@ -84,10 +91,12 @@ def project():
         return redirect(url_for('auth.login'))
 
     role = Role.query.filter_by(name=current_user.username).first()
+    _val = handler.get_project_info('pj_ing_t')
     context = dict(
         user={"role": role.level},
-        projects=[],
-        pre_projects=[],
+        projects=handler.get_project_info('pj_deliver_t'),
+        pre_projects=_val,
+        pre_quota=handler.get_sum(_val, u'规模'),
     )
 
     return render_template('project.html', **context)
@@ -95,7 +104,14 @@ def project():
 
 @main.route('/honor')
 def honor():
+    global my_context, set_time
+
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    return render_template('honor.html')
+    if my_context is None:
+        my_context = server.set_context()
+        set_time = datetime.datetime.now()
+    _context = server.set_honor_context()
+
+    return render_template('honor.html', **_context)

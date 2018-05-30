@@ -15,19 +15,28 @@
                         <hr>
                         <table border="2">
                             <tr style="text-align:center">
-                                <th width="420px" style="text-align:center">名称</th>
-                                <th width="120px" style="text-align:center">项目经理</th>
-                                <th width="120px" style="text-align:center">合同</th>
-                                <th width="120px" style="text-align:center">启动</th>
-                                <th width="120px" style="text-align:center">需求</th>
-                                <th width="120px" style="text-align:center">设计</th>
-                                <th width="120px" style="text-align:center">开发</th>
-                                <th width="120px" style="text-align:center">交付</th>
-                                <th width="120px" style="text-align:center">运维</th>
+                                <th width="140px" style="text-align:center">名称</th>
+                                <th width="140px" style="text-align:center">合同</th>
+                                <th width="140px" style="text-align:center">启动</th>
+                                <th width="140px" style="text-align:center">立项</th>
+                                <th width="140px" style="text-align:center">需求</th>
+                                <th width="140px" style="text-align:center">开发</th>
+                                <th width="140px" style="text-align:center">部署</th>
+                                <th width="140px" style="text-align:center; color:#F00">合同交付</th>
                             </tr>
                             {% for pj in projects %}
+                            <tr>
+                                <td>{{ pj['项目名称'][0:pj['项目名称'].find('(简称')] }}</td>
+                                <td style="text-align:center">{{ pj['合同'] }}</td>
+                                <td style="text-align:center">{{ pj['启动'] }}</td>
+                                <td style="text-align:center">{{ pj['实际立项'] }}</td>
+                                <td style="text-align:center">{{ pj['实际需求设计'] }}</td>
+                                <td style="text-align:center">{{ pj['实际研发测试'] }}</td>
+                                <td style="text-align:center">{{ pj['实际部署实施'] }}</td>
+                            </tr>
                             {% endfor %}
                         </table>
+                        <b style="color:#F00">注：以上日期为阶段完成的时间点；【合同交付】是合同要求的交付日期。</b>
                         <br/>
                         {% if user["role"] <= 2 %}
                         <h3><b>争取项目：</b></h3>
@@ -40,12 +49,31 @@
                                 <th width="120px" style="text-align:center">项目经理</th>
                                 <th width="120px" style="text-align:center">售前</th>
                                 <th width="120px" style="text-align:center">拟招标</th>
-                                <th width="120px" style="text-align:center">招标</th>
                                 <th width="120px" style="text-align:center">中标</th>
-                                <th width="220px" style="text-align:center">规模（万元）</th>
+                                <th width="220px" style="text-align:center; color:#F00">规模（万元）</th>
                             </tr>
                             {% for pj in pre_projects %}
+                            <tr>
+                                <td style="text-align:center">{{ pj['业务条线'] }}</td>
+                                <td>{{ pj['项目名称'][0:pj['项目名称'].find('(简称')] }}</td>
+                                <td style="text-align:center">{{ pj['立项状态'] }}</td>
+                                <td style="text-align:center">{{ pj['项目经理'] }}</td>
+                                <td style="text-align:center">{{ pj['售前'] }}</td>
+                                <td style="text-align:center">{{ pj['拟招标'] }}</td>
+                                <td style="text-align:center">{{ pj['中标'] }}</td>
+                                <td style="text-align:right">{{ pj['规模'] }}</td>
+                            </tr>
                             {% endfor %}
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td style="text-align:right">总计：</td>
+                                <td style="text-align:right">{{ pre_quota }}</td>
+                            </tr>
                         </table>
                         {% endif %}
                     </dh>

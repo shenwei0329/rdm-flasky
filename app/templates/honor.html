@@ -6,64 +6,64 @@
 <div class="page-header">
         <div class="head" id="A1">
             <div style="text-align:center">
-                <h1><b style="color:#F00">光荣榜</b></h1><h4>【注：仅针对注册员工，按个人任务执行情况排名】</h4>
+                <h1><b style="color:#F00">光荣榜</b></h1>
             </div>
             <div class="list">
                 <ul>
                     <li>
-                        <h2><b style="color:#F00">明星</b></h2>
+                        <h2><b style="color:#F00">年度排行榜</b></h2>
                         <hr>
                         <table border="2">
                             <tr style="text-align:center">
-                                <th width="300px" style="text-align:center">员工</th>
-                                <th width="300px" style="text-align:center">员工</th>
-                                <th width="300px" style="text-align:center">员工</th>
+                                <th width="200px" style="text-align:center">员工</th>
+                                <th width="200px" style="text-align:center">员工</th>
+                                <th width="200px" style="text-align:center">员工</th>
+                                <th width="200px" style="text-align:center">员工</th>
+                                <th width="200px" style="text-align:center">员工</th>
+                                <th width="200px" style="text-align:center">员工</th>
                             </tr>
-                        </table>
-                    </li>
-                    <li>
-                        <h2><b style="color:#F00">本周排行榜</b></h2>
-                        <hr>
-                        <table border="2">
-                            <tr style="text-align:center">
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
+                            <tr>
+                            {% for _p in personals01 %}
+                                <td>
+                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=180px height=260px>
+                                    <br/><h4 style="text-align:center">{{ _p['name'] }}<br/>指标：{{ _p['quota'] }}</h4>
+                                </td>
+                            {% endfor %}
                             </tr>
-                        </table>
-                    </li>
-                    <li>
-                        <h2><b style="color:#F00">本月排行榜</b></h2>
-                        <hr>
-                        <table border="2">
-                            <tr style="text-align:center">
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
+                            <tr>
+                            {% for _p in personals02 %}
+                                <td>
+                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=180px height=260px>
+                                    <<br/><h4 style="text-align:center">{{ _p['name'] }}<br/>指标：{{ _p['quota'] }}</h4>
+                                </td>
+                            {% endfor %}
                             </tr>
-                        </table>
-                    </li>
-                    <li>
-                        <h2><b style="color:#F00">本年排行榜</b></h2>
-                        <hr>
-                        <table border="2">
-                            <tr style="text-align:center">
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
-                                <th width="150px" style="text-align:center">员工</th>
+                            <tr>
+                            {% for _p in personals03 %}
+                                <td>
+                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=180px height=260px>
+                                    <br/><h4 style="text-align:center">{{ _p['name'] }}<br/>指标：{{ _p['quota'] }}</h4>
+                                </td>
+                            {% endfor %}
+                            </tr>
+                            <tr>
+                            {% for _p in personals04 %}
+                                <td>
+                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=180px height=260px>
+                                    <br/><h4 style="text-align:center">{{ _p['name'] }}<br/>指标：{{ _p['quota'] }}</h4>
+                                </td>
+                            {% endfor %}
                             </tr>
                         </table>
                     </li>
                 </ul>
+                <br/>
+                <ul>【注】：
+                    <li>仅针对注册员工，按个人已完成任务的任务指标进行排名。</li>
+                    <li>任务指标=p*∑w*u；p职级系数=[0.8(高级)，1(中级)，1.3(初级)]；
+                        w工作量=估计工时；u效率=估计工时/实际工时</li>
+                </ul>
+
             </div>
         </div>
         <br>

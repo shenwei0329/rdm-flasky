@@ -8,6 +8,7 @@ from ..email import send_email
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm,\
     PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm, InitUserRequestForm
 import initDB
+import logging
 
 @auth.before_app_request
 def before_request():
@@ -40,6 +41,7 @@ def login():
         if user is not None and user.verify_password(form.password.data) and\
                 role.verify_secretkey(form.secretkey.data):
             login_user(user, form.remember_me.data)
+            logging.log(logging.WARN, ">>> Login <%s>" % user)
             next = request.args.get('next')
             if next is None or not next.startswith('/'):
                 next = url_for('main.index')
@@ -51,6 +53,7 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
+    logging.log(logging.WARN, ">>> Logout <%s>" % current_user)
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('main.index'))
