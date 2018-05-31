@@ -27,12 +27,41 @@
                             {% for pj in projects %}
                             <tr>
                                 <td>{{ pj['项目名称'][0:pj['项目名称'].find('(简称')] }}</td>
-                                <td style="text-align:center">{{ pj['合同'] }}</td>
-                                <td style="text-align:center">{{ pj['启动'] }}</td>
-                                <td style="text-align:center">{{ pj['实际立项'] }}</td>
-                                <td style="text-align:center">{{ pj['实际需求设计'] }}</td>
-                                <td style="text-align:center">{{ pj['实际研发测试'] }}</td>
-                                <td style="text-align:center">{{ pj['实际部署实施'] }}</td>
+                                {% if '年' in pj['合同'] %}
+                                    <td style="text-align:center; background-color:#0F0;">{{ pj['合同'] }}</td>
+                                {% else %}
+                                    <td style="text-align:center">{{ pj['合同'] }}</td>
+                                {% endif %}
+                                {% if '年' in pj['启动'] %}
+                                    <td style="text-align:center; background-color:#0F0;">{{ pj['启动'] }}</td>
+                                {% else %}
+                                    <td style="text-align:center">{{ pj['启动'] }}</td>
+                                {% endif %}
+                                {% if '年' in pj['实际立项'] %}
+                                    <td style="text-align:center; background-color:#0F0;">{{ pj['实际立项'] }}</td>
+                                {% else %}
+                                    <td style="text-align:center">{{ pj['实际立项'] }}</td>
+                                {% endif %}
+                                {% if '年' in pj['实际需求设计'] %}
+                                    <td style="text-align:center; background-color:#0F0;">{{ pj['实际需求设计'] }}</td>
+                                {% else %}
+                                    <td style="text-align:center">{{ pj['实际需求设计'] }}</td>
+                                {% endif %}
+                                {% if '年' in pj['实际研发测试'] %}
+                                    <td style="text-align:center; background-color:#0F0;">{{ pj['实际研发测试'] }}</td>
+                                {% else %}
+                                    <td style="text-align:center">{{ pj['实际研发测试'] }}</td>
+                                {% endif %}
+                                {% if '年' in pj['实际部署实施'] %}
+                                    <td style="text-align:center; background-color:#0F0;">{{ pj['实际部署实施'] }}</td>
+                                {% else %}
+                                    <td style="text-align:center">{{ pj['实际部署实施'] }}</td>
+                                {% endif %}
+                                {% if '年' in pj['合同交付日期'] %}
+                                    <td style="text-align:center; background-color:#FF0;">{{ pj['合同交付日期'] }}</td>
+                                {% else %}
+                                    <td style="text-align:center">{{ pj['合同交付日期'] }}</td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                         </table>

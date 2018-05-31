@@ -13,7 +13,7 @@ import PersonalStat
 import logging
 
 pd_databases = ['CPSJ', 'FAST', 'HUBBLE', 'ROOOOT']
-pj_databases = ['JX', 'GZ', 'RDM']
+pj_databases = ['JX', 'GZ', 'SCGA']
 rdm_databases = ['RDM', 'TESTCENTER']
 
 month = [u'一月', u'二月', u'三月', u'四月', u'五月', u'六月', u'七月', u'八月', u'九月', u'十月', u'十一月', u'十二月']
@@ -31,32 +31,57 @@ def set_honor_context():
     _pj_work_ind = pjPersonals.getWorkIndList()
     _rdm_work_ind = rdmPersonals.getWorkIndList()
 
-    _pd_count = int(float(len(_pd_work_ind))*0.2 + 0.5)
-    _pj_count = int(float(len(_pj_work_ind))*0.3 + 0.5)
-    _rdm_count = int(float(len(_rdm_work_ind))*0.2 + 0.5)
+    _pd_count = 18
+    _pd_numb_list = _pd_count/6
+    """int(float(len(_pd_work_ind))*0.2 + 0.5)
+    """
+    _pj_count = 6
+    _pj_numb_list = _pj_count/6
+    """int(float(len(_pj_work_ind))*0.35 + 0.5)
+    """
+    _rdm_count = 6
+    _rdm_numb_list = _rdm_count/6
+    """int(float(len(_rdm_work_ind))*0.2 + 0.5)
+    """
 
     logging.log(logging.WARN, ">>> %s,%s,%s" % (type(_pd_work_ind), type(_pj_work_ind), type(_rdm_work_ind)))
     logging.log(logging.WARN, ">>> %d,%d,%d" % (_pd_count, _pj_count, _rdm_count))
 
-    _personal = []
-    for _item in _pd_work_ind[:_pd_count]:
-        logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
-        _personal.append({'name': _item[0], 'quota': _item[1]})
+    _pd_list = []
+    _pj_list = []
+    _rdm_list = []
 
-    for _item in _pj_work_ind[:_pj_count]:
-        if _item[0] in [u'谭颖卿', u'吴丹阳']:
-            continue
-        logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
-        _personal.append({'name': _item[0], 'quota': _item[1]})
-    for _item in _rdm_work_ind[:_rdm_count]:
-        logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
-        _personal.append({'name': _item[0], 'quota': _item[1]})
+    for _i in range(_pd_numb_list):
+        _personal = []
+        for _j in range(6):
+            _item = _pd_work_ind[_i*6 + _j]
+            logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
+            _personal.append({'name': _item[0], 'quota': _item[1]})
+        _pd_list.append(_personal)
+
+    for _i in range(_pj_numb_list):
+        _personal = []
+        for _j in range(6):
+            _item = _pj_work_ind[_i*6 + _j]
+            logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
+            _personal.append({'name': _item[0], 'quota': _item[1]})
+        _pj_list.append(_personal)
+
+    for _i in range(_rdm_numb_list):
+        _personal = []
+        for _j in range(6):
+            _item = _rdm_work_ind[_i*6 + _j]
+            logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
+            _personal.append({'name': _item[0], 'quota': _item[1]})
+        _rdm_list.append(_personal)
 
     _context = dict(
-        personals01=_personal[:6],
-        personals02=_personal[6:12],
-        personals03=_personal[12:18],
-        personals04=_personal[18:],
+        pd_list=_pd_list,
+        pj_list=_pj_list,
+        rdm_list=_rdm_list,
+        pd_numb=range(_pd_numb_list),
+        pj_numb=range(_pj_numb_list),
+        rdm_numb=range(_rdm_numb_list),
     )
     return _context
 

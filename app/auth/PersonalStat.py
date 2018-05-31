@@ -6,6 +6,8 @@
 
 import mongodb_class
 
+spi_list = [u'王云枫', u'张嘉麒']
+
 
 class Personal:
     """
@@ -58,6 +60,8 @@ class Personal:
 
         for _issue in _cur:
             if _issue['users'] is None:
+                continue
+            if _issue['users'] in spi_list:
                 continue
             if _issue['users'] not in self.personal:
                 self.personal[_issue['users']] = {'issue': [], 'worklog': [], 'quota': 0.}
@@ -172,6 +176,7 @@ class Personal:
 
     def scanProject(self, project):
         self._getTaskListByPersonal(project)
+        self._getWorklogListByPersonal(project)
         self.calWorkInd()
 
     def getPersonal(self, name=None):
@@ -222,7 +227,14 @@ class Personal:
                 if _spent_time==0:
                     _quota += _org_time
                 else:
-                    _quota += (_org_time*(_org_time/_spent_time))
+                    _miu = _org_time/_spent_time
+                    if _miu > 10:
+                        _miu = 1.8
+                    elif _miu > 5:
+                        _miu = 1.5
+                    elif _miu > 1:
+                        _miu = 1.3
+                    _quota += (_org_time*_miu)
             self.personal[_p]['quota'] = _quota
 
     def getWorkIndList(self):

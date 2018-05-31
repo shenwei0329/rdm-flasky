@@ -11,12 +11,13 @@ from ..models import Role
 from ..auth import handler
 
 my_context = None
+honor_context = None
 set_time = None
 
 
 @main.route('/')
 def index():
-    global my_context, set_time
+    global my_context, set_time, honor_context
 
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
@@ -24,9 +25,11 @@ def index():
     if my_context is None:
         my_context = server.set_context()
         set_time = datetime.datetime.now()
+        honor_context = server.set_honor_context()
     elif (datetime.datetime.now() - set_time).seconds > 3600:
         set_time = datetime.datetime.now()
         my_context = server.set_context()
+        honor_context = server.set_honor_context()
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     my_context['user'] = {'role': role.level}
@@ -104,7 +107,7 @@ def project():
 
 @main.route('/honor')
 def honor():
-    global my_context, set_time
+    global my_context, set_time, honor_context
 
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
@@ -112,6 +115,7 @@ def honor():
     if my_context is None:
         my_context = server.set_context()
         set_time = datetime.datetime.now()
-    _context = server.set_honor_context()
+    if honor_context is None:
+        honor_context = server.set_honor_context()
 
-    return render_template('honor.html', **_context)
+    return render_template('honor.html', **honor_context)

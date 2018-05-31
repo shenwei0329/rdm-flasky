@@ -11,49 +11,80 @@
             <div class="list">
                 <ul>
                     <li>
-                        <h2><b style="color:#F00">年度排行榜</b></h2>
+                        <h3><b style="color:#F00">产品研发中心</b></h3>
                         <hr>
-                        <table border="2">
+                        <table border="0">
                             <tr style="text-align:center">
-                                <th width="200px" style="text-align:center">员工</th>
-                                <th width="200px" style="text-align:center">员工</th>
-                                <th width="200px" style="text-align:center">员工</th>
-                                <th width="200px" style="text-align:center">员工</th>
-                                <th width="200px" style="text-align:center">员工</th>
-                                <th width="200px" style="text-align:center">员工</th>
+                                <th width="40px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
                             </tr>
+                            {% for _i in pd_numb %}
                             <tr>
-                            {% for _p in personals01 %}
-                                <td>
-                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=180px height=260px>
-                                    <br/><h4 style="text-align:center">{{ _p['name'] }}<br/>指标：{{ _p['quota'] }}</h4>
+                                <td></td>
+                                {% for _p in pd_list[_i] %}
+                                <td style="text-align:center">
+                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=130px height=180px  align="middle">
+                                    <br/><h4 style="text-align:center"><b style="color:#F00">{{ _p['name'] }}</b></h4>
+                                    <h5>指标：{{ _p['quota'] }}</h5>
                                 </td>
-                            {% endfor %}
+                                {% endfor %}
                             </tr>
+                            {% endfor %}
+                        </table>
+                        <h3><b style="color:#F00">项目开发</b></h3>
+                        <hr>
+                        <table border="0">
+                            <tr style="text-align:center">
+                                <th width="40px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                            </tr>
+                            {% for _i in pj_numb %}
                             <tr>
-                            {% for _p in personals02 %}
-                                <td>
-                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=180px height=260px>
-                                    <<br/><h4 style="text-align:center">{{ _p['name'] }}<br/>指标：{{ _p['quota'] }}</h4>
+                                <td></td>
+                                {% for _p in pj_list[_i] %}
+                                <td style="text-align:center">
+                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=130px height=180px  align="middle">
+                                    <br/><h4 style="text-align:center"><b style="color:#F00">{{ _p['name'] }}</b></h4>
+                                    <h5>指标：{{ _p['quota'] }}</h5>
                                 </td>
-                            {% endfor %}
+                                {% endfor %}
                             </tr>
+                            {% endfor %}
+                        </table>
+                        <h3><b style="color:#F00">研发管理与测试</b></h3>
+                        <hr>
+                        <table border="0">
+                            <tr style="text-align:center">
+                                <th width="40px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                                <th width="160px" style="text-align:center"></th>
+                            </tr>
+                            {% for _i in rdm_numb %}
                             <tr>
-                            {% for _p in personals03 %}
-                                <td>
-                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=180px height=260px>
-                                    <br/><h4 style="text-align:center">{{ _p['name'] }}<br/>指标：{{ _p['quota'] }}</h4>
+                                <td></td>
+                                {% for _p in rdm_list[_i] %}
+                                <td style="text-align:center">
+                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=130px height=180px  align="middle">
+                                    <br/><h4 style="text-align:center"><b style="color:#F00">{{ _p['name'] }}</b></h4>
+                                    <h5>指标：{{ _p['quota'] }}</h5>
                                 </td>
-                            {% endfor %}
+                                {% endfor %}
                             </tr>
-                            <tr>
-                            {% for _p in personals04 %}
-                                <td>
-                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=180px height=260px>
-                                    <br/><h4 style="text-align:center">{{ _p['name'] }}<br/>指标：{{ _p['quota'] }}</h4>
-                                </td>
                             {% endfor %}
-                            </tr>
                         </table>
                     </li>
                 </ul>

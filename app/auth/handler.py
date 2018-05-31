@@ -653,10 +653,16 @@ def get_product_deliver():
     products = mongo_db.handler('pd_deliver_t', 'find', {})
 
     for _pd in products:
-        pj_name = mongo_db.handler('project_t', 'find_one', {u'编号': _pd[u'项目编号']})
-        if pj_name is None:
-            pj_name = _pd[u'项目编号']
-        pd.append({'name': pj_name[u'名称'],
+        if '-' in _pd[u'项目编号']:
+            pj_name = mongo_db.handler('project_t', 'find_one', {u'编号': _pd[u'项目编号']})
+            if pj_name is None:
+                _name = _pd[u'项目编号']
+            else:
+                _name = pj_name[u'名称']
+        else:
+            _name = '-'
+
+        pd.append({'name': _name,
                    'code': _pd[u'产品代号'],
                    'version': _pd[u'版本'],
                    'address': _pd[u'安装地址'],
