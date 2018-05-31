@@ -18,6 +18,11 @@ import MySQLdb
 import mysql_hdr
 import types
 import datetime
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
+print sys.getdefaultencoding()
 
 mongo_db = mongodb_class.mongoDB()
 db = MySQLdb.connect(host="172.16.60.2", user="tk", passwd="53ZkAuoDVc8nsrVG", db="nebula", charset='utf8')

@@ -10,6 +10,11 @@ from .forms import LoginForm, RegistrationForm, ChangePasswordForm,\
 import initDB
 import logging
 
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 @auth.before_app_request
 def before_request():
     current_user.confirmed = True

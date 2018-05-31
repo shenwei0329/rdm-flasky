@@ -4,6 +4,10 @@
 #   MySQL处理机
 #   ===========
 #
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 class SqlService:

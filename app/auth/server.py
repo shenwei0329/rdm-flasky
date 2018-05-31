@@ -12,6 +12,11 @@ from ..models import Role
 import PersonalStat
 import logging
 
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 pd_databases = ['CPSJ', 'FAST', 'HUBBLE', 'ROOOOT']
 pj_databases = ['JX', 'GZ', 'SCGA']
 rdm_databases = ['RDM', 'TESTCENTER']

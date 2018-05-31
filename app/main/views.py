@@ -9,6 +9,10 @@ from ..auth import server
 import datetime
 from ..models import Role
 from ..auth import handler
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 my_context = None
 honor_context = None
