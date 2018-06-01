@@ -6,7 +6,7 @@
 
 import mongodb_class
 
-spi_list = [u'王云枫', u'张嘉麒']
+spi_list = [u'王云枫', u'张嘉麒', u'何坤峰']
 
 
 class Personal:
@@ -24,6 +24,9 @@ class Personal:
         else:
             self.st_date = date['st_date']
             self.ed_date = date['ed_date']
+
+    def clearData(self):
+        self.personal = {}
 
     def setDate(self, date):
         self.st_date = date['st_date']

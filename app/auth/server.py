@@ -108,6 +108,8 @@ def set_rdm_context():
 
     global Personals, pdPersonals, pjPersonals, rdmPersonals
 
+    role = Role.query.filter_by(name=current_user.username).first()
+
     pj = []
     _m = handler.get_material()
     _count = _m.count()
@@ -115,12 +117,17 @@ def set_rdm_context():
         if __m[u'项目名称'] not in pj:
             pj.append(__m[u'项目名称'])
 
+    _ext_personals_stat = handler.get_project_info('ext_personals_stat')
     context = dict(
+        user={"role": role.level},
         total=len(Personals),
         total_task=pdPersonals.getTotalNumbOfTask() + pjPersonals.getTotalNumbOfTask() + rdmPersonals.getTotalNumbOfTask(),
         total_worklog=pdPersonals.getTotalNumbOfWorkLog() + pjPersonals.getTotalNumbOfWorkLog() + rdmPersonals.getTotalNumbOfWorkLog(),
         total_pj=len(pj),
-        total_material=_count
+        total_material=_count,
+        ext_personals_stat=_ext_personals_stat,
+        ext_personals=handler.get_project_info('ext_personals_t'),
+        ext_personals_count=handler.get_sum(_ext_personals_stat, u'数量')
     )
 
     return context
@@ -143,9 +150,16 @@ def set_context():
     today = datetime.date.today()
     ed_date = today.strftime("%Y-%m-%d")
 
-    pdPersonals.setDate(date={'st_date': st_date, 'ed_date': ed_date})
-    pjPersonals.setDate(date={'st_date': st_date, 'ed_date': ed_date})
-    rdmPersonals.setDate(date={'st_date': st_date, 'ed_date': ed_date})
+    pdPersonals.setDate(date={'st_date': '2018-03-01', 'ed_date': ed_date})
+    pjPersonals.setDate(date={'st_date': '2018-03-01', 'ed_date': ed_date})
+    rdmPersonals.setDate(date={'st_date': '2018-03-01', 'ed_date': ed_date})
+
+    """清空原有数据
+    """
+    pdPersonals.clearData()
+    pjPersonals.clearData()
+    rdmPersonals.clearData()
+
 
     for _db in pd_databases:
         pdPersonals.scanProject(_db)

@@ -5,14 +5,14 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>Login</h1>
+    <h2><b  style="color:#F00">欢迎!</b></h2>
 </div>
 <div class="col-md-4">
     {{ wtf.quick_form(form) }}
     <br>
+    {% if user["role"] == 88 %}
     <p>Forgot your password? <a href="{{ url_for('auth.password_reset_request') }}">Click here to reset it</a>.</p>
     <p>New user? <a href="{{ url_for('auth.register') }}">Click here to register</a>.</p>
-    {% if user["role"] == 0 %}
     <p>Init user? <a href="{{ url_for('auth.inituser') }}">Click here to init</a>.</p>
     {% endif %}
 </div>

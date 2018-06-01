@@ -13,17 +13,65 @@
                     <dh>
                         <h2><b>注册人员：</b>{{ total }}（人）</h2>
                         <hr>
-                        <h2><b>基础数据：</b></h2>
+                        <h2><b>基础数据</b></h2>
                         <ul><h3>任务统计</h3>
                             <li><h4>任务总数：{{ total_task }}（个）</h4></li>
                             <li><h4>工作日志记录总数：{{ total_worklog }}（条）</h4></li>
                         </ul>
-                        <br/>
                         <ul><h3>项目成果存档统计</h3>
-                            <li><h4>参与归档的项目数：{{ total_pj }}（个）</h4></li>
+                            <li><h4>参与归档的项目数：{{ total_pj }}（个）<br/></h4></li>
                             <li><h4>项目成果数：{{ total_material }}（项）</h4></li>
                         </ul>
-                        <hr>
+                        <hr/>
+                        <h2><b>外包资源情况</b></h2>
+                        <table border="1"><h3>资源统计</h3>
+                            <tr style="text-align:center">
+                                <th width="240px" style="text-align:center">项目</th>
+                                <th width="160px" style="text-align:center">负责人</th>
+                                <th width="120px" style="text-align:center">外包人数</th>
+                                <th width="480px" style="text-align:center">备注</th>
+                            </tr>
+                            {% for _v in ext_personals_stat %}
+                            <tr>
+                                <td style="text-align:left">{{ _v['项目名称'] }}</td>
+                                <td style="text-align:center">{{ _v['项目经理'] }}</td>
+                                <td style="text-align:center">{{ _v['数量'] }}</td>
+                                <td style="text-align:left">{{ _v['备注'] }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td></td>
+                                <td style="text-align:right"><b>总计：</b></td>
+                                <td style="text-align:center">{{ ext_personals_count }}</td>
+                            </tr>
+                        </table>
+                        {% if user["role"] <= 4 %}
+                        <br/>
+                        <table border="1"><h3>资源明细</h3>
+                            <tr style="text-align:center">
+                                <th width="240px" style="text-align:center">部门</th>
+                                <th width="200px" style="text-align:center">项目</th>
+                                <th width="160px" style="text-align:center">负责人</th>
+                                <th width="120px" style="text-align:center">人员</th>
+                                <th width="220px" style="text-align:center">期限</th>
+                                <th width="200px" style="text-align:center">供应商</th>
+                                <th width="240px" style="text-align:center">岗位</th>
+                                <th width="120px" style="text-align:center">工作地点</th>
+                            </tr>
+                            {% for _v in ext_personals %}
+                            <tr>
+                                <td style="text-align:left">{{ _v['部门'] }}</td>
+                                <td style="text-align:left">{{ _v['项目'] }}</td>
+                                <td style="text-align:center">{{ _v['负责人'] }}</td>
+                                <td style="text-align:center">{{ _v['姓名'] }}</td>
+                                <td style="text-align:center">{{ _v['使用期限'] }}</td>
+                                <td style="text-align:center">{{ _v['所属供应商'] }}</td>
+                                <td style="text-align:center">{{ _v['所任岗位角色'] }}</td>
+                                <td style="text-align:center">{{ _v['工作地点'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                        {% endif %}
                     </dh>
                 </ul>
             </div>

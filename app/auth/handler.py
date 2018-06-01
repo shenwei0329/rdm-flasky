@@ -42,15 +42,10 @@ def get_trip_count(st_date, ed_date):
     :return:
     """
 
-    # 连接ext_system数据库
-    mongo_db.connect_db('ext_system')
-
     # 从出差申请表中获取出差类型为：出差的数据
-    return mongo_db.handler('trip_req', 'find', {u'外出类型': u'出差',
-                                                 "$and": [{"审批完成时间": {"$gte": "%s" % st_date}},
-                                                          {"审批完成时间": {"$lt": "%s" % ed_date}}]
-                                                 }).count()
-
+    return (get_table_count('trip_req', {u'外出类型': u'出差',
+                                         "$and": [{u"审批完成时间": {"$gte": "%s" % st_date}},
+                                                  {u"审批完成时间": {"$lt": "%s" % ed_date}}]}))
 
 def addr_filter(addr_data, addr_info):
     """
@@ -150,16 +145,13 @@ def get_trip_data(st_date, ed_date):
     addr_data = {}
     _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
-    # 连接ext_system数据库
-    mongo_db.connect_db('ext_system')
-
     # 从出差申请表中获取出差类型为：出差的数据
-    _rec = mongo_db.handler('trip_req', 'find', {u'外出类型': u'出差',
-                                                 "$and": [{"审批完成时间": {"$gte": "%s" % st_date}},
-                                                          {"审批完成时间": {"$lt": "%s" % ed_date}}]})
+    mongo_db.connect_db('ext_system')
+    _rec = do_search('trip_req', {u'外出类型': u'出差',
+                                  "$and": [{u"审批完成时间": {"$gte": "%s" % st_date}},
+                                           {u"审批完成时间": {"$lt": "%s" % ed_date}}]})
 
     for _r in _rec:
-
         addr_data = addr_filter(addr_data, _r[u'起止地点'])
         _date = datetime.datetime.strptime(_r[u'审批发起时间'], "%Y-%m-%d %H:%M:%S")
         _month_stat[str(_date.month)] += 1
@@ -188,12 +180,10 @@ def get_reim_data(st_date, ed_date):
     addr_data = {}
     _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
-    # 连接ext_system数据库
-    mongo_db.connect_db('ext_system')
-
     # 从出差申请表中获取出差类型为：出差的数据
-    _rec = mongo_db.handler('reimbursement_req', 'find', {"$and": [{"审批发起时间": {"$gte": "%s" % st_date}},
-                                                                   {"审批发起时间": {"$lt": "%s" % ed_date}}]})
+    mongo_db.connect_db('ext_system')
+    _rec = do_search('reimbursement_req', {"$and": [{u"审批发起时间": {"$gte": "%s" % st_date}},
+                                                    {u"审批发起时间": {"$lt": "%s" % ed_date}}]})
 
     for _r in _rec:
         addr_data = addr_filter(addr_data, _r[u'出差起止地点'])
@@ -237,8 +227,7 @@ def get_pj_state():
     _pj_ing = 0
 
     mongo_db.connect_db('ext_system')
-    projects = mongo_db.handler('project_t', 'find', {})
-
+    projects = do_search('project_t', {})
     _pj_count = projects.count()
     for _pj in projects:
         if _pj[u'状态'] in [u'在建', u'验收']:
@@ -302,7 +291,7 @@ def get_task_stat(st_date, ed_date):
 
     _count = 0
     _done_count = 0
-    persion = {}
+    personal = {}
     date = {}
     _cost = 0
 
@@ -315,9 +304,9 @@ def get_task_stat(st_date, ed_date):
             _count += 1
             if _r['status'] == u'完成':
                 _done_count += 1
-            if _r['users'] not in persion:
-                persion[_r['users']] = 0
-            persion[_r['users']] += 1
+            if _r['users'] not in personal:
+                personal[_r['users']] = 0
+            personal[_r['users']] += 1
             _date = _r['created'].split('T')[0]
             if _date not in date:
                 date[_date] = 0
@@ -328,7 +317,7 @@ def get_task_stat(st_date, ed_date):
         mongo_db.close_db()
 
     _pd_count = _count
-    _pd_persion = len(persion)
+    _pd_personal = len(personal)
     _pd_cost = _cost
 
     for pj in pj_list:
@@ -340,9 +329,9 @@ def get_task_stat(st_date, ed_date):
             _count += 1
             if _r['status'] == u'完成':
                 _done_count += 1
-            if _r['users'] not in persion:
-                persion[_r['users']] = 0
-            persion[_r['users']] += 1
+            if _r['users'] not in personal:
+                personal[_r['users']] = 0
+            personal[_r['users']] += 1
             _date = _r['created'].split('T')[0]
             if _date not in date:
                 date[_date] = 0
@@ -353,7 +342,7 @@ def get_task_stat(st_date, ed_date):
         mongo_db.close_db()
 
     _pj_count = _count - _pd_count
-    _pj_persion = len(persion) - _pd_persion
+    _pj_personal = len(personal) - _pd_personal
     _pj_cost = _cost - _pd_cost
 
     for pj in rdm_list:
@@ -365,9 +354,9 @@ def get_task_stat(st_date, ed_date):
             _count += 1
             if _r['status'] == u'完成':
                 _done_count += 1
-            if _r['users'] not in persion:
-                persion[_r['users']] = 0
-            persion[_r['users']] += 1
+            if _r['users'] not in personal:
+                personal[_r['users']] = 0
+            personal[_r['users']] += 1
             _date = _r['created'].split('T')[0]
             if _date not in date:
                 date[_date] = 0
@@ -378,20 +367,20 @@ def get_task_stat(st_date, ed_date):
         mongo_db.close_db()
 
     _rdm_count = _count - _pd_count - _pj_count
-    _rdm_persion = len(persion) - _pd_persion - _pj_persion
+    _rdm_personal = len(personal) - _pd_personal - _pj_personal
     _rdm_cost = _cost - _pd_cost - _pj_cost
 
-    return _count, _done_count, persion, date, _cost,\
-           {'pd': [_pd_count, _pd_persion, _pd_cost],
-            'pj': [_pj_count, _pj_persion, _pj_cost],
-            'rdm': [_rdm_count, _rdm_persion, _rdm_cost],
+    return _count, _done_count, personal, date, _cost,\
+           {'pd': [_pd_count, _pd_personal, _pd_cost],
+            'pj': [_pj_count, _pj_personal, _pj_cost],
+            'rdm': [_rdm_count, _rdm_personal, _rdm_cost],
             }
 
 
 def get_hr_stat(st_date, ed_date):
 
     _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
-    persion = {}
+    personal = {}
     date = {}
 
     for pj in pd_list+pj_list+rdm_list:
@@ -401,9 +390,9 @@ def get_hr_stat(st_date, ed_date):
         for _r in _rec:
             if 'author' not in _r:
                 continue
-            if _r['author'] not in persion:
-                persion[_r['author']] = 0
-            persion[_r['author']] += _r['timeSpentSeconds']
+            if _r['author'] not in personal:
+                personal[_r['author']] = 0
+            personal[_r['author']] += _r['timeSpentSeconds']
             _date = _r['created'].split('T')[0]
             if _date not in date:
                 date[_date] = 0
@@ -418,7 +407,7 @@ def get_hr_stat(st_date, ed_date):
     for _d in range(1, 13):
         _date.append(int(_month_stat[str(_d)]))
 
-    return persion, date, _date
+    return personal, date, _date
 
 
 def get_loan_stat(st_date, ed_date):
@@ -426,15 +415,16 @@ def get_loan_stat(st_date, ed_date):
     _month_cost_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
     mongo_db.connect_db('ext_system')
-
-    _rec = mongo_db.handler('loan_req', 'find', {"$and": [{"审批完成时间": {"$gte": "%s" % st_date}},
-                                                          {"审批完成时间": {"$lt": "%s" % ed_date}}]})
+    _rec = do_search('loan_req', {"$and": [{u"审批完成时间": {"$gte": "%s" % st_date}},
+                                           {u"审批完成时间": {"$lt": "%s" % ed_date}}]})
     _cost = 0.
     for _r in _rec:
         _cost += float(_r[u'金额小计'])
 
         _date = datetime.datetime.strptime(_r[u'审批完成时间'], "%Y-%m-%d %H:%M:%S")
         _month_cost_stat[str(_date.month)] += float(_r[u'金额小计'])
+
+    mongo_db.close_db()
 
     _date_cost = []
     for _d in range(1, 13):
@@ -448,15 +438,16 @@ def get_reimbursement_stat(st_date, ed_date):
     _month_cost_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
     mongo_db.connect_db('ext_system')
-
-    _rec = mongo_db.handler('reimbursement_req', 'find', {"$and": [{"审批发起时间": {"$gte": "%s" % st_date}},
-                                                                   {"审批发起时间": {"$lt": "%s" % ed_date}}]})
+    _rec = do_search('reimbursement_req', {"$and": [{u"审批发起时间": {"$gte": "%s" % st_date}},
+                                                    {u"审批发起时间": {"$lt": "%s" % ed_date}}]})
     _cost = 0.
     for _r in _rec:
         _cost += float(_r[u'金额小计'])
 
         _date = datetime.datetime.strptime(_r[u'审批发起时间'], "%Y-%m-%d %H:%M:%S")
         _month_cost_stat[str(_date.month)] += float(_r[u'金额小计'])
+
+    mongo_db.close_db()
 
     _date_cost = []
     for _d in range(1, 13):
@@ -470,16 +461,15 @@ def get_ticket_stat(st_date, ed_date):
     _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
     _month_cost_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
-    mongo_db.connect_db('ext_system')
-
     _date = st_date.split('-')
     _st_date = u"%d年%d月%d日" % (int(_date[0]), int(_date[1]), int(_date[2]))
 
     _date = ed_date.split('-')
     _ed_date = u"%d年%d月%d日" % (int(_date[0]), int(_date[1]), int(_date[2]))
 
-    _rec = mongo_db.handler('plane_ticket', 'find', {"$and": [{"起飞时间": {"$gte": "%s" % _st_date}},
-                                                              {"起飞时间": {"$lt": "%s" % _ed_date}}]})
+    mongo_db.connect_db('ext_system')
+    _rec = do_search('plane_ticket', {"$and": [{u"起飞时间": {"$gte": "%s" % _st_date}},
+                                               {u"起飞时间": {"$lt": "%s" % _ed_date}}]})
     _cost = 0.
     addr_data = {}
 
@@ -505,7 +495,6 @@ def get_ticket_stat(st_date, ed_date):
         _month_stat[str(_date.month)] += 1
         _month_cost_stat[str(_date.month)] += float(_r[u'实收'])
 
-    # 关闭数据库
     mongo_db.close_db()
 
     _date = []
@@ -536,11 +525,13 @@ def get_pd4pj_stat(st_date, ed_date):
     pj_info = {}
 
     mongo_db.connect_db('ext_system')
-    projects = mongo_db.handler('project_t', 'find', {})
+    projects = do_search('project_t', {})
 
     for _pj in projects:
         if _pj[u'别名'] not in pj_info:
             pj_info[_pj[u'别名']] = [_pj[u'名称'], 0.]
+
+    mongo_db.close_db()
 
     issues = []
     for _grp in ["CPSJ", "FAST", "ROOOT", "HUBBLE"]:
@@ -559,6 +550,7 @@ def get_pd4pj_stat(st_date, ed_date):
         _cur = mongo_db.handler('issue', 'find', _search)
         for _issue in _cur:
             issues.append(_issue)
+
         mongo_db.close_db()
 
     _count = 0
@@ -585,14 +577,15 @@ def get_pd4pj_stat(st_date, ed_date):
 def get_product_stat():
 
     mongo_db.connect_db('ext_system')
-    products = mongo_db.handler('producting_t', 'find', {u"状态": {"$not": {"$eq": u"发布"}}})
+    products = do_search('producting_t', {u"状态": {"$not": {"$eq": u"发布"}}})
     _ing_count = products.count()
-    products = mongo_db.handler('pd_shelves_t', 'find', {})
+    products = do_search('pd_shelves_t', {})
     _ed_count = products.count()
 
     _count = []
     _addr = []
-    products = mongo_db.handler('pd_deliver_t', 'find', {})
+
+    products = do_search('pd_deliver_t', {})
     for pd in products:
         if pd[u'安装地址'] not in _addr:
             _addr.append(pd[u'安装地址'])
@@ -607,13 +600,14 @@ def get_product_stat():
 def get_contract_stat():
 
     mongo_db.connect_db('ext_system')
-    contracts = mongo_db.handler('contract_t', 'find', {})
-
+    contracts = do_search('contract_t', {})
     _count = contracts.count()
     _total = 0.
     for _r in contracts:
         if (len(_r[u'金额']) > 0) and ((_r[u'金额'].replace('.', '')).isdigit()):
             _total += float(_r[u'金额'])
+
+    mongo_db.close_db()
 
     return _count, _total
 
@@ -621,7 +615,7 @@ def get_contract_stat():
 def get_budget_stat():
 
     mongo_db.connect_db('ext_system')
-    enginerrings = mongo_db.handler('enginerring_budget', 'find', {})
+    enginerrings = do_search('enginerring_budget', {})
 
     _total = {}
     _all = 0.
@@ -633,6 +627,8 @@ def get_budget_stat():
             _total[u'项目编号'] += float(_r[u'金额'])
             _all += float(_r[u'金额'])
 
+    mongo_db.close_db()
+
     return _all, _total
 
 
@@ -640,7 +636,7 @@ def get_product_shelves():
 
     pd = []
     mongo_db.connect_db('ext_system')
-    products = mongo_db.handler('pd_shelves_t', 'find', {})
+    products = do_search('pd_shelves_t', {})
 
     for _pd in products:
         pd.append({'name': _pd[u'名称'],
@@ -648,18 +644,24 @@ def get_product_shelves():
                    'version': _pd[u'版本'],
                    'release': _pd[u'发布日期']})
 
+    mongo_db.close_db()
+
     return pd
 
 
 def get_product_deliver():
+    """
+    获取产品交付信息
+    :return: 数据列表
+    """
 
     pd = []
     mongo_db.connect_db('ext_system')
-    products = mongo_db.handler('pd_deliver_t', 'find', {})
+    products = do_search('pd_deliver_t', {})
 
     for _pd in products:
         if '-' in _pd[u'项目编号']:
-            pj_name = mongo_db.handler('project_t', 'find_one', {u'编号': _pd[u'项目编号']})
+            pj_name = search_one_table('project_t', {u'编号': _pd[u'项目编号']})
             if pj_name is None:
                 _name = _pd[u'项目编号']
             else:
@@ -673,43 +675,56 @@ def get_product_deliver():
                    'address': _pd[u'安装地址'],
                    'date': _pd[u'交付日期']})
 
+    mongo_db.close_db()
+
     return pd
 
 
 def get_producting_list():
+    """
+    获取在研产品信息
+    :return: 数据列表
+    """
 
     pd = []
     mongo_db.connect_db('ext_system')
-    products = mongo_db.handler('producting_t', 'find', {u'状态': u'在研'})
+    products = do_search('producting_t', {u'状态': u'在研'})
 
     for _pd in products:
         pd.append({'name': _pd[u'名称'],
                    'code': _pd[u'代号'],
                    'version': _pd[u'版本'],
                    'date': _pd[u'发布日期']})
-
+    mongo_db.close_db()
     return pd
 
 
 def get_pd_project_desc(pd_code):
+    """
+    获取产品的研发项目信息
+    :param pd_code: 产品代码
+    :return: 数据列表
+    """
 
-    mongo_db.connect_db('ext_system')
-    return mongo_db.handler('pd_project_desc', 'find_one', {u'项目别名': u'%s' % pd_code.lower()})
+    return search_one_table('pd_project_desc', {u'项目别名': u'%s' % pd_code.lower()})
 
 
 def get_personal_stat(pd_code):
-
-    personal = []
+    """
+    按产品获取人员的统计数据
+    :param pd_code: 产品代码
+    :return: 数据列表
+    """
     mongo_db.connect_db('ext_system')
-    _personals = mongo_db.handler('personal_stat', 'find', {u'别名': pd_code.lower()})
-
-    for _p in _personals:
-        personal.append(_p)
-
-    return personal
+    return do_search('personal_stat', {u'别名': pd_code.lower()})
 
 
 def get_project_info(table):
+    """
+    无条件获取表数据
+    :param table: 表名
+    :return: 数据列表
+    """
 
     projects = []
     mongo_db.connect_db('ext_system')
@@ -722,17 +737,59 @@ def get_project_info(table):
 
 
 def get_sum(values, field):
+    """
+    指定域值求和
+    :param values: 数据集
+    :param field: 指定域
+    :return:
+    """
 
     _sum = 0.
     for _v in values:
-        if dict(_v).has_key(field) and str(_v[field]).replace('.', '').isdigit():
+        if (field in dict(_v)) and (str(_v[field]).replace('.', '').isdigit()):
             _sum += float(_v[field])
 
     return "%0.2f" % _sum
 
 
 def get_material():
+    """
+    获取项目归档数据
+    :return:
+    """
 
     mongo_db.connect_db('ext_system')
     return mongo_db.handler('material', 'find', {})
+
+
+def do_search(table, search):
+    """
+    有条件获取表数据
+    :param table: 表名
+    :param search: 条件
+    :return: 数据列表
+    """
+    return mongo_db.handler(table, "find", search)
+
+
+def search_one_table(table, search):
+    """
+    有条件获取表数据
+    :param table: 表名
+    :param op: 操作方式
+    :param search: 条件
+    :return: 数据列表
+    """
+    return mongo_db.handler(table, "find_one", search)
+
+
+def get_table_count(table, search):
+    """
+    有条件获取表数据记录个数
+    :param table: 表名
+    :param op: 操作方式
+    :param search: 条件
+    :return: 数据列表
+    """
+    return mongo_db.handler(table, "find", search).count()
 

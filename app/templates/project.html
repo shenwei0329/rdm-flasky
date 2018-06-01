@@ -15,7 +15,7 @@
                         <hr>
                         <table border="2">
                             <tr style="text-align:center">
-                                <th width="140px" style="text-align:center">名称</th>
+                                <th width="300px" style="text-align:center">名称</th>
                                 <th width="140px" style="text-align:center">合同</th>
                                 <th width="140px" style="text-align:center">启动</th>
                                 <th width="140px" style="text-align:center">立项</th>
@@ -105,6 +105,20 @@
                             </tr>
                         </table>
                         {% endif %}
+                        <h3><b>重点项目执行情况：</b></h3>
+                        <hr>
+                        <table border="2">
+                            <tr>
+                                <th width="300px" style="text-align:center">项目信息</th>
+                                <th width="300px" style="text-align:center">任务情况</th>
+                            </tr>
+                            {% for _p in imp_projects %}
+                            <tr>
+                                <td>{{ _p['info'] }}</td>
+                                <td>{{ _p['pic'] | safe }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
                     </dh>
                 </ul>
             </div>

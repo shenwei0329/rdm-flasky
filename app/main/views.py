@@ -30,7 +30,7 @@ def index():
         my_context = server.set_context()
         set_time = datetime.datetime.now()
         honor_context = server.set_honor_context()
-    elif (datetime.datetime.now() - set_time).seconds > 3600:
+    elif (datetime.datetime.now() - set_time).seconds > 3600*8:
         set_time = datetime.datetime.now()
         my_context = server.set_context()
         honor_context = server.set_honor_context()

@@ -185,13 +185,13 @@
                     <li>
                         <h2>差旅综合</h2>
                         <hr>
-                        {% if user["role"] <= 1 %}
+                        {% if user["role"] <= 2 %}
                         <table border="2">
                             <tr style="text-align:left">
                                 <th width="300px">差旅总次数（人次）</th>
-                                <th width="300px">总费用（万元）</th>
+                                <th width="300px">总费用（万元）<br/><font size="1">：借款+机票</font></th>
                                 <th width="300px">差旅费借款（万元）</th>
-                                <th width="300px">差旅费报账（万元）<br><font size="1">：按差旅报账申请计</font></th>
+                                <th width="300px">差旅费报账（万元）<br/><font size="1">：按差旅报账申请计</font></th>
                                 <th width="300px">机票费（万元）</th>
                             </tr>
                             <tr>
@@ -213,7 +213,7 @@
                                 <th width="20px"></th>
                                 <th>{{ planeTicket | safe }}</th>
                             </tr>
-                            {% if user["role"] <= 1 %}
+                            {% if user["role"] <= 2 %}
                             <tr>
                                 <th width="50px"></th>
                                 <th>{{ tripMonth | safe }}</th>

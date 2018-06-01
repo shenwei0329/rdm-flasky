@@ -1,3 +1,7 @@
+#coding=utf-8
+
+from __future__ import unicode_literals
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
@@ -6,12 +10,11 @@ from ..models import User
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Length(1, 64),
-                                             Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    secretkey = StringField('Secret Key', validators=[DataRequired()])
-    remember_me = BooleanField('Keep me logged in')
-    submit = SubmitField('Log In')
+    email = StringField(u'您的公司邮箱：', validators=[DataRequired(), Length(1, 64), Email()])
+    password = PasswordField(u'口令', validators=[DataRequired()])
+    secretkey = StringField(u'安全字', validators=[DataRequired()])
+    remember_me = BooleanField(u'保留我的登陆信息')
+    submit = SubmitField(u'进入系统')
 
 
 class RegistrationForm(FlaskForm):
