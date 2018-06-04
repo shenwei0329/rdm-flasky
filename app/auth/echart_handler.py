@@ -45,6 +45,7 @@ def get_geo(title, sub_title, addr_data):
 
     geo.add("", attr, value, visual_range=[0, 10], visual_text_color="#fff", symbol_size=15, is_visualmap=True)
     # geo.show_config()
+    geo.options['toolbox']['show'] = False
     return geo.render_embed()
 
 
@@ -70,6 +71,7 @@ def bar(title, attr, datas):
                 mark_line=['average'],
                 mark_point=['max', 'min'])
 
+    bar.options['toolbox']['show'] = False
     return bar.render_embed()
 
 
@@ -93,6 +95,7 @@ def scatter(title, range_def, data):
                 mark_line=['average'],
                 mark_point=['max', 'min'])
 
+    scatter.options['toolbox']['show'] = False
     return scatter.render_embed()
 
 
@@ -105,6 +108,8 @@ def scatter3d():
                    '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
     scatter3D = Scatter3D(u"【人-任务-日期】分布图", width=600, height=600)
     scatter3D.add("", data, is_visualmap=True, visual_range_color=range_color)
+
+    scatter3D.options['toolbox']['show'] = False
     return scatter3D.render_embed()
 
 
@@ -131,4 +136,33 @@ def line(title, data):
                  area_color=_dot['color'],
                  area_opacity=0.4,
                  is_smooth=True)
+
+    line.options['toolbox']['show'] = False
     return line.render_embed()
+
+
+def pie(title, attr, values):
+    """
+    输出Pie图
+    :param title: 标题
+    :param attr: 属性
+    :param values: 数据
+    :return: 图形
+    """
+    from pyecharts import Pie
+
+    pie = Pie(title, title_pos='center', width=600)
+    for _value in values:
+        pie.add(title, attr, _value,
+                center=[50, 50],
+                is_random=False,
+                radius=[20, 45],
+                rosetype='rose',
+                is_legend_show=False,
+                is_label_show=True,
+                label_text_size=28)
+
+    pie.options['toolbox']['show'] = False
+
+    return pie.render_embed()
+

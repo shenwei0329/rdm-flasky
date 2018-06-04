@@ -5,26 +5,40 @@
 {% block page_content %}
 <div class="page-header">
         <div class="head" id="A1">
-            <div style="text-align:center">
-                <h1><b>研发管理信息系统</b></h1>
+            <div class="jumbotron">
+                <div class="container">
+                    <div  style="text-align:center">
+                        <h1><b>研发管理信息系统</b></h1>
+                    </div>
+                    <p>
+                        系统共有{{ total }}人，记录了{{ total_worklog }}条工作日志。<br/>
+                        产品研发中心有{{ pd_count }}人，项目开发有{{ pj_count }}人，
+                        研发管理与测试部有{{ rdm_count }}人。<br/>
+                        外包人员有{{ ext_personals_count }}人。
+                    </p>
+                </div>
             </div>
             <div class="list">
-                <ul>
-                    <dh>
-                        <h2><b>注册人员：</b>{{ total }}（人）</h2>
-                        <hr>
-                        <h2><b>基础数据</b></h2>
-                        <ul><h3>任务统计</h3>
-                            <li><h4>任务总数：{{ total_task }}（个）</h4></li>
-                            <li><h4>工作日志记录总数：{{ total_worklog }}（条）</h4></li>
-                        </ul>
-                        <ul><h3>项目成果存档统计</h3>
-                            <li><h4>参与归档的项目数：{{ total_pj }}（个）<br/></h4></li>
-                            <li><h4>项目成果数：{{ total_material }}（项）</h4></li>
-                        </ul>
-                        <hr/>
-                        <h2><b>外包资源情况</b></h2>
-                        <table border="1"><h3>资源统计</h3>
+                <div class="container">
+                    <p><h2><b>注册人员：</b><b style="color:#F00">{{ total }}</b>（人）</h2></p>
+                </div>
+                <div class="container"><h2><b>基础数据</b></h2>
+                    <p>
+                    <h4>任务统计</h4>
+                    任务总数：<b style="color:#F00">{{ total_task }}</b>（个）<br/>
+                    工作日志记录总数：<b style="color:#F00">{{ total_worklog }}</b>（条）
+                    </p>
+                    <p>
+                    <h4>项目成果存档统计</h4>
+                    参与归档的项目数：<b style="color:#F00">{{ total_pj }}</b>（个）<br/>
+                    项目成果数：<b style="color:#F00">{{ total_material }}</b>（项）
+                    </p>
+                </div>
+                <div class="container"><h2><b>外包资源情况</b></h2>
+                    <p><h3>资源统计</h3>
+                    </p>
+                    <div>
+                    <table border="1">
                             <tr style="text-align:center">
                                 <th width="240px" style="text-align:center">项目</th>
                                 <th width="160px" style="text-align:center">负责人</th>
@@ -72,8 +86,8 @@
                             {% endfor %}
                         </table>
                         {% endif %}
-                    </dh>
-                </ul>
+                    </div>
+                </div>
             </div>
         </div>
         <br>

@@ -127,7 +127,10 @@ def set_rdm_context():
         total_material=_count,
         ext_personals_stat=_ext_personals_stat,
         ext_personals=handler.get_project_info('ext_personals_t'),
-        ext_personals_count=handler.get_sum(_ext_personals_stat, u'数量')
+        ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'数量'))),
+        pd_count=pdPersonals.getNumbOfMember(),
+        pj_count=pjPersonals.getNumbOfMember(),
+        rdm_count=rdmPersonals.getNumbOfMember(),
     )
 
     return context
@@ -190,7 +193,7 @@ def set_context():
         "op": _pj_op,
         "done": _pj_ed,
         "ing": _pj_ing,
-        "pre": _pj_count-_pj_ing-_pj_ed,
+        "pre": _pj_count-_pj_ing-_pj_ed-_pj_op,
     }
     _contract_count, _contract_total = handler.get_contract_stat()
     _budget, _budget_list = handler.get_budget_stat()
@@ -271,18 +274,18 @@ def set_context():
         "ratio": "%0.2f" % (float(done_count*100)/float(count)),
 
         "pd_count": g_stat['pd'][0],
-        "pd_persion": g_stat['pd'][1],
+        "pd_persion": pdPersonals.getNumbOfMember(), # g_stat['pd'][1],
         "pd_cost_time": "%0.2f" % g_stat['pd'][2],
         "pd_cost": "%0.2f" % (float(g_stat['pd'][2]) * 2.5 / (26. * 8.)),
 
         "pj_group": "甘孜、嘉兴、四川公安等",
         "pj_count": g_stat['pj'][0],
-        "pj_persion": g_stat['pj'][1],
+        "pj_persion": pjPersonals.getNumbOfMember(), # g_stat['pj'][1],
         "pj_cost_time": "%0.2f" % g_stat['pj'][2],
         "pj_cost": "%0.2f" % (float(g_stat['pj'][2]) * 2.5 / (26. * 8.)),
 
         "rdm_count": g_stat['rdm'][0],
-        "rdm_persion": g_stat['rdm'][1],
+        "rdm_persion": rdmPersonals.getNumbOfMember(),
         "rdm_cost_time": "%0.2f" % g_stat['rdm'][2],
         "rdm_cost": "%0.2f" % (float(g_stat['rdm'][2]) * 2.5 / (26. * 8.)),
 
@@ -341,8 +344,8 @@ def set_context():
                                        {'title': u'金额（1000元）', 'data': _month_cost}]),
         trip=echart_handler.get_geo(u"借款", u"信息来源于出差申请", _trip_addr_data),
         reim=echart_handler.get_geo(u"报账", u"信息来源于差旅报账申请", _reim_addr_data),
-        persionTask=echart_handler.scatter(u'【人-任务】', [0, _persion_max/2], _persion),
-        dateTask=echart_handler.scatter(u'【日期-任务】', [0, _persion_max/2], _date),
+        persionTask=echart_handler.scatter(u'任务/人', [0, _persion_max/2], _persion),
+        dateTask=echart_handler.scatter(u'任务/天', [0, _persion_max/2], _date),
         chkonam=echart_handler.scatter(u'上班时间', [0,12], _checkon_am_data),
         chkonpm=echart_handler.scatter(u'下班时间', [8,24], _checkon_pm_data),
         chkonwork=echart_handler.scatter(u'工作时长', [0, 12], _checkon_work),

@@ -227,7 +227,7 @@ def get_pj_state():
     _pj_ing = 0
 
     mongo_db.connect_db('ext_system')
-    projects = do_search('project_t', {})
+    projects = do_search('project_t', {u'状态': {'$ne': u'挂起'}})
     _pj_count = projects.count()
     for _pj in projects:
         if _pj[u'状态'] in [u'在建', u'验收']:

@@ -98,11 +98,14 @@ def project():
         return redirect(url_for('auth.login'))
 
     role = Role.query.filter_by(name=current_user.username).first()
+    _pj = handler.get_project_info('pj_deliver_t')
     _val = handler.get_project_info('pj_ing_t')
     context = dict(
         user={"role": role.level},
-        projects=handler.get_project_info('pj_deliver_t'),
+        projects=_pj,
+        pj_count=len(_pj),
         pre_projects=_val,
+        pre_pj_count=len(_val),
         pre_quota=handler.get_sum(_val, u'规模'),
     )
 

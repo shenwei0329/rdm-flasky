@@ -6,7 +6,7 @@
 
 import mongodb_class
 
-spi_list = [u'王云枫', u'张嘉麒', u'何坤峰']
+spi_list = [u'王云枫', u'张嘉麒', u'何坤峰', u'唐高飞']
 
 
 class Personal:

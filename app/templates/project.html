@@ -5,8 +5,16 @@
 {% block page_content %}
 <div class="page-header">
         <div class="head" id="A1">
-            <div style="text-align:center">
-                <h1><b>项目开发信息</b></h1>
+            <div class="jumbotron">
+                <div class="container">
+                    <div  style="text-align:center">
+                        <h1><b>项目开发信息</b></h1>
+                    </div>
+                    <p>
+                        目前，有{{ pj_count }}个项目正在建设中，其中包含已投入开发资源的跟进项目；
+                        有{{ pre_pj_count }}个项目正处于商务跟进中。
+                    </p>
+                </div>
             </div>
             <div class="list">
                 <ul>
