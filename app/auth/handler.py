@@ -13,12 +13,16 @@
 
 from __future__ import unicode_literals
 
-from app.auth.DataHandler import mongodb_class
+import mongodb_class
 import MySQLdb
 import mysql_hdr
 import types
 import datetime
 import sys
+import PersonalStat
+from echart_handler import pie
+import logging
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -31,7 +35,7 @@ mysql_db = mysql_hdr.SqlService(db)
 """项目状态："""
 pj_state = [u'在建', u'验收', u'交付', u'发布', u'运维']
 
-pj_list = ['GZ', 'JX', 'SCGA']
+pj_list = ['GZ', 'JX', 'SCGA', 'FT']
 rdm_list = ['RDM', 'TESTCENTER']
 pd_list = ['CPSJ', 'FAST', 'HUBBLE', 'ROOOT']
 
@@ -792,4 +796,53 @@ def get_table_count(table, search):
     :return: 数据列表
     """
     return mongo_db.handler(table, "find", search).count()
+
+
+def get_imp_projects():
+    """
+    获取2018年度重点项目执行情况
+    :return:
+    """
+    pj_lists = {'JX': u'JX大数据',
+                'GZ': u'GZ一号',
+                'SCGA': u'SC综战1期',
+                'FT': u'FT基础支撑平台',
+                'HBB17': u'HBB 17课题',
+                'BJXJC': u'BJ新机场',
+                }
+    _personal = PersonalStat.Personal()
+    _pjs = []
+    for _p in pj_lists:
+        _pj_desc = {'name': pj_lists[_p]}
+        _personal.clearData()
+        _personal.scanProject(_p)
+        if _personal.getNumbOfMember() == 0:
+            logging.log(logging.WARN, ">>> project<%s> no personals" % _p)
+            continue
+        mongo_db.connect_db(_p)
+        _pj_desc['personal_count'] = _personal.getNumbOfMember()
+        _pj_desc['total_task'] = mongo_db.handler('issue', 'find', {}).count()
+        _pj_desc['wait_task'] = mongo_db.handler('issue', 'find', {'status': u'待办'}).count()
+        _pj_desc['done_task'] = mongo_db.handler('issue', 'find', {'status': u'完成'}).count()
+        _pj_desc['pic'] = pie(_p, [u'等待', u'执行中', u'完成'],
+                              [[_pj_desc['wait_task'],
+                                _pj_desc['total_task']-_pj_desc['done_task'],
+                                _pj_desc['done_task']]])
+        _pjs.append(_pj_desc)
+
+    return _pjs
+
+
+def get_pj_managers():
+
+    mongo_db.connect_db('ext_system')
+    pj_managers = {}
+    _lists = mongo_db.handler('pj_deliver_t', 'find', {})
+    for _pj in _lists:
+        if _pj[u'负责人'] not in pj_managers:
+            pj_managers[_pj[u'负责人']] = []
+        pj_managers[_pj[u'负责人']].append(_pj[u'项目名称'][_pj[u'项目名称'].find('(简称'):])
+
+    return pj_managers
+
 

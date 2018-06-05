@@ -100,6 +100,8 @@ def project():
     role = Role.query.filter_by(name=current_user.username).first()
     _pj = handler.get_project_info('pj_deliver_t')
     _val = handler.get_project_info('pj_ing_t')
+    _imp_pj = handler.get_imp_projects()
+    _pj_managers = handler.get_pj_managers()
     context = dict(
         user={"role": role.level},
         projects=_pj,
@@ -107,6 +109,9 @@ def project():
         pre_projects=_val,
         pre_pj_count=len(_val),
         pre_quota=handler.get_sum(_val, u'规模'),
+        imp_projects=_imp_pj,
+        pj_managers=_pj_managers,
+        pj_manager_count=len(_pj_managers),
     )
 
     return render_template('project.html', **context)

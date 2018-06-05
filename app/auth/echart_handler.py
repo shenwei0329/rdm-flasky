@@ -151,7 +151,7 @@ def pie(title, attr, values):
     """
     from pyecharts import Pie
 
-    pie = Pie(title, title_pos='center', width=600)
+    pie = Pie(title, title_pos='center', width=300)
     for _value in values:
         pie.add(title, attr, _value,
                 center=[50, 50],
@@ -160,7 +160,7 @@ def pie(title, attr, values):
                 rosetype='rose',
                 is_legend_show=False,
                 is_label_show=True,
-                label_text_size=28)
+                label_text_size=12)
 
     pie.options['toolbox']['show'] = False
 

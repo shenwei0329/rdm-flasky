@@ -12,70 +12,87 @@
                     </div>
                     <p>
                         目前，有{{ pj_count }}个项目正在建设中，其中包含已投入开发资源的跟进项目；
-                        有{{ pre_pj_count }}个项目正处于商务跟进中。
+                        有{{ pre_pj_count }}个项目正处于商务跟进中。<br/>
+                        共有{{ pj_manager_count }}位项目经理。
                     </p>
                 </div>
             </div>
             <div class="list">
                 <ul>
                     <dh>
-                        <h3><b>在建项目：</b></h3>
-                        <hr>
-                        <table border="2">
-                            <tr style="text-align:center">
-                                <th width="300px" style="text-align:center">名称</th>
-                                <th width="140px" style="text-align:center">合同</th>
-                                <th width="140px" style="text-align:center">启动</th>
-                                <th width="140px" style="text-align:center">立项</th>
-                                <th width="140px" style="text-align:center">需求</th>
-                                <th width="140px" style="text-align:center">开发</th>
-                                <th width="140px" style="text-align:center">部署</th>
-                                <th width="140px" style="text-align:center; color:#F00">合同交付</th>
-                            </tr>
-                            {% for pj in projects %}
-                            <tr>
-                                <td>{{ pj['项目名称'][0:pj['项目名称'].find('(简称')] }}</td>
-                                {% if '年' in pj['合同'] %}
-                                    <td style="text-align:center; background-color:#0F0;">{{ pj['合同'] }}</td>
-                                {% else %}
-                                    <td style="text-align:center">{{ pj['合同'] }}</td>
-                                {% endif %}
-                                {% if '年' in pj['启动'] %}
-                                    <td style="text-align:center; background-color:#0F0;">{{ pj['启动'] }}</td>
-                                {% else %}
-                                    <td style="text-align:center">{{ pj['启动'] }}</td>
-                                {% endif %}
-                                {% if '年' in pj['实际立项'] %}
-                                    <td style="text-align:center; background-color:#0F0;">{{ pj['实际立项'] }}</td>
-                                {% else %}
-                                    <td style="text-align:center">{{ pj['实际立项'] }}</td>
-                                {% endif %}
-                                {% if '年' in pj['实际需求设计'] %}
-                                    <td style="text-align:center; background-color:#0F0;">{{ pj['实际需求设计'] }}</td>
-                                {% else %}
-                                    <td style="text-align:center">{{ pj['实际需求设计'] }}</td>
-                                {% endif %}
-                                {% if '年' in pj['实际研发测试'] %}
-                                    <td style="text-align:center; background-color:#0F0;">{{ pj['实际研发测试'] }}</td>
-                                {% else %}
-                                    <td style="text-align:center">{{ pj['实际研发测试'] }}</td>
-                                {% endif %}
-                                {% if '年' in pj['实际部署实施'] %}
-                                    <td style="text-align:center; background-color:#0F0;">{{ pj['实际部署实施'] }}</td>
-                                {% else %}
-                                    <td style="text-align:center">{{ pj['实际部署实施'] }}</td>
-                                {% endif %}
-                                {% if '年' in pj['合同交付日期'] %}
-                                    <td style="text-align:center; background-color:#FF0;">{{ pj['合同交付日期'] }}</td>
-                                {% else %}
-                                    <td style="text-align:center">{{ pj['合同交付日期'] }}</td>
-                                {% endif %}
-                            </tr>
-                            {% endfor %}
-                        </table>
-                        <b style="color:#F00">注：以上日期为阶段完成的时间点；【合同交付】是合同要求的交付日期。</b>
+                        <div class="container">
+                            <h3><b>项目经理：</b></h3>
+                            <hr>
+                            <p>
+                                {% for _p in pj_managers %}
+                                <b>{{ _p }}</b>，负责
+                                    {% for _pj in pj_managers[_p] %}
+                                    {{ _pj.replace("简称","").replace('：',"").replace(':',"") }}
+                                    {% endfor %}
+                                等项目。<br/>
+                                {% endfor %}
+                            </p>
+                        </div>
+                        <div class="container">
+                            <h3><b>在建项目：</b></h3>
+                            <hr>
+                            <table border="2">
+                                <tr style="text-align:center">
+                                    <th width="300px" style="text-align:center">名称</th>
+                                    <th width="140px" style="text-align:center">合同</th>
+                                    <th width="140px" style="text-align:center">启动</th>
+                                    <th width="140px" style="text-align:center">立项</th>
+                                    <th width="140px" style="text-align:center">需求</th>
+                                    <th width="140px" style="text-align:center">开发</th>
+                                    <th width="140px" style="text-align:center">部署</th>
+                                    <th width="140px" style="text-align:center; color:#F00">合同交付</th>
+                                </tr>
+                                {% for pj in projects %}
+                                <tr>
+                                    <td>{{ pj['项目名称'][pj['项目名称'].find('(简称'):].replace('简称',"").replace('：',"").replace(':',"") }}</td>
+                                    {% if '年' in pj['合同'] %}
+                                        <td style="text-align:center; background-color:#0F0;">{{ pj['合同'] }}</td>
+                                    {% else %}
+                                        <td style="text-align:center">{{ pj['合同'] }}</td>
+                                    {% endif %}
+                                    {% if '年' in pj['启动'] %}
+                                        <td style="text-align:center; background-color:#0F0;">{{ pj['启动'] }}</td>
+                                    {% else %}
+                                        <td style="text-align:center">{{ pj['启动'] }}</td>
+                                    {% endif %}
+                                    {% if '年' in pj['实际立项'] %}
+                                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际立项'] }}</td>
+                                    {% else %}
+                                        <td style="text-align:center">{{ pj['实际立项'] }}</td>
+                                    {% endif %}
+                                    {% if '年' in pj['实际需求设计'] %}
+                                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际需求设计'] }}</td>
+                                    {% else %}
+                                        <td style="text-align:center">{{ pj['实际需求设计'] }}</td>
+                                    {% endif %}
+                                    {% if '年' in pj['实际研发测试'] %}
+                                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际研发测试'] }}</td>
+                                    {% else %}
+                                        <td style="text-align:center">{{ pj['实际研发测试'] }}</td>
+                                    {% endif %}
+                                    {% if '年' in pj['实际部署实施'] %}
+                                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际部署实施'] }}</td>
+                                    {% else %}
+                                        <td style="text-align:center">{{ pj['实际部署实施'] }}</td>
+                                    {% endif %}
+                                    {% if '年' in pj['合同交付日期'] %}
+                                        <td style="text-align:center; background-color:#FF0;">{{ pj['合同交付日期'] }}</td>
+                                    {% else %}
+                                        <td style="text-align:center">{{ pj['合同交付日期'] }}</td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </table>
+                            <b style="color:#F00">注：以上日期为阶段完成的时间点；【合同交付】是合同要求的交付日期。</b>
+                        </div>
                         <br/>
                         {% if user["role"] <= 2 %}
+                        <div class="container">
                         <h3><b>争取项目：</b></h3>
                         <hr>
                         <table border="2">
@@ -112,7 +129,9 @@
                                 <td style="text-align:right">{{ pre_quota }}</td>
                             </tr>
                         </table>
+                        </div>
                         {% endif %}
+                        <div class="container">
                         <h3><b>重点项目执行情况：</b></h3>
                         <hr>
                         <table border="2">
@@ -122,11 +141,21 @@
                             </tr>
                             {% for _p in imp_projects %}
                             <tr>
-                                <td>{{ _p['info'] }}</td>
-                                <td>{{ _p['pic'] | safe }}</td>
+                                <td>
+                                    <p>
+                                        <b>{{ _p['name'] }}</b><br/>
+                                        开发人员：{{ _p['personal_count'] }}人<br/>
+                                        共有任务：{{ _p['total_task'] }}个<br/>
+                                        已完成：{{ _p['done_task'] }}个<br/>
+                                    </p>
+                                </td>
+                                <td>
+                                    <p>{{ _p['pic'] | safe }}</p>
+                                </td>
                             </tr>
                             {% endfor %}
                         </table>
+                        </div>
                     </dh>
                 </ul>
             </div>
