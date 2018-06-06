@@ -64,24 +64,23 @@
                         </p>
                         <div><h3>资源明细：</h3></div>
                         <p>
-                        产品研发中心共有<b style="color:#F00">{{ taskStat["pd_persion"] }}</b>名员工，
+                        今年，产品研发中心共有<b style="color:#F00">{{ taskStat["pd_persion"] }}</b>名员工，
                         耗费<b style="color:#F00">{{ taskStat["pd_cost_time"] }}</b>个工时，
                         完成<b style="color:#F00">{{ taskStat["pd_count"] }}</b>项任务。
+                        在支撑项目上，共投入<b style="color:#F00">{{ hrStat["pd_pj_time"] }}</b>个工时
+                            （占比<b style="color:#F00">{{ hrStat["pd_pj_time_ratio"] }}</b>%），
+                        完成<b style="color:#F00">{{ hrStat["pd_pj_task_numb"] }}</b>项任务
+                            （占比<b style="color:#F00">{{ hrStat["pd_pj_task_numb_ratio"]}}</b>%）。
                         </p>
                         <p>
-                        有<b style="color:#F00">{{ taskStat["pj_persion"] }}</b>名员工
-                            <sub>注：含产品研发中心投入的</sub>参与项目开发，
+                        在项目开发上，共有<b style="color:#F00">{{ taskStat["pj_persion"] }}</b>名员工，
                         耗费<b style="color:#F00">{{ taskStat["pj_cost_time"] }}</b>个工时，
                         完成<b style="color:#F00">{{ taskStat["pj_count"] }}</b>项任务。
                         </p>
                         <p>
-                        研发管理与测试部共有<b style="color:#F00">{{ taskStat["rdm_persion"] }}</b>名员工投入工作，
+                        研发管理与测试部共有<b style="color:#F00">{{ taskStat["rdm_persion"] }}</b>名员工，
                         耗费<b style="color:#F00">{{ taskStat["rdm_cost_time"] }}</b>个工时，
                         完成<b style="color:#F00">{{ taskStat["rdm_count"] }}</b>项任务。
-                        </p>
-                        <p>
-                        产品研发中心共投入<b style="color:#F00">{{ hrStat["pd_cost_time"] }}</b>个工时到项目支撑，
-                        投入<b style="color:#F00">{{ hrStat["pd_n_cost_time"] }}</b>个工时到公司其它方面的支撑。
                         </p>
                     </li>
                     <li>

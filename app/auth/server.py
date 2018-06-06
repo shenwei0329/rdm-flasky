@@ -29,6 +29,7 @@ pdPersonals = PersonalStat.Personal()
 pjPersonals = PersonalStat.Personal()
 rdmPersonals = PersonalStat.Personal()
 Personals = []
+extTask = None
 
 
 def set_honor_context():
@@ -146,9 +147,28 @@ def set_pding_context():
     return context
 
 
+def cal_ext_task_desc():
+    """
+    统计入侵任务信息
+    :return: 统计结果
+    """
+    global extTask
+
+    _stat = {'count': 0, 'spent': 0}
+    if extTask is None:
+        return _stat
+    for _t in extTask:
+        _stat['spent'] += _t['spent_time']
+
+    _stat['count'] = len(extTask)
+
+    return _stat
+
+
 def set_context():
 
-    global Personals, pdPersonals, pjPersonals, rdmPersonals, pd_databases, pj_databases, rdm_databases, st_date, ed_date, today
+    global Personals, pdPersonals, pjPersonals, rdmPersonals, pd_databases,\
+        pj_databases, rdm_databases, st_date, ed_date, today, extTask
 
     today = datetime.date.today()
     ed_date = today.strftime("%Y-%m-%d")
@@ -156,6 +176,8 @@ def set_context():
     pdPersonals.setDate(date={'st_date': '2018-03-01', 'ed_date': ed_date})
     pjPersonals.setDate(date={'st_date': '2018-03-01', 'ed_date': ed_date})
     rdmPersonals.setDate(date={'st_date': '2018-03-01', 'ed_date': ed_date})
+
+    extTask = handler.scan_pj_task(st_date, ed_date)
 
     """清空原有数据
     """
@@ -228,6 +250,8 @@ def set_context():
     _persion_cost = _cost/3600
 
     pd_count, pd_cost, pd_n_cost = handler.get_pd4pj_stat(st_date, ed_date)
+    _pj_task_stat = cal_ext_task_desc()
+    count, done_count, persion, date, cost, g_stat = handler.get_task_stat(st_date, ed_date)
 
     hrStat = {
         "cost_time": _persion_cost,
@@ -239,9 +263,11 @@ def set_context():
         "pd_n_cost": "%0.2f" % (float(pd_n_cost) * 2.5 / (26. * 8.)),
         "pd_cost_total": "%0.2f" % (float(pd_cost+pd_n_cost) * 2.5 / (26. * 8.)),
         "pd_cost_time_total": pd_cost + pd_n_cost,
+        "pd_pj_task_numb": _pj_task_stat['count'],
+        "pd_pj_time": "%0.2f" % (_pj_task_stat['spent'] / 3600.),
+        "pd_pj_task_numb_ratio": "%0.2f" % (_pj_task_stat['count']*100./g_stat['pd'][0]),
+        "pd_pj_time_ratio": "%0.2f" % ((_pj_task_stat['spent'] / 3600.)*100./g_stat['pd'][2]),
     }
-
-    count, done_count, persion, date, cost, g_stat = handler.get_task_stat(st_date, ed_date)
 
     _persion = []
     _persion_max = 0

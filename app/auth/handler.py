@@ -846,3 +846,31 @@ def get_pj_managers():
     return pj_managers
 
 
+def scan_pj_task(st_date, ed_date):
+    """
+    获取产品研发中心投入到非产品研发的任务
+    :param st_date: 起始时间
+    :param ed_date: 截止时间
+    :return: 数据
+    """
+    _task = []
+    for _pd_g in pd_list:
+        mongo_db.connect_db(_pd_g)
+        _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
+                                                  "summary": {'$regex': ".*入侵.*"},
+                                                  "spent_time": {'$ne': None},
+                                                  "$and": [{"created": {"$gte": "%s" % st_date}},
+                                                           {"created": {"$lt": "%s" % ed_date}}]})
+        for _r in _rec:
+            _task.append(_r)
+
+        ext_epic = mongo_db.handler("issue", "find_one", {"issue_type": "epic", "summary": u"项目入侵"})
+        _res = mongo_db.handler("issue", "find", {"issue_type": {"$ne": ["epic", "story"]},
+                                                  "spent_time": {'$ne': None},
+                                                  "epic_link": ext_epic['issue']})
+        for _r in _res:
+            if _r not in _task:
+                _task.append(_r)
+
+    return _task
+
