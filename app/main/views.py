@@ -124,10 +124,7 @@ def honor():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    if my_context is None:
-        my_context = server.set_context()
-        set_time = datetime.datetime.now()
     if honor_context is None:
-        honor_context = server.set_honor_context()
+        redirect(url_for('auth.login'))
 
     return render_template('honor.html', **honor_context)

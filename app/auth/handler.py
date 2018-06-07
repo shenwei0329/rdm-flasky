@@ -824,6 +824,7 @@ def get_imp_projects():
         _pj_desc['total_task'] = mongo_db.handler('issue', 'find', {}).count()
         _pj_desc['wait_task'] = mongo_db.handler('issue', 'find', {'status': u'待办'}).count()
         _pj_desc['done_task'] = mongo_db.handler('issue', 'find', {'status': u'完成'}).count()
+        _pj_desc['ratio'] = "%0.2f" % (float(_pj_desc['done_task'])/float(_pj_desc['personal_count']))
         _pj_desc['pic'] = pie(_p, [u'等待', u'执行中', u'完成'],
                               [[_pj_desc['wait_task'],
                                 _pj_desc['total_task']-_pj_desc['done_task'],
