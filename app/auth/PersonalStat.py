@@ -116,7 +116,7 @@ class Personal:
 
         return _spent_time
 
-    def getSpentTime(self, name):
+    def getSumSpentTime(self, name):
         """
         获取个人任务中工时统计
         :param name: 名称
@@ -131,7 +131,37 @@ class Personal:
 
         return _time
 
-    def getOrgTime(self, name):
+    def getSpentTime(self, name):
+        """
+        获取个人任务中工时统计
+        :param name: 名称
+        :return:
+        """
+        issues = self.personal[name]['issue']
+        _time = []
+        for _issue in issues:
+            if _issue['spent_time'] is None:
+                continue
+            _time.append(float(_issue['spent_time']))
+
+        return _time
+
+    def getDiffTime(self, name):
+        """
+        获取个人任务中执行时间与估计时间之差的统计
+        :param name: 名称
+        :return:
+        """
+        issues = self.personal[name]['issue']
+        _time = 0
+        for _issue in issues:
+            if (_issue['org_time'] is None) or (_issue['spent_time'] is None):
+                continue
+            _time += (float(_issue['org_time']) - float(_issue['spent_time']))
+
+        return _time
+
+    def getSumOrgTime(self, name):
         """
         获取个人任务中工时统计
         :param name: 名称
@@ -143,6 +173,21 @@ class Personal:
             if _issue['org_time'] is None:
                 continue
             _time += float(_issue['org_time'])
+
+        return _time
+
+    def getOrgTime(self, name):
+        """
+        获取个人任务中工时统计
+        :param name: 名称
+        :return:
+        """
+        issues = self.personal[name]['issue']
+        _time = []
+        for _issue in issues:
+            if _issue['org_time'] is None:
+                continue
+            _time.append(float(_issue['org_time']))
 
         return _time
 

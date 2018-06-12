@@ -53,6 +53,9 @@ def rdm():
         set_time = datetime.datetime.now()
 
     _context = server.set_rdm_context()
+    role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % role.level)
+    _context['user'] = {'role': role.level}
     return render_template('rdm.html', **_context)
 
 
@@ -62,6 +65,9 @@ def product():
         return redirect(url_for('auth.login'))
 
     _context = server.set_pd_context()
+    role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % role.level)
+    _context['user'] = {'role': role.level}
     return render_template('product.html', **_context)
 
 
@@ -71,6 +77,9 @@ def producting():
         return redirect(url_for('auth.login'))
 
     _context = server.set_pding_context()
+    role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % role.level)
+    _context['user'] = {'role': role.level}
     return render_template('producting.html', **_context)
 
 
@@ -89,6 +98,9 @@ def pd_select(value):
     _context['ratio'] = _desc[u'任务完成率']
     _context['personals'] = handler.get_personal_stat(value)
 
+    role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % role.level)
+    _context['user'] = {'role': role.level}
     return render_template('product_desc.html', **_context)
 
 
@@ -113,6 +125,9 @@ def project():
         pj_managers=_pj_managers,
         pj_manager_count=len(_pj_managers),
     )
+    role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % role.level)
+    context['user'] = {'role': role.level}
 
     return render_template('project.html', **context)
 
@@ -127,4 +142,18 @@ def honor():
     if honor_context is None:
         redirect(url_for('auth.login'))
 
+    role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % role.level)
+    honor_context['user'] = {'role': role.level}
     return render_template('honor.html', **honor_context)
+
+
+@main.route('/manager')
+def manager():
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    _context = server.set_manager_context()
+
+    return render_template('manager.html', **_context)

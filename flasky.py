@@ -5,6 +5,7 @@ from app.models import User, Role
 import sys
 
 import logging
+
 logging.basicConfig(format='%(asctime)s --%(lineno)s -- %(levelname)s:%(message)s',
                     filename='flasky.log', level=logging.WARN)
 

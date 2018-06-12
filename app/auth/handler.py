@@ -875,3 +875,177 @@ def scan_pj_task(st_date, ed_date):
 
     return _task
 
+
+def getPersonalByLevel(lvl):
+
+    mongo_db.connect_db('ext_system')
+    return mongo_db.handler('pd_member_level_t', 'find', {u'职级': "%d" % lvl})
+
+
+def nTaskByLevel(Personals):
+    """
+    各职级的执行任务情况
+    :param Personals: 人员表
+    :return: 数据
+    """
+
+    x = []
+    y = []
+
+    _personals = Personals.getNameList()
+    for _lvl in range(13):
+
+        print(">>> _lvl = %d" % _lvl)
+        _ps = getPersonalByLevel(_lvl)
+        if _ps is None:
+            continue
+
+        for _p in _ps:
+            if _p[u'姓名'] in _personals:
+                x.append(_lvl)
+                y.append(Personals.getNumbOfTask(_p[u'姓名']))
+
+    return x, y
+
+
+def spentTimeByLevel(Personals):
+    """
+    各职级的执行任务的用时情况
+    :param Personals: 人员表
+    :return: 数据
+    """
+
+    x = []
+    y = []
+
+    _personals = Personals.getNameList()
+    for _lvl in range(13):
+
+        print(">>> _lvl = %d" % _lvl)
+        _ps = getPersonalByLevel(_lvl)
+        if _ps is None:
+            continue
+
+        for _p in _ps:
+            if _p[u'姓名'] in _personals:
+                _times = Personals.getSpentTime(_p[u'姓名'])
+                for _t in _times:
+                    if _t/3600 > 100:
+                        continue
+                    x.append(_lvl)
+                    y.append(_t/3600.)
+
+    return x, y
+
+
+def orgTimeByLevel(Personals):
+    """
+    各职级的执行任务的预估时间情况
+    :param Personals: 人员表
+    :return: 数据
+    """
+
+    x = []
+    y = []
+
+    _personals = Personals.getNameList()
+    for _lvl in range(13):
+
+        print(">>> _lvl = %d" % _lvl)
+        _ps = getPersonalByLevel(_lvl)
+        if _ps is None:
+            continue
+
+        for _p in _ps:
+            if _p[u'姓名'] in _personals:
+                _times = Personals.getOrgTime(_p[u'姓名'])
+                for _t in _times:
+                    if _t/3600 > 100:
+                        continue
+                    x.append(_lvl)
+                    y.append(_t/3600.)
+
+    return x, y
+
+
+def spentTimeSumByLevel(Personals):
+    """
+    各职级的执行任务的用时情况
+    :param Personals: 人员表
+    :return: 数据
+    """
+
+    x = []
+    y = []
+
+    _personals = Personals.getNameList()
+    for _lvl in range(13):
+
+        print(">>> _lvl = %d" % _lvl)
+        _ps = getPersonalByLevel(_lvl)
+        if _ps is None:
+            continue
+
+        for _p in _ps:
+            if _p[u'姓名'] in _personals:
+                _t = Personals.getSumSpentTime(_p[u'姓名'])
+                x.append(_lvl)
+                y.append(_t/3600.)
+
+    return x, y
+
+
+def orgTimeSumByLevel(Personals):
+    """
+    各职级的执行任务的预估时间情况
+    :param Personals: 人员表
+    :return: 数据
+    """
+
+    x = []
+    y = []
+
+    _personals = Personals.getNameList()
+    for _lvl in range(13):
+
+        print(">>> _lvl = %d" % _lvl)
+        _ps = getPersonalByLevel(_lvl)
+        if _ps is None:
+            continue
+
+        for _p in _ps:
+            if _p[u'姓名'] in _personals:
+                _t = Personals.getSumOrgTime(_p[u'姓名'])
+                x.append(_lvl)
+                y.append(_t/3600.)
+
+    return x, y
+
+
+def diffTimeByLevel(Personals):
+    """
+    各职级的执行任务的预估时间情况
+    :param Personals: 人员表
+    :return: 数据
+    """
+
+    x = []
+    y = []
+
+    _personals = Personals.getNameList()
+    for _lvl in range(13):
+
+        print(">>> _lvl = %d" % _lvl)
+        _ps = getPersonalByLevel(_lvl)
+        if _ps is None:
+            continue
+
+        for _p in _ps:
+            if _p[u'姓名'] in _personals:
+                _t = Personals.getDiffTime(_p[u'姓名'])
+                x.append(_lvl)
+                y.append(_t/3600.)
+
+    return x, y
+
+

@@ -22,6 +22,19 @@ pj_databases = ['JX', 'GZ', 'SCGA', 'FT']
 rdm_databases = ['RDM', 'TESTCENTER']
 
 month = [u'一月', u'二月', u'三月', u'四月', u'五月', u'六月', u'七月', u'八月', u'九月', u'十月', u'十一月', u'十二月']
+level = [u'职级1',
+         u'职级2',
+         u'职级3',
+         u'职级4',
+         u'职级5',
+         u'职级6',
+         u'职级7',
+         u'职级8',
+         u'职级9',
+         u'职级10',
+         u'职级11',
+         u'职级12',
+         ]
 
 st_date = '2018-01-01'
 ed_date = '2018-12-31'
@@ -31,6 +44,26 @@ rdmPersonals = PersonalStat.Personal()
 Personals = []
 extTask = None
 
+
+def set_manager_context():
+
+    _x, _y = handler.nTaskByLevel(pdPersonals)
+    _xs, _ys = handler.spentTimeSumByLevel(pdPersonals)
+    _xo, _yo = handler.orgTimeSumByLevel(pdPersonals)
+    _xd, _yd = handler.diffTimeByLevel(pdPersonals)
+
+    _context = dict()
+    role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % role.level)
+    _context['user'] = {'role': role.level}
+    _context['pic'] = echart_handler.effectscatter('职级-任务量', [{"x": _x, "y": _y}], size={'width': 640, 'height': 420})
+    _context['pic_time'] = echart_handler.effectscatter('职级-时间',
+                                                         [{"x": _xo, "y": _yo},
+                                                          {"x": _xs, "y": _ys}],
+                                                         size={'width': 640, 'height': 420})
+    _context['pic_diff'] = echart_handler.effectscatter('职级-时间差', [{"x": _xd, "y": _yd}], size={'width': 640, 'height': 420})
+
+    return _context
 
 def set_honor_context():
     _pd_work_ind = pdPersonals.getWorkIndList()

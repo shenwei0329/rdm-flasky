@@ -75,19 +75,69 @@ def bar(title, attr, datas):
     return bar.render_embed()
 
 
-def scatter(title, range_def, data):
+def effectscatter(title, datas, size=None):
+    from pyecharts import EffectScatter
+
+    # import random
+    # data = [random.randint(0, 100) for _ in range(80)]
+    range_color = ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf',
+                   '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+
+    if size is None:
+        scatter = EffectScatter(
+                                title,
+                                width=320,
+                                height=180,
+                                title_pos="center",
+                                background_color='#b0bab9',
+                          )
+    else:
+        scatter = EffectScatter(
+                                title,
+                                width=size['width'],
+                                height=size['height'],
+                                title_pos="center",
+                                background_color='#b0bab9',
+                          )
+    _scale = 1.5
+    for _data in datas:
+        scatter.add("", _data['x'], _data['y'],
+                    is_visualmap=False,
+                    visual_range_color=range_color,
+                    mark_line=['average'],
+                    mark_point=['max', 'min'],
+                    effect_scale=_scale,
+                    symbol_size=5,
+                    )
+        _scale += 1.
+
+    scatter.options['toolbox']['show'] = False
+    return scatter.render_embed()
+
+
+def scatter(title, range_def, data, size=None):
     from pyecharts import Scatter
 
     # import random
     # data = [random.randint(0, 100) for _ in range(80)]
     range_color = ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf',
                    '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
-    scatter = Scatter(title,
-                      width=320,
-                      height=180,
-                      title_pos="center",
-                      background_color='#b0bab9',
-                      )
+
+    if size is None:
+        scatter = Scatter(title,
+                          width=320,
+                          height=180,
+                          title_pos="center",
+                          background_color='#b0bab9',
+                          )
+    else:
+        scatter = Scatter(title,
+                          width=size['width'],
+                          height=size['height'],
+                          title_pos="center",
+                          background_color='#b0bab9',
+                          )
+
     scatter.add("", range(len(data)), data,
                 visual_range=range_def,
                 is_visualmap=False,
