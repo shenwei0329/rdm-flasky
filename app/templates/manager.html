@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}研发管理信息系统{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+        <div class="head" id="A1">
+            <div class="jumbotron">
+                <div class="container">
+                    <div  style="text-align:center">
+                        <h1><b>欢迎进入系统管理环境！</b></h1>
+                    </div>
+                    <p>
+                        这里是一个别样的世界。
+                    </p>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="container">
+            <p>
+                {{ pic | safe }}
+                {{ pic_time | safe }}
+                {{ pic_diff | safe }}
+            </p>
+        </div>
+        <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
+</div>
+{% endblock %}
