@@ -274,7 +274,6 @@ def init_users():
             user = User()
             user.username = _email
             user.email = _email
-            user.username = _email
 
             if email_str[_email] == 'user':
                 _password = '12345678'

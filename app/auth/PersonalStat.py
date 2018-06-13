@@ -7,6 +7,7 @@
 import mongodb_class
 
 spi_list = [u'王云枫', u'张嘉麒', u'何坤峰', u'唐高飞']
+spi_for_honor = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟']
 
 
 class Personal:
@@ -272,23 +273,28 @@ class Personal:
                 else:
                     _org_time = float(_i['org_time'])
                     _spent_time = float(_i['spent_time'])
-                if _spent_time==0:
+                if _spent_time == 0:
                     _quota += _org_time
                 else:
                     _miu = _org_time/_spent_time
-                    if _miu > 10:
+                    if _miu > 10:   # 预估时间严重失真
                         _miu = 1.8
-                    elif _miu > 5:
+                    elif _miu > 5:  # 预估时间偏离过大
                         _miu = 1.5
-                    elif _miu > 1:
+                    elif _miu > 1:  # 经验问题
                         _miu = 1.3
                     _quota += (_org_time*_miu)
             self.personal[_p]['quota'] = _quota
 
     def getWorkIndList(self):
+        """
+        获取个人工作量指标列表（按量排序），注：不包含研发管理部组员。
+        :return: 排序的人员-工作量序列
+        """
         _personal = ()
         for _p in self.personal:
-            _personal += (_p, int(self.personal[_p]['quota']),),
+            if _p not in spi_for_honor:
+                _personal += (_p, int(self.personal[_p]['quota']),),
 
         return sorted(_personal, key=lambda x: x[1], reverse=True)
 

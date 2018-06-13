@@ -1,39 +1,4 @@
-{% extends "base.html" %}
-
-{% block title %}研发管理信息系统{% endblock %}
-
-{% block page_content %}
-<div class="page-header">
-        <div class="head" id="A1">
-            <div class="jumbotron">
-                <div class="container">
-                    <div  style="text-align:center">
-                        <h1><b style="color:#F00">光荣榜</b></h1>
-                    </div>
-                    <p>
-                        评选方法：注册员工，按部门、项目组对个人已完成的任务指标进行排名，按比例上榜。
-                    </p><br/>
-                    <p>
-                        本年度：指本年截至今天的工作量统计；<br/>
-                        近三个月：指本月前三个月的工作量统计。
-                    </p>
-                </div>
-            </div>
             <div>
-                <h4><b style="color:#F00">选择：</b></h4>
-                <ul class="menu">
-                    <li><button type="button" value="yearly" onclick="btn_onclick(this.value)">
-                        本年度
-                    </button></li>
-                    <li><button type="button" value="monthly" onclick="btn_onclick(this.value)">
-                        近三个月
-                    </button></li>
-                </ul>
-                <br/>
-            </div>
-            <hr/>
-            <div id="honor_list" class="list">
-                <div>
                 <h2><b style="color:#F00">{{ info }}光荣榜</b></h2><br/>
                 <ul>
                     <li>
@@ -115,27 +80,4 @@
                     </li>
                 </ul>
                 <br/>
-                </div>
             </div>
-        </div>
-        <div class="container">
-            <p>
-                <h4>
-                    <b>【注】：任务指标=p*∑w*u；p职级系数=[0.8(高级)，1(中级)，1.3(初级)]；w工作量=估计工时；u效率=估计工时/实际工时
-                    </b>
-                </h4>
-            </p>
-            <br>
-        </div>
-        <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
-</div>
-
-<script type="text/javascript">
-    function btn_onclick(value){
-        htmlobj=$.ajax({url:"/honor_select/"+value,async:false});
-        $("#honor_list").html(htmlobj.responseText);
-        $("#honor_list").show()
-    }
-</script>
-
-{% endblock %}

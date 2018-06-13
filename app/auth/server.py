@@ -17,9 +17,21 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-pd_databases = ['CPSJ', 'FAST', 'HUBBLE', 'ROOOOT']
-pj_databases = ['JX', 'GZ', 'SCGA', 'FT']
-rdm_databases = ['RDM', 'TESTCENTER']
+# 产品研发中心
+pd_databases = ['CPSJ',
+                'FAST',
+                'HUBBLE',
+                'ROOOOT']
+
+# 项目开发组
+pj_databases = ['JX',
+                'GZ',
+                'SCGA',
+                'FT']
+
+# 研发管理与测试部
+rdm_databases = ['RDM',
+                 'TESTCENTER']
 
 month = [u'一月', u'二月', u'三月', u'四月', u'五月', u'六月', u'七月', u'八月', u'九月', u'十月', u'十一月', u'十二月']
 level = [u'职级1',
@@ -43,6 +55,9 @@ pjPersonals = PersonalStat.Personal()
 rdmPersonals = PersonalStat.Personal()
 Personals = []
 extTask = None
+pdPersonalsDate = PersonalStat.Personal()
+pjPersonalsDate = PersonalStat.Personal()
+rdmPersonalsDate = PersonalStat.Personal()
 
 
 def set_manager_context():
@@ -65,10 +80,39 @@ def set_manager_context():
 
     return _context
 
-def set_honor_context():
-    _pd_work_ind = pdPersonals.getWorkIndList()
-    _pj_work_ind = pjPersonals.getWorkIndList()
-    _rdm_work_ind = rdmPersonals.getWorkIndList()
+
+def set_honor_context(_st_date, _ed_date):
+    """
+    设置“光荣榜”的context内容
+    :param st_date: 工作量计量的起始日期
+    :param ed_date: 工作量计量的终止日期
+    :return: context
+    """
+    global ed_date, st_date
+
+    if _ed_date is None:
+        _ed_date = ed_date
+    if _st_date is None:
+        _st_date = st_date
+
+    pdPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date})
+    pjPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date})
+    rdmPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date})
+
+    pdPersonalsDate.clearData()
+    pjPersonalsDate.clearData()
+    rdmPersonalsDate.clearData()
+
+    for _db in pd_databases:
+        pdPersonalsDate.scanProject(_db)
+    for _db in pj_databases:
+        pjPersonalsDate.scanProject(_db)
+    for _db in rdm_databases:
+        rdmPersonalsDate.scanProject(_db)
+
+    _pd_work_ind = pdPersonalsDate.getWorkIndList()
+    _pj_work_ind = pjPersonalsDate.getWorkIndList()
+    _rdm_work_ind = rdmPersonalsDate.getWorkIndList()
 
     _pd_count = 18
     _pd_numb_list = _pd_count/6

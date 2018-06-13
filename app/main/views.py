@@ -15,13 +15,12 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 my_context = None
-honor_context = None
 set_time = None
 
 
 @main.route('/')
 def index():
-    global my_context, set_time, honor_context
+    global my_context, set_time
 
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
@@ -29,11 +28,9 @@ def index():
     if my_context is None:
         my_context = server.set_context()
         set_time = datetime.datetime.now()
-        honor_context = server.set_honor_context()
     elif (datetime.datetime.now() - set_time).seconds > 3600*8:
         set_time = datetime.datetime.now()
         my_context = server.set_context()
-        honor_context = server.set_honor_context()
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     my_context['user'] = {'role': role.level}
@@ -134,18 +131,52 @@ def project():
 
 @main.route('/honor')
 def honor():
-    global my_context, set_time, honor_context
+    global my_context, set_time
 
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    if honor_context is None:
-        redirect(url_for('auth.login'))
+    _context = server.set_honor_context(None, None)
+    role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % role.level)
+    _context['user'] = {'role': role.level}
+    _context['info'] = u"【本年度】"
+    return render_template('honor.html', **_context)
+
+
+@main.route('/honor_select/<value>')
+def honor_select(value):
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    print(">>> value: %s" % value)
+
+    if value in 'yearly':
+        _context = server.set_honor_context(None, None)
+        _context['info'] = u"【本年度】"
+    elif value in 'monthly':
+        _now = datetime.datetime.now()
+        if _now.month > 1:
+            _ed_date = _now - datetime.timedelta(days=_now.day)
+        else:
+            _ed_date = _now
+        if _ed_date.month > 2:
+            _st_date = (datetime.datetime(_ed_date.year, _ed_date.month-2, 1)).strftime("%Y-%m-%d 00:00:00")
+        else:
+            _st_date = (datetime.datetime(_ed_date.year, 1, 1)).strftime("%Y-%m-%d 00:00:00")
+        _ed_date = _ed_date.strftime("%Y-%m-%d 23:59:59")
+        print(">>> %s --> %s" % (_st_date, _ed_date))
+        _context = server.set_honor_context(_st_date, _ed_date)
+        _context['info'] = u"【近三个月】"
+    else:
+        _context = server.set_honor_context('2018-06-04', '2018-06-11')
+        _context['info'] = u"【上周】"
 
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
-    honor_context['user'] = {'role': role.level}
-    return render_template('honor.html', **honor_context)
+    _context['user'] = {'role': role.level}
+    return render_template('honor_desc.html', **_context)
 
 
 @main.route('/manager')
