@@ -855,6 +855,8 @@ def scan_pj_task(st_date, ed_date):
     :param ed_date: 截止时间
     :return: 数据
     """
+
+    logging.log(logging.WARN, ">>> ext_date: %s-%s" % (st_date, ed_date))
     _task = []
     for _pd_g in pd_list:
         mongo_db.connect_db(_pd_g)
@@ -863,13 +865,17 @@ def scan_pj_task(st_date, ed_date):
                                                   "spent_time": {'$ne': None},
                                                   "$and": [{"created": {"$gte": "%s" % st_date}},
                                                            {"created": {"$lt": "%s" % ed_date}}]})
+        logging.log(logging.WARN, ">>> ext_regex: %s-%d" % (_pd_g, _rec.count()))
         for _r in _rec:
             _task.append(_r)
 
         ext_epic = mongo_db.handler("issue", "find_one", {"issue_type": "epic", "summary": u"项目入侵"})
         _res = mongo_db.handler("issue", "find", {"issue_type": {"$ne": ["epic", "story"]},
                                                   "spent_time": {'$ne': None},
+                                                  "$and": [{"created": {"$gte": "%s" % st_date}},
+                                                           {"created": {"$lt": "%s" % ed_date}}],
                                                   "epic_link": ext_epic['issue']})
+        logging.log(logging.WARN, ">>> ext_epic: %s-%d" % (_pd_g, _res.count()))
         for _r in _res:
             if _r not in _task:
                 _task.append(_r)

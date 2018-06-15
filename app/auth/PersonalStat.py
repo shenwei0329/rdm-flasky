@@ -33,13 +33,17 @@ class Personal:
         else:
             self.st_date = date['st_date']
             self.ed_date = date['ed_date']
+        self.whichdate = "created"
 
     def clearData(self):
         self.personal = {}
 
-    def setDate(self, date):
+    def setDate(self, date, whichdate=None):
         self.st_date = date['st_date']
         self.ed_date = date['ed_date']
+        if whichdate is not None:
+            self.whichdate = whichdate
+
 
     def _getTaskListByPersonal(self, project):
         """
@@ -56,8 +60,8 @@ class Personal:
             _search = {"issue_type": {"$ne": ["epic", "story"]},
                        "$or": [{"spent_time": {"$ne": None}},
                                {"org_time": {"$ne": None}}],
-                       "$and": [{"created": {"$gte": "%s" % self.st_date}},
-                                {"created": {"$lt": "%s" % self.ed_date}}]
+                       "$and": [{self.whichdate: {"$gte": "%s" % self.st_date}},
+                                {self.whichdate: {"$lt": "%s" % self.ed_date}}]
                        }
         else:
             _search = {"issue_type": {"$ne": ["epic", "story"]},

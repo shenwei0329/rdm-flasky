@@ -34,6 +34,94 @@
                     项目成果数：<b style="color:#F00">{{ total_material }}</b>（项）
                     </p>
                 </div>
+                {% if user["role"] <= 2 %}
+                <div class="container"><h2><b>资源池工作分布情况</b></h2>
+                    <p>
+                        注：图中每个点表示一个资源个体（员工），情况分三类：<br/>
+                        >：“大圈”表示负载饱和（承担的任务量超过40个工时）；<br/>
+                        >：“中圈”表示负载适中（承担的任务量在24至40个工时之间）；<br/>
+                        >：“小圈”表示负载欠缺（承担的任务量小于24个工时）。
+                    </p>
+                    <table border="0">
+                        <tr style="text-align:center">
+                            <p>产品研发中心资源
+                                {{ task_ind_pd | safe }}
+                                {{ task_ind_pd_org | safe }}
+                            </p>
+                            <p>项目开发资源
+                                {{ task_ind_pj | safe }}
+                                {{ task_ind_pj_org | safe }}
+                            </p>
+                            <p>测试资源
+                                {{ task_ind_rdm | safe }}
+                                {{ task_ind_rdm_org | safe }}
+                            </p>
+                        </tr>
+                    </table>
+                </div>
+                <div class="container"><h2><b>产品研发中心支撑项目统计</b></h2>
+                    <table border="1">
+                        <tr style="text-align:center">
+                            <th width="320px" style="text-align:center">年度</th>
+                            <th width="320px" style="text-align:center">近三个月</th>
+                            <th width="320px" style="text-align:center">上个月</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>今年截至现在，产品研发资源的工时投入占比情况：<br/>
+                                    >：产品研发投入{{ task_pd }}个工时，占比{{ task_pd_ratio }}%；<br/>
+                                    >：项目支撑投入{{ task_pj }}个工时，占比{{ task_pj_ratio }}%；<br/>
+                                    >：其它任务支撑投入{{ task_npj }}个工时，占比{{ task_npj_ratio }}%。
+                                </p>
+                            </td>
+                            <td>
+                                <p>近三个月，产品研发资源的工时投入占比情况：<br/>
+                                    >：产品研发投入{{ task_pd_3m }}个工时，占比{{ task_pd_ratio_3m }}%；<br/>
+                                    >：项目支撑投入{{ task_pj_3m }}个工时，占比{{ task_pj_ratio_3m }}%；<br/>
+                                    >：其它任务支撑投入{{ task_npj_3m }}个工时，占比{{ task_npj_ratio_3m }}%。
+                                </p>
+                            </td>
+                            <td>
+                                <p>上个月，产品研发资源的工时投入占比情况：<br/>
+                                    >：产品研发投入{{ task_pd_1m }}个工时，占比{{ task_pd_ratio_1m }}%；<br/>
+                                    >：项目支撑投入{{ task_pj_1m }}个工时，占比{{ task_pj_ratio_1m }}%；<br/>
+                                    >：其它任务支撑投入{{ task_npj_1m }}个工时，占比{{ task_npj_ratio_1m }}%。
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center">
+                                {{ task_ratio | safe }}
+                            </td>
+                            <td style="text-align:center">
+                                {{ task_ratio_3m | safe }}
+                            </td>
+                            <td style="text-align:center">
+                                {{ task_ratio_1m | safe }}
+                            </td>
+                        </tr>
+                    </table>
+                    <br/>
+                    <h3>产品研发资源在非产品类任务的投入明细：</h3>
+                   {% for _pj_name in sorted(pd_project) %}
+                    <p>
+                        “<b>{{ _pj_name }}</b>”项目资源（工时）投入情况：
+                    </p>
+                    <table border="1">
+                        <tr style="text-align:center">
+                            {% for _name in sorted(pd_project[_pj_name], reverse=False) %}
+                                <th width="200px" style="text-align:center">{{ _name }}</th>
+                            {% endfor %}
+                        </tr>
+                        <tr style="text-align:center">
+                            {% for _name in sorted(pd_project[_pj_name], reverse=False) %}
+                                <td style="text-align:center">{{ pd_project[_pj_name][_name]/3600 }}</td>
+                            {% endfor %}
+                        </tr>
+                    </table>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 <div class="container"><h2><b>外包资源情况</b></h2>
                     <p><h3>资源统计</h3>
                     </p>
