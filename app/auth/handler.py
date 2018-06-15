@@ -51,6 +51,7 @@ def get_trip_count(st_date, ed_date):
                                          "$and": [{u"审批完成时间": {"$gte": "%s" % st_date}},
                                                   {u"审批完成时间": {"$lt": "%s" % ed_date}}]}))
 
+
 def addr_filter(addr_data, addr_info):
     """
     地址合规性处理
@@ -1048,4 +1049,57 @@ def diffTimeByLevel(Personals):
 
     return x, y
 
+
+def calDateMonthly(nMonth):
+    """
+    计算月度日期
+    :param nMonth: 指定是前几个月
+    :return: 起止日期
+    """
+
+    """上月最后一天"""
+    _now = datetime.datetime.now()
+    if _now.month > 1:
+        _ed_date = _now - datetime.timedelta(days=_now.day)
+    else:
+        _ed_date = _now
+
+    """起始日期"""
+    _n_month = 0
+    if nMonth > 0:
+        _n_month = nMonth - 1
+    if _ed_date.month > _n_month:
+        _st_date = (datetime.datetime(_ed_date.year, _ed_date.month - _n_month, 1)).strftime("%Y-%m-%d 00:00:00")
+    else:
+        _st_date = (datetime.datetime(_ed_date.year, 1, 1)).strftime("%Y-%m-%d 00:00:00")
+
+    _ed_date = _ed_date.strftime("%Y-%m-%d 23:59:59")
+
+    print(">>> %s --> %s" % (_st_date, _ed_date))
+
+    return _st_date, _ed_date
+
+
+def isDateBef(dateA, dateB):
+    """
+    判断日期A是否在日期B前
+    :param dateA: 日期A
+    :param dateB: 日期B
+    :return: 判断结果
+    """
+    _time1 = datetime.datetime.strptime(dateA, "%Y-%m-%d")
+    _time2 = datetime.datetime.strptime(dateB, "%Y-%m-%d")
+    return _time1 < _time2
+
+
+def isDateAft(dateA, dateB):
+    """
+    判断日期A是否在日期B后
+    :param dateA: 日期A
+    :param dateB: 日期B
+    :return: 判断结果
+    """
+    _time1 = datetime.datetime.strptime(dateA, "%Y-%m-%d")
+    _time2 = datetime.datetime.strptime(dateB, "%Y-%m-%d")
+    return _time1 > _time2
 

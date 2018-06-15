@@ -60,6 +60,112 @@ pjPersonalsDate = PersonalStat.Personal()
 rdmPersonalsDate = PersonalStat.Personal()
 
 
+def calTaskInd(_type):
+    global pdPersonals, pjPersonals, rdmPersonals
+
+    _sum = 0
+    _task = {}
+    _personal = {}
+    pdPersonals.calTaskInd()
+    _task['pd'], _personal['pd'] = pdPersonals.getTaskIndList(_type)
+    pjPersonals.calTaskInd()
+    _task['pj'], _personal['pj'] = pjPersonals.getTaskIndList(_type)
+    rdmPersonals.calTaskInd()
+    _task['rdm'], _personal['rdm'] = rdmPersonals.getTaskIndList(_type)
+
+    dots = {}
+    for _g in ['pd', 'pj', 'rdm']:
+        """中值"""
+        _task_median = np.median(_task[_g])
+        _task_std = np.std(_task[_g])
+        _sum += sum(_task[_g])
+
+        # print(">>> %d, %d" % (_task_median, _task_std))
+
+        _dot = {'low': {'x': [], 'y': []},
+                'norm': {'x': [], 'y': []},
+                'high': {'x': [], 'y': []},
+                }
+        _cnt = 0
+        for _yy in range(1, 11):
+            if _cnt >= len(_task[_g]):
+                break
+            for _xx in range(1, 21):
+                if _cnt >= len(_task[_g]):
+                    break
+                # if _task[_g][_cnt] > _task_median + _task_std:
+                if _task[_g][_cnt] > 40:
+                    _dot['high']['x'].append(_xx)
+                    _dot['high']['y'].append(_yy)
+                # elif _task[_g][_cnt] >= _task_median:
+                elif _task[_g][_cnt] >= 24:
+                    _dot['norm']['x'].append(_xx)
+                    _dot['norm']['y'].append(_yy)
+                else:
+                    _dot['low']['x'].append(_xx)
+                    _dot['low']['y'].append(_yy)
+                    # print(u">>> G(%s)-LOW.<%s>" % (_g, _personal[_g][_cnt]))
+                _cnt += 1
+
+        dots[_g] = _dot
+
+    return dots, _sum
+
+
+def calTaskIndByDate(_type, st_date, ed_date):
+    global pdPersonalsDate, pjPersonalsDate, rdmPersonalsDate
+
+    setPersonalDate(st_date, ed_date)
+
+    _sum = 0
+    _task = {}
+    _personal = {}
+    pdPersonals.calTaskInd()
+    _task['pd'], _personal['pd'] = pdPersonalsDate.getTaskIndList(_type)
+    pjPersonals.calTaskInd()
+    _task['pj'], _personal['pj'] = pjPersonalsDate.getTaskIndList(_type)
+    rdmPersonals.calTaskInd()
+    _task['rdm'], _personal['rdm'] = rdmPersonalsDate.getTaskIndList(_type)
+
+    dots = {}
+    for _g in ['pd', 'pj', 'rdm']:
+        """中值"""
+        _task_median = np.median(_task[_g])
+        _task_std = np.std(_task[_g])
+        _sum += sum(_task[_g])
+
+        # print(">>> %d, %d" % (_task_median, _task_std))
+
+        _dot = {'low': {'x': [], 'y': []},
+                'norm': {'x': [], 'y': []},
+                'high': {'x': [], 'y': []},
+                }
+        _cnt = 0
+        for _yy in range(1, 11):
+            if _cnt >= len(_task[_g]):
+                break
+            for _xx in range(1, 21):
+                if _cnt >= len(_task[_g]):
+                    break
+                # if _task[_g][_cnt] > _task_median + _task_std:
+                if _task[_g][_cnt] > 40:
+                    _dot['high']['x'].append(_xx)
+                    _dot['high']['y'].append(_yy)
+                # elif _task[_g][_cnt] >= _task_median:
+                elif _task[_g][_cnt] >= 24:
+                    _dot['norm']['x'].append(_xx)
+                    _dot['norm']['y'].append(_yy)
+                else:
+                    _dot['low']['x'].append(_xx)
+                    _dot['low']['y'].append(_yy)
+                    # print(u">>> G(%s)-LOW.<%s>" % (_g, _personal[_g][_cnt]))
+                _cnt += 1
+
+        dots[_g] = _dot
+
+    return dots, _sum
+
+
 def set_manager_context():
 
     _x, _y = handler.nTaskByLevel(pdPersonals)
@@ -73,12 +179,34 @@ def set_manager_context():
     _context['user'] = {'role': role.level}
     _context['pic'] = echart_handler.effectscatter('职级-任务量', [{"x": _x, "y": _y}], size={'width': 640, 'height': 420})
     _context['pic_time'] = echart_handler.effectscatter('职级-时间',
-                                                         [{"x": _xo, "y": _yo},
-                                                          {"x": _xs, "y": _ys}],
-                                                         size={'width': 640, 'height': 420})
+                                                        [{"x": _xo, "y": _yo}, {"x": _xs, "y": _ys}],
+                                                        size={'width': 640, 'height': 420})
     _context['pic_diff'] = echart_handler.effectscatter('职级-时间差', [{"x": _xd, "y": _yd}], size={'width': 640, 'height': 420})
 
     return _context
+
+
+def setPersonalDate(_st_date, _ed_date):
+
+    global pdPersonalsDate, pjPersonalsDate, rdmPersonalsDate
+
+    pdPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date})
+    pjPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date})
+    rdmPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date})
+
+    pdPersonalsDate.clearData()
+    pjPersonalsDate.clearData()
+    rdmPersonalsDate.clearData()
+
+    for _db in pd_databases:
+        pdPersonalsDate.scanProject(_db)
+        pdPersonalsDate.calTaskInd()
+    for _db in pj_databases:
+        pjPersonalsDate.scanProject(_db)
+        pjPersonalsDate.calTaskInd()
+    for _db in rdm_databases:
+        rdmPersonalsDate.scanProject(_db)
+        rdmPersonalsDate.calTaskInd()
 
 
 def set_honor_context(_st_date, _ed_date):
@@ -95,20 +223,7 @@ def set_honor_context(_st_date, _ed_date):
     if _st_date is None:
         _st_date = st_date
 
-    pdPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date})
-    pjPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date})
-    rdmPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date})
-
-    pdPersonalsDate.clearData()
-    pjPersonalsDate.clearData()
-    rdmPersonalsDate.clearData()
-
-    for _db in pd_databases:
-        pdPersonalsDate.scanProject(_db)
-    for _db in pj_databases:
-        pjPersonalsDate.scanProject(_db)
-    for _db in rdm_databases:
-        rdmPersonalsDate.scanProject(_db)
+    setPersonalDate(_st_date, _ed_date)
 
     _pd_work_ind = pdPersonalsDate.getWorkIndList()
     _pj_work_ind = pjPersonalsDate.getWorkIndList()
@@ -182,18 +297,144 @@ def set_pd_context():
     return context
 
 
+def scan_project_name(project_info, summary):
+
+    for _pj in project_info:
+        if _pj[u'别名'] in summary:
+            return _pj[u'名称']
+    return None
+
+
+def calPjTaskInd(st_date, ed_date):
+    """
+    计算产品研发中心资源投入到非产品事务的指标。
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 统计指标
+    """
+    global extTask
+
+    _pj_info = handler.get_project_info("project_t")
+
+    st_date = st_date.split(' ')[0]
+    ed_date = ed_date.split(' ')[0]
+
+    _pj_sum = 0
+    _npj_sum = 0
+    _project = {}
+    for _issue in extTask:
+
+        if _issue["updated"] is None:
+            continue
+
+        _issue_updated_date = _issue["updated"].split('T')[0]
+
+        # print ">>> Time: ", _issue_updated_date, st_date, ed_date
+
+        if handler.isDateBef(_issue_updated_date, st_date) and handler.isDateAft(_issue_updated_date, ed_date):
+            continue
+
+        _group = _issue['issue'].split('-')[0]
+
+        if _issue['project_alias'] is not None:
+            if _issue['project_alias'] not in _project:
+                _project[_issue['project_alias']] = {_group: _issue['spent_time']}
+            else:
+                if _group not in _project[_issue['project_alias']]:
+                    _project[_issue['project_alias']][_group] = _issue['spent_time']
+                else:
+                    _project[_issue['project_alias']][_group] += _issue['spent_time']
+            _pj_sum += _issue['spent_time']
+        else:
+            _pj_name = scan_project_name(_pj_info, _issue['summary'])
+            if _pj_name is not None:
+                if _pj_name not in _project:
+                    _project[_pj_name] = {_group: _issue['spent_time']}
+                else:
+                    if _group not in _project[_pj_name]:
+                        _project[_pj_name][_group] = _issue['spent_time']
+                    else:
+                        _project[_pj_name][_group] += _issue['spent_time']
+                _pj_sum += _issue['spent_time']
+            else:
+                if u'其它' not in _project:
+                    _project[u'其它'] = {_group: _issue['spent_time']}
+                else:
+                    if _group not in _project[u'其它']:
+                        _project[u'其它'][_group] = _issue['spent_time']
+                    else:
+                        _project[u'其它'][_group] += _issue['spent_time']
+                _npj_sum += _issue['spent_time']
+
+    return _project, _pj_sum, _npj_sum
+
+
+def projectSum(_project):
+
+    for _pj in _project:
+        _sum = 0
+        for _g in _project[_pj]:
+            _sum += _project[_pj][_g]
+        _project[_pj][u'合计'] = _sum
+
+
 def set_rdm_context():
 
-    global Personals, pdPersonals, pjPersonals, rdmPersonals
+    global Personals, pdPersonals, pjPersonals, rdmPersonals, extTask, st_date, ed_date
 
     role = Role.query.filter_by(name=current_user.username).first()
 
+    """产品研发投入项目开发情况
+    """
+    _project, _pj_sum, _npj_sum = calPjTaskInd(st_date, ed_date)
+    _st_date_3m, _ed_date_3m = handler.calDateMonthly(3)
+    _project_3m, _pj_sum_3m, _npj_sum_3m = calPjTaskInd(_st_date_3m, _ed_date_3m)
+
+    _st_date_1m, _ed_date_1m = handler.calDateMonthly(1)
+    _project_1m, _pj_sum_1m, _npj_sum_1m = calPjTaskInd(_st_date_1m, _ed_date_1m)
+
+    projectSum(_project)
+    projectSum(_project_1m)
+    projectSum(_project_3m)
+
+    for _pj in _project:
+        _sum = 0
+        for _g in _project[_pj]:
+            _sum += _project[_pj][_g]
+        _project[_pj][u'合计'] = _sum
+
+    _npj_sum = _npj_sum/3600
+    _pj_sum = _pj_sum/3600
+    _npj_sum_1m = _npj_sum_1m/3600
+    _pj_sum_1m = _pj_sum_1m/3600
+    _npj_sum_3m = _npj_sum_3m/3600
+    _pj_sum_3m = _pj_sum_3m/3600
+
+    """项目归档情况
+    """
     pj = []
     _m = handler.get_material()
     _count = _m.count()
     for __m in _m:
         if __m[u'项目名称'] not in pj:
             pj.append(__m[u'项目名称'])
+
+    """资源池情况
+    """
+    _dot, _spent_doing_sum = calTaskIndByDate('spent_doing', st_date, ed_date)
+    __dot, _spent_done_sum = calTaskIndByDate('spent_done', st_date, ed_date)
+    _org_dot, _doing_sum = calTaskIndByDate('doing', st_date, ed_date)
+    _pd_sum = _spent_doing_sum+_spent_done_sum-_pj_sum-_npj_sum
+
+    _dot_1m, _spent_doing_sum_1m = calTaskIndByDate('spent_doing', _st_date_1m, _ed_date_1m)
+    __dot, _spent_done_sum_1m = calTaskIndByDate('spent_done', _st_date_1m, _ed_date_1m)
+    _org_dot_1m, _doing_sum_1m = calTaskIndByDate('doing', _st_date_1m, _ed_date_1m)
+    _pd_sum_1m = _spent_doing_sum_1m+_spent_done_sum_1m-_pj_sum_1m-_npj_sum_1m
+
+    _dot_3m, _spent_doing_sum_3m = calTaskIndByDate('spent_doing', _st_date_3m, _ed_date_3m)
+    __dot_3m, _spent_done_sum_3m = calTaskIndByDate('spent_done', _st_date_3m, _ed_date_3m)
+    _org_dot_3m, _doing_sum_3m = calTaskIndByDate('doing', _st_date_3m, _ed_date_3m)
+    _pd_sum_3m = _spent_doing_sum_3m+_spent_done_sum_3m-_pj_sum_3m-_npj_sum_3m
 
     _ext_personals_stat = handler.get_project_info('ext_personals_stat')
     context = dict(
@@ -209,6 +450,62 @@ def set_rdm_context():
         pd_count=pdPersonals.getNumbOfMember(),
         pj_count=pjPersonals.getNumbOfMember(),
         rdm_count=rdmPersonals.getNumbOfMember(),
+        pd_project=_project,
+        sorted=sorted,
+        task_ind_pd=echart_handler.effectscatterByInd('产品研发资源的当前负载执行情况',
+                                                      _dot['pd'],
+                                                      size={'width': 860, 'height': 220}),
+        task_ind_pj=echart_handler.effectscatterByInd('项目开发资源的当前负载执行情况',
+                                                      _dot['pj'],
+                                                      size={'width': 860, 'height': 180}),
+        task_ind_rdm=echart_handler.effectscatterByInd('测试资源的当前负载执行情况',
+                                                       _dot['rdm'],
+                                                       size={'width': 860, 'height': 120}),
+        task_ind_pd_org=echart_handler.effectscatterByInd('产品研发资源的当前分配负载情况',
+                                                          _org_dot['pd'],
+                                                          size={'width': 860, 'height': 240}),
+        task_ind_pj_org=echart_handler.effectscatterByInd('项目开发资源的当前分配负载情况',
+                                                          _org_dot['pj'],
+                                                          size={'width': 860, 'height': 180}),
+        task_ind_rdm_org=echart_handler.effectscatterByInd('测试资源的当前分配负载情况',
+                                                           _org_dot['rdm'],
+                                                           size={'width': 860, 'height': 120}),
+        task_pd=_pd_sum,
+        task_pj=_pj_sum,
+        task_npj=_npj_sum,
+        task_pd_ratio="%0.2f" % (float(_pd_sum*100)/float(_pd_sum+_pj_sum+_npj_sum)),
+        task_pj_ratio="%0.2f" % (float(_pj_sum*100)/float(_pd_sum+_pj_sum+_npj_sum)),
+        task_npj_ratio="%0.2f" % (float(_npj_sum*100)/float(_pd_sum+_pj_sum+_npj_sum)),
+        task_ratio=echart_handler.pie(u'年度工时占比（工时）',
+                                      [u'产品研发', u'项目投入', u'其它'],
+                                      [[_pd_sum,
+                                        _pj_sum,
+                                        _npj_sum]]
+                                      ),
+        task_pd_1m=_pd_sum_1m,
+        task_pj_1m=_pj_sum_1m,
+        task_npj_1m=_npj_sum_1m,
+        task_pd_ratio_1m="%0.2f" % (float(_pd_sum_1m * 100) / float(_pd_sum_1m + _pj_sum_1m + _npj_sum_1m)),
+        task_pj_ratio_1m="%0.2f" % (float(_pj_sum_1m * 100) / float(_pd_sum_1m + _pj_sum_1m + _npj_sum_1m)),
+        task_npj_ratio_1m="%0.2f" % (float(_npj_sum_1m * 100) / float(_pd_sum_1m + _pj_sum_1m + _npj_sum_1m)),
+        task_ratio_1m=echart_handler.pie(u'上个月工时占比（工时）',
+                                      [u'产品研发', u'项目投入', u'其它'],
+                                      [[_pd_sum_1m,
+                                        _pj_sum_1m,
+                                        _npj_sum_1m]]
+                                      ),
+        task_pd_3m=_pd_sum_3m,
+        task_pj_3m=_pj_sum_3m,
+        task_npj_3m=_npj_sum_3m,
+        task_pd_ratio_3m="%0.2f" % (float(_pd_sum_3m * 100) / float(_pd_sum_3m + _pj_sum_3m + _npj_sum_3m)),
+        task_pj_ratio_3m="%0.2f" % (float(_pj_sum_3m * 100) / float(_pd_sum_3m + _pj_sum_3m + _npj_sum_3m)),
+        task_npj_ratio_3m="%0.2f" % (float(_npj_sum_3m * 100) / float(_pd_sum_3m + _pj_sum_3m + _npj_sum_3m)),
+        task_ratio_3m=echart_handler.pie(u'近三个月工时占比（工时）',
+                                      [u'产品研发', u'项目投入', u'其它'],
+                                      [[_pd_sum_3m,
+                                        _pj_sum_3m,
+                                        _npj_sum_3m]]
+                                      )
     )
 
     return context

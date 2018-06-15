@@ -156,17 +156,7 @@ def honor_select(value):
         _context = server.set_honor_context(None, None)
         _context['info'] = u"【本年度】"
     elif value in 'monthly':
-        _now = datetime.datetime.now()
-        if _now.month > 1:
-            _ed_date = _now - datetime.timedelta(days=_now.day)
-        else:
-            _ed_date = _now
-        if _ed_date.month > 2:
-            _st_date = (datetime.datetime(_ed_date.year, _ed_date.month-2, 1)).strftime("%Y-%m-%d 00:00:00")
-        else:
-            _st_date = (datetime.datetime(_ed_date.year, 1, 1)).strftime("%Y-%m-%d 00:00:00")
-        _ed_date = _ed_date.strftime("%Y-%m-%d 23:59:59")
-        print(">>> %s --> %s" % (_st_date, _ed_date))
+        _st_date, _ed_date = handler.calDateMonthly(3)
         _context = server.set_honor_context(_st_date, _ed_date)
         _context['info'] = u"【近三个月】"
     else:

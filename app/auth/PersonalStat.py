@@ -3,11 +3,19 @@
 #
 #
 #
-
 import mongodb_class
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 spi_list = [u'王云枫', u'张嘉麒', u'何坤峰', u'唐高飞']
 spi_for_honor = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟']
+spi_for_group = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟', u'吴昱珉',
+                 u'杨飞', u'柏银', u'王学凯', u'饶定远', u'王宇',
+                 u'杨勇', u'李诗', u'金日海', u'雷东东', u'蒲治国'
+                 u'何坤峰', u'刘伟'
+                 ]
 
 
 class Personal:
@@ -214,11 +222,12 @@ class Personal:
         for _name in personal:
             _done, _ratio = self.getNumberDone(personal[_name]['issue'])
             print(u'>>> %s: Task=%d, Done=%d, R=%0.2f%%, Spent=%0.2f (工时)' % (
-                _name,
-                len(personal[_name]['issue']),
-                _done,
-                _ratio,
-                self.getSpentTime(_name)/3600.))
+                  _name,
+                  len(personal[_name]['issue']),
+                  _done,
+                  _ratio,
+                  self.getSpentTime(_name)/3600.)
+                  )
 
     def clearPersonal(self):
         self.personal = {}
@@ -256,6 +265,10 @@ class Personal:
         return len(self.personal)
 
     def calWorkInd(self):
+        """
+        计算个人工作量指标
+        :return: 个人工作量指标集合
+        """
 
         for _p in self.personal:
             _quota = 0.
@@ -285,6 +298,62 @@ class Personal:
                         _miu = 1.3
                     _quota += (_org_time*_miu)
             self.personal[_p]['quota'] = _quota
+
+    def calTaskInd(self):
+        """
+        计算个人任务量指标
+        :return: 个人任务量指标集合
+        """
+
+        for _p in self.personal:
+            _doing = 0
+            _done = 0
+            _spent_doing = 0
+            _spent_done = 0
+            for _i in self.personal[_p]['issue']:
+                if _i['org_time'] is not None:
+                    if u'完成' not in _i['status']:
+                        _doing += _i['org_time']
+                    else:
+                        _done += _i['org_time']
+
+                if _i['spent_time'] is not None:
+                    if u'完成' not in _i['status']:
+                        _spent_doing += _i['spent_time']
+                    else:
+                        _spent_done += _i['spent_time']
+
+            self.personal[_p]['doing'] = _doing/3600
+            self.personal[_p]['done'] = _done/3600
+            self.personal[_p]['spent_doing'] = _spent_doing/3600
+            self.personal[_p]['spent_done'] = _spent_done/3600
+
+    def getTaskIndList(self, ind_type):
+        """
+        获取指定指标类性（执行的，和完成的）个人任务指标
+        :param ind_type: 指标类性，"doing"和"done"
+        :return: 个人任务指标集
+        """
+        _ind = []
+        _personal = []
+        for _p in self.personal:
+
+            if _p in spi_for_group:
+                continue
+
+            if ind_type == "doing":
+                _ind.append(self.personal[_p]["doing"])
+            elif ind_type == "done":
+                _ind.append(self.personal[_p]["done"])
+            elif ind_type == "spent_doing":
+                _ind.append(self.personal[_p]["spent_doing"])
+            elif ind_type == "spent_done":
+                _ind.append(self.personal[_p]["spent_done"])
+            else:
+                continue
+            _personal.append(_p)
+
+        return _ind, _personal
 
     def getWorkIndList(self):
         """
