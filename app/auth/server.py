@@ -112,10 +112,10 @@ def calTaskInd(_type):
     return dots, _sum
 
 
-def calTaskIndByDate(_type, st_date, ed_date):
+def calTaskIndByDate(_type, _st_date, _ed_date):
     global pdPersonalsDate, pjPersonalsDate, rdmPersonalsDate
 
-    setPersonalDate(st_date, ed_date)
+    setPersonalDate(_st_date, _ed_date)
 
     _sum = 0
     _task = {}
