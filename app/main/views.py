@@ -31,6 +31,7 @@ def index():
     elif (datetime.datetime.now() - set_time).seconds > 3600*8:
         set_time = datetime.datetime.now()
         my_context = server.set_context()
+
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     my_context['user'] = {'role': role.level}

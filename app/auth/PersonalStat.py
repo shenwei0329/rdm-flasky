@@ -5,6 +5,9 @@
 #
 import mongodb_class
 import sys
+import member
+
+import logging
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -16,6 +19,9 @@ spi_for_group = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟', u'吴昱�
                  u'杨勇', u'李诗', u'金日海', u'雷东东', u'蒲治国'
                  u'何坤峰', u'刘伟'
                  ]
+pj_devel_dpt = [u'行业营销部',
+                u'解决方案与交付中心',
+                u'新型智慧城市及运营商事业部']
 
 
 class Personal:
@@ -25,6 +31,7 @@ class Personal:
 
     def __init__(self, date=None, landmark=None):
         self.personal = {}
+        self.members = {}
         self.mongodb = mongodb_class.mongoDB()
         self.landmark = landmark
         if date is None:
@@ -36,7 +43,8 @@ class Personal:
         self.whichdate = "created"
 
     def clearData(self):
-        self.personal = {}
+        # self.personal = {}
+        pass
 
     def setDate(self, date, whichdate=None):
         self.st_date = date['st_date']
@@ -44,11 +52,11 @@ class Personal:
         if whichdate is not None:
             self.whichdate = whichdate
 
-
-    def _getTaskListByPersonal(self, project):
+    def _getTaskListByPersonal(self, project, dpt):
         """
         按组列出 人员-任务
         :param project: 项目
+        :param dpt: 部门
         :return:
         """
 
@@ -79,13 +87,23 @@ class Personal:
                 continue
             if _issue['users'] in spi_list:
                 continue
+            if _issue['users'] not in self.members:
+                # logging.log(logging.WARN, u">>> user(%s) not in members" % _issue['users'])
+                continue
+
+            if u"项目开发" in dpt:
+                if self.members[_issue['users']] not in pj_devel_dpt:
+                    continue
+            else:
+                if self.members[_issue['users']] not in dpt:
+                    continue
             if _issue['users'] not in self.personal:
-                self.personal[_issue['users']] = {'issue': [], 'worklog': [], 'quota': 0.}
+                self.personal[_issue['users']] = member.Member(_issue['users'])
             _task = {}
             for _i in ['issue', 'summary', 'status', 'org_time',
                        'agg_time', 'spent_time', 'sprint', 'created', 'updated']:
                 _task[_i] = _issue[_i]
-            self.personal[_issue['users']]['issue'].append(_task)
+            self.personal[_issue['users']].add_task(_task)
 
     def _getWorklogListByPersonal(self, project):
         """
@@ -100,19 +118,19 @@ class Personal:
 
         for _personal in self.personal:
             _search = {"author": u'%s' % _personal,
-                       "$and": [{"started": {"$gte": "%s" % self.st_date}},
-                                {"started": {"$lt": "%s" % self.ed_date}}]
+                       "$and": [{"updated": {"$gte": "%s" % self.st_date}},
+                                {"updated": {"$lt": "%s" % self.ed_date}}]
                        }
             _cur = self.mongodb.handler('worklog', 'find', _search)
 
             if _cur.count() == 0:
                 continue
 
-            _worklog = {}
             for _wl in _cur:
+                _worklog = {}
                 for _i in ['issue', 'comment', 'timeSpentSeconds', 'created', 'started', 'updated']:
                     _worklog[_i] = _wl[_i]
-                self.personal[_personal]['worklog'].append(_worklog)
+                self.personal[_personal].add_work_log(_worklog)
 
     def getWorklogSpentTime(self, name):
         """
@@ -120,7 +138,7 @@ class Personal:
         :param name: 名称
         :return:
         """
-        worklogs = self.personal[name]['worklog']
+        worklogs = self.personal[name].get_work_log()
         _spent_time = 0
         for _issue in worklogs:
             if _issue['timeSpentSeconds'] is None:
@@ -135,7 +153,7 @@ class Personal:
         :param name: 名称
         :return:
         """
-        issues = self.personal[name]['issue']
+        issues = self.personal[name].get_task()
         _time = 0
         for _issue in issues:
             if _issue['spent_time'] is None:
@@ -150,7 +168,7 @@ class Personal:
         :param name: 名称
         :return:
         """
-        issues = self.personal[name]['issue']
+        issues = self.personal[name].get_task()
         _time = []
         for _issue in issues:
             if _issue['spent_time'] is None:
@@ -165,7 +183,7 @@ class Personal:
         :param name: 名称
         :return:
         """
-        issues = self.personal[name]['issue']
+        issues = self.personal[name].get_task()
         _time = 0
         for _issue in issues:
             if (_issue['org_time'] is None) or (_issue['spent_time'] is None):
@@ -180,7 +198,7 @@ class Personal:
         :param name: 名称
         :return:
         """
-        issues = self.personal[name]['issue']
+        issues = self.personal[name].get_task()
         _time = 0
         for _issue in issues:
             if _issue['org_time'] is None:
@@ -195,7 +213,7 @@ class Personal:
         :param name: 名称
         :return:
         """
-        issues = self.personal[name]['issue']
+        issues = self.personal[name].get_task()
         _time = []
         for _issue in issues:
             if _issue['org_time'] is None:
@@ -210,34 +228,23 @@ class Personal:
         :param name:
         :return:
         """
-        issues = self.personal[name]['issue']
+        issues = self.personal[name].get_task()
         _done = 0
         for _issue in issues:
             if _issue['status'] == u'完成':
                 _done += 1
         return _done, float(_done*100)/float(len(issues))
 
-    def dispPersonal(self, personal):
-        """
-        显示个人业绩
-        :param persion: 个人数据汇总
-        :return:
-        """
-        for _name in personal:
-            _done, _ratio = self.getNumberDone(personal[_name]['issue'])
-            print(u'>>> %s: Task=%d, Done=%d, R=%0.2f%%, Spent=%0.2f (工时)' % (
-                  _name,
-                  len(personal[_name]['issue']),
-                  _done,
-                  _ratio,
-                  self.getSpentTime(_name)/3600.)
-                  )
+    def scanMember(self):
+        self.mongodb.connect_db("ext_system")
+        _cur = self.mongodb.handler("member", "find", {u'状态': "1"})
+        self.members = {}
+        for _m in _cur:
+            self.members[_m[u'人员姓名']] = _m[u'部门']
 
-    def clearPersonal(self):
-        self.personal = {}
-
-    def scanProject(self, project):
-        self._getTaskListByPersonal(project)
+    def scanProject(self, project, dpt):
+        self.scanMember()
+        self._getTaskListByPersonal(project, dpt)
         self._getWorklogListByPersonal(project)
         self.calWorkInd()
 
@@ -251,18 +258,18 @@ class Personal:
         return self.personal.keys()
 
     def getNumbOfTask(self, name):
-        return len(self.personal[name]['issue'])
+        return len(self.personal[name].get_task())
 
     def getTotalNumbOfTask(self):
         _count = 0
         for _p in self.personal:
-            _count += len(self.personal[_p]['issue'])
+            _count += self.personal[_p].get_task_count()
         return _count
 
     def getTotalNumbOfWorkLog(self):
         _count = 0
         for _p in self.personal:
-            _count += len(self.personal[_p]['worklog'])
+            _count += self.personal[_p].get_work_log_count()
         return _count
 
     def getNumbOfMember(self):
@@ -273,35 +280,8 @@ class Personal:
         计算个人工作量指标
         :return: 个人工作量指标集合
         """
-
         for _p in self.personal:
-            _quota = 0.
-            for _i in self.personal[_p]['issue']:
-                if u'完成' not in _i['status']:
-                    continue
-                if (_i['org_time'] is None) and (_i['spent_time'] is None):
-                    continue
-                if _i['org_time'] is None:
-                    _org_time = float(_i['spent_time'])
-                    _spent_time = float(_i['spent_time'])
-                elif _i['spent_time'] is None:
-                    _org_time = float(_i['org_time'])
-                    _spent_time = float(_i['org_time'])
-                else:
-                    _org_time = float(_i['org_time'])
-                    _spent_time = float(_i['spent_time'])
-                if _spent_time == 0:
-                    _quota += _org_time
-                else:
-                    _miu = _org_time/_spent_time
-                    if _miu > 10:   # 预估时间严重失真
-                        _miu = 1.8
-                    elif _miu > 5:  # 预估时间偏离过大
-                        _miu = 1.5
-                    elif _miu > 1:  # 经验问题
-                        _miu = 1.3
-                    _quota += (_org_time*_miu)
-            self.personal[_p]['quota'] = _quota
+            self.personal[_p].cal_quota(self.st_date, self.ed_date)
 
     def calTaskInd(self):
         """
@@ -310,27 +290,7 @@ class Personal:
         """
 
         for _p in self.personal:
-            _doing = 0
-            _done = 0
-            _spent_doing = 0
-            _spent_done = 0
-            for _i in self.personal[_p]['issue']:
-                if _i['org_time'] is not None:
-                    if u'完成' not in _i['status']:
-                        _doing += _i['org_time']
-                    else:
-                        _done += _i['org_time']
-
-                if _i['spent_time'] is not None:
-                    if u'完成' not in _i['status']:
-                        _spent_doing += _i['spent_time']
-                    else:
-                        _spent_done += _i['spent_time']
-
-            self.personal[_p]['doing'] = _doing/3600
-            self.personal[_p]['done'] = _done/3600
-            self.personal[_p]['spent_doing'] = _spent_doing/3600
-            self.personal[_p]['spent_done'] = _spent_done/3600
+            self.personal[_p].cal_ind(self.st_date, self.ed_date)
 
     def getTaskIndList(self, ind_type):
         """
@@ -345,14 +305,18 @@ class Personal:
             if _p in spi_for_group:
                 continue
 
+            __ind = self.personal[_p].get_ind()
+            if __ind is None:
+                continue
+
             if ind_type == "doing":
-                _ind.append(self.personal[_p]["doing"])
+                _ind.append(__ind["doing"])
             elif ind_type == "done":
-                _ind.append(self.personal[_p]["done"])
+                _ind.append(__ind["done"])
             elif ind_type == "spent_doing":
-                _ind.append(self.personal[_p]["spent_doing"])
+                _ind.append(__ind["spent_doing"])
             elif ind_type == "spent_done":
-                _ind.append(self.personal[_p]["spent_done"])
+                _ind.append(__ind["spent_done"])
             else:
                 continue
             _personal.append(_p)
@@ -367,7 +331,7 @@ class Personal:
         _personal = ()
         for _p in self.personal:
             if _p not in spi_for_honor:
-                _personal += (_p, int(self.personal[_p]['quota']),),
+                _personal += (_p, int(self.personal[_p].get_quota()),),
 
         return sorted(_personal, key=lambda x: x[1], reverse=True)
 

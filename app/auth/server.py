@@ -50,14 +50,15 @@ level = [u'职级1',
 
 st_date = '2018-01-01'
 ed_date = '2018-12-31'
+
+"""产品研发中心人员"""
 pdPersonals = PersonalStat.Personal()
+"""项目开发人员"""
 pjPersonals = PersonalStat.Personal()
+"""研发管理与测试人员"""
 rdmPersonals = PersonalStat.Personal()
-Personals = []
+"""产品研发中心对外支撑任务"""
 extTask = None
-pdPersonalsDate = PersonalStat.Personal()
-pjPersonalsDate = PersonalStat.Personal()
-rdmPersonalsDate = PersonalStat.Personal()
 
 
 def calTaskInd(_type):
@@ -76,8 +77,8 @@ def calTaskInd(_type):
     dots = {}
     for _g in ['pd', 'pj', 'rdm']:
         """中值"""
-        _task_median = np.median(_task[_g])
-        _task_std = np.std(_task[_g])
+        # _task_median = np.median(_task[_g])
+        # _task_std = np.std(_task[_g])
         _sum += sum(_task[_g])
 
         # print(">>> %d, %d" % (_task_median, _task_std))
@@ -113,32 +114,36 @@ def calTaskInd(_type):
 
 
 def calTaskIndByDate(_type, _st_date, _ed_date):
-    global pdPersonalsDate, pjPersonalsDate, rdmPersonalsDate
+    global pdPersonals, pjPersonals, rdmPersonals
 
     setPersonalDate(_st_date, _ed_date)
 
     _sum = 0
-    _task = {}
     _personal = {}
-    pdPersonals.calTaskInd()
-    _task['pd'], _personal['pd'] = pdPersonalsDate.getTaskIndList(_type)
-    pjPersonals.calTaskInd()
-    _task['pj'], _personal['pj'] = pjPersonalsDate.getTaskIndList(_type)
-    rdmPersonals.calTaskInd()
-    _task['rdm'], _personal['rdm'] = rdmPersonalsDate.getTaskIndList(_type)
+    _task = {}
+
+    _t, _p = pdPersonals.getTaskIndList(_type)
+    _personal['pd'] = _p
+    _task['pd'] = _t
+    _t, _p = pjPersonals.getTaskIndList(_type)
+    _personal['pj'] = _p
+    _task['pj'] = _t
+    _t, _p = rdmPersonals.getTaskIndList(_type)
+    _personal['rdm'] = _p
+    _task['rdm'] = _t
 
     dots = {}
     for _g in ['pd', 'pj', 'rdm']:
         """中值"""
-        _task_median = np.median(_task[_g])
-        _task_std = np.std(_task[_g])
+        # _task_median = np.median(_task[_g])
+        # _task_std = np.std(_task[_g])
         _sum += sum(_task[_g])
 
         # print(">>> %d, %d" % (_task_median, _task_std))
 
-        _dot = {'low': {'x': [], 'y': []},
-                'norm': {'x': [], 'y': []},
-                'high': {'x': [], 'y': []},
+        _dot = {'low': {'x': [], 'y': [], 'label': []},
+                'norm': {'x': [], 'y': [], 'label': []},
+                'high': {'x': [], 'y': [], 'label': []},
                 }
         _cnt = 0
         for _yy in range(1, 11):
@@ -151,13 +156,16 @@ def calTaskIndByDate(_type, _st_date, _ed_date):
                 if _task[_g][_cnt] > 40:
                     _dot['high']['x'].append(_xx)
                     _dot['high']['y'].append(_yy)
+                    _dot['high']['label'].append(_personal[_g][_cnt])
                 # elif _task[_g][_cnt] >= _task_median:
                 elif _task[_g][_cnt] >= 24:
                     _dot['norm']['x'].append(_xx)
                     _dot['norm']['y'].append(_yy)
+                    _dot['norm']['label'].append(_personal[_g][_cnt])
                 else:
                     _dot['low']['x'].append(_xx)
                     _dot['low']['y'].append(_yy)
+                    _dot['low']['label'].append(_personal[_g][_cnt])
                     # print(u">>> G(%s)-LOW.<%s>" % (_g, _personal[_g][_cnt]))
                 _cnt += 1
 
@@ -188,25 +196,19 @@ def set_manager_context():
 
 def setPersonalDate(_st_date, _ed_date):
 
-    global pdPersonalsDate, pjPersonalsDate, rdmPersonalsDate
+    global pdPersonals, pjPersonals, rdmPersonals
 
-    pdPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date}, whichdate="updated")
-    pjPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date}, whichdate="updated")
-    rdmPersonalsDate.setDate(date={'st_date': _st_date, 'ed_date': _ed_date}, whichdate="updated")
+    pdPersonals.setDate(date={'st_date': _st_date, 'ed_date': _ed_date}, whichdate="updated")
+    pjPersonals.setDate(date={'st_date': _st_date, 'ed_date': _ed_date}, whichdate="updated")
+    rdmPersonals.setDate(date={'st_date': _st_date, 'ed_date': _ed_date}, whichdate="updated")
 
-    pdPersonalsDate.clearData()
-    pjPersonalsDate.clearData()
-    rdmPersonalsDate.clearData()
+    pdPersonals.calTaskInd()
+    pjPersonals.calTaskInd()
+    rdmPersonals.calTaskInd()
 
-    for _db in pd_databases:
-        pdPersonalsDate.scanProject(_db)
-        pdPersonalsDate.calTaskInd()
-    for _db in pj_databases:
-        pjPersonalsDate.scanProject(_db)
-        pjPersonalsDate.calTaskInd()
-    for _db in rdm_databases:
-        rdmPersonalsDate.scanProject(_db)
-        rdmPersonalsDate.calTaskInd()
+    pdPersonals.calWorkInd()
+    pjPersonals.calWorkInd()
+    rdmPersonals.calWorkInd()
 
 
 def set_honor_context(_st_date, _ed_date):
@@ -216,18 +218,20 @@ def set_honor_context(_st_date, _ed_date):
     :param ed_date: 工作量计量的终止日期
     :return: context
     """
-    global ed_date, st_date
+    global ed_date, st_date, pdPersonals, pjPersonals, rdmPersonals
 
     if _ed_date is None:
         _ed_date = ed_date
     if _st_date is None:
         _st_date = st_date
 
+    # logging.log(logging.WARN, ">>> server.set_honour_context(%s,%s)" % (_st_date, _ed_date))
+
     setPersonalDate(_st_date, _ed_date)
 
-    _pd_work_ind = pdPersonalsDate.getWorkIndList()
-    _pj_work_ind = pjPersonalsDate.getWorkIndList()
-    _rdm_work_ind = rdmPersonalsDate.getWorkIndList()
+    _pd_work_ind = pdPersonals.getWorkIndList()
+    _pj_work_ind = pjPersonals.getWorkIndList()
+    _rdm_work_ind = rdmPersonals.getWorkIndList()
 
     _pd_count = 18
     _pd_numb_list = _pd_count/6
@@ -242,9 +246,6 @@ def set_honor_context(_st_date, _ed_date):
     """int(float(len(_rdm_work_ind))*0.2 + 0.5)
     """
 
-    logging.log(logging.WARN, ">>> %s,%s,%s" % (type(_pd_work_ind), type(_pj_work_ind), type(_rdm_work_ind)))
-    logging.log(logging.WARN, ">>> %d,%d,%d" % (_pd_count, _pj_count, _rdm_count))
-
     _pd_list = []
     _pj_list = []
     _rdm_list = []
@@ -253,7 +254,7 @@ def set_honor_context(_st_date, _ed_date):
         _personal = []
         for _j in range(6):
             _item = _pd_work_ind[_i*6 + _j]
-            logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
+            # logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
             _personal.append({'name': _item[0], 'quota': _item[1]})
         _pd_list.append(_personal)
 
@@ -261,7 +262,7 @@ def set_honor_context(_st_date, _ed_date):
         _personal = []
         for _j in range(6):
             _item = _pj_work_ind[_i*6 + _j]
-            logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
+            # logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
             _personal.append({'name': _item[0], 'quota': _item[1]})
         _pj_list.append(_personal)
 
@@ -269,7 +270,7 @@ def set_honor_context(_st_date, _ed_date):
         _personal = []
         for _j in range(6):
             _item = _rdm_work_ind[_i*6 + _j]
-            logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
+            # logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
             _personal.append({'name': _item[0], 'quota': _item[1]})
         _rdm_list.append(_personal)
 
@@ -302,7 +303,7 @@ def scan_project_name(project_info, summary):
     for _pj in project_info:
         if _pj[u'别名'] in summary:
             return _pj[u'名称']
-    print(u">>> summary: %s" % summary)
+    # print(u">>> summary: %s" % summary)
     return None
 
 
@@ -317,10 +318,7 @@ def calPjTaskInd(_st_date, _ed_date):
 
     _pj_info = handler.get_project_info("project_t")
 
-    _st_date = _st_date.split(' ')[0]
-    _ed_date = _ed_date.split(' ')[0]
-
-    print ">>> Time: ", _st_date, _ed_date
+    # logging.log(logging.WARN, ">>> calPjTaskInd( %s, %s )" % (_st_date, _ed_date))
 
     _pj_sum = 0
     _npj_sum = 0
@@ -331,7 +329,6 @@ def calPjTaskInd(_st_date, _ed_date):
             continue
 
         _issue_updated_date = _issue["updated"].split('T')[0]
-
         if handler.isDateBef(_issue_updated_date, _st_date) and handler.isDateAft(_issue_updated_date, _ed_date):
             continue
 
@@ -367,6 +364,7 @@ def calPjTaskInd(_st_date, _ed_date):
                         _project[u'其它'][_group] += _issue['spent_time']
                 _npj_sum += _issue['spent_time']
 
+    # logging.log(logging.WARN, ">>> return %s, %d, %d" % (_project, _pj_sum, _npj_sum))
     return _project, _pj_sum, _npj_sum
 
 
@@ -381,7 +379,7 @@ def projectSum(_project):
 
 def set_rdm_context():
 
-    global Personals, pdPersonals, pjPersonals, rdmPersonals, extTask, st_date, ed_date
+    global pdPersonals, pjPersonals, rdmPersonals, extTask, st_date, ed_date
 
     role = Role.query.filter_by(name=current_user.username).first()
 
@@ -437,9 +435,15 @@ def set_rdm_context():
     if role.level <= 2:
         context = dict(
             user={"role": role.level},
-            total=len(Personals),
-            total_task=pdPersonals.getTotalNumbOfTask() + pjPersonals.getTotalNumbOfTask() + rdmPersonals.getTotalNumbOfTask(),
-            total_worklog=pdPersonals.getTotalNumbOfWorkLog() + pjPersonals.getTotalNumbOfWorkLog() + rdmPersonals.getTotalNumbOfWorkLog(),
+            total=pdPersonals.getNumbOfMember() +
+                  pjPersonals.getNumbOfMember() +
+                  rdmPersonals.getNumbOfMember(),
+            total_task=pdPersonals.getTotalNumbOfTask() +
+                       pjPersonals.getTotalNumbOfTask() +
+                       rdmPersonals.getTotalNumbOfTask(),
+            total_worklog=pdPersonals.getTotalNumbOfWorkLog() +
+                          pjPersonals.getTotalNumbOfWorkLog() +
+                          rdmPersonals.getTotalNumbOfWorkLog(),
             total_pj=len(pj),
             total_material=_count,
             ext_personals_stat=_ext_personals_stat,
@@ -557,34 +561,22 @@ def set_context():
     today = datetime.date.today()
     ed_date = today.strftime("%Y-%m-%d")
 
-    pdPersonals.setDate(date={'st_date': '2018-03-01', 'ed_date': ed_date}, whichdate="updated")
-    pjPersonals.setDate(date={'st_date': '2018-03-01', 'ed_date': ed_date}, whichdate="updated")
-    rdmPersonals.setDate(date={'st_date': '2018-03-01', 'ed_date': ed_date}, whichdate="updated")
-
-    extTask = handler.scan_pj_task(st_date, ed_date)
-
-    """清空原有数据
-    """
-    pdPersonals.clearData()
-    pjPersonals.clearData()
-    rdmPersonals.clearData()
-
+    pdPersonals.setDate(date={'st_date': '2018-01-01', 'ed_date': ed_date}, whichdate="updated")
     for _db in pd_databases:
-        pdPersonals.scanProject(_db)
-    for _db in pj_databases:
-        pjPersonals.scanProject(_db)
-    for _db in rdm_databases:
-        rdmPersonals.scanProject(_db)
-
+        pdPersonals.scanProject(_db, u'产品研发中心')
     pdPersonals.calWorkInd()
+
+    pjPersonals.setDate(date={'st_date': '2018-01-01', 'ed_date': ed_date}, whichdate="updated")
+    for _db in pj_databases:
+        pjPersonals.scanProject(_db, u'项目开发')
     pjPersonals.calWorkInd()
+
+    rdmPersonals.setDate(date={'st_date': '2018-01-01', 'ed_date': ed_date}, whichdate="updated")
+    for _db in rdm_databases:
+        rdmPersonals.scanProject(_db, u'研发管理与测试部')
     rdmPersonals.calWorkInd()
 
-    for _p in [pdPersonals, pjPersonals, rdmPersonals]:
-        for __p in _p.getNameList():
-            if __p not in Personals:
-                Personals.append(__p)
-
+    extTask = handler.scan_pj_task(st_date, ed_date)
     _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(st_date, ed_date)
     _act_user = 0
     for _v in _checkon_user:
@@ -674,7 +666,9 @@ def set_context():
     # 任务统计
     taskStat = {
         "total": count,
-        "persion_count": len(Personals),
+        "persion_count": pdPersonals.getNumbOfMember() +
+                         pjPersonals.getNumbOfMember() +
+                         rdmPersonals.getNumbOfMember(),
         "persion_ratio": "%0.2f" % (float(len(persion)*100)/float(_act_user)),
         "done": done_count,
         "cost_time": "%0.2f" % cost,

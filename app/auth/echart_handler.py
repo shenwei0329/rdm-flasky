@@ -140,7 +140,7 @@ def effectscatterByInd(title, datas, size=None):
                                 height=180,
                                 title_pos="center",
                                 background_color='#b0bab9',
-                          )
+        )
     else:
         scatter = EffectScatter(
                                 title,
@@ -148,16 +148,16 @@ def effectscatterByInd(title, datas, size=None):
                                 height=size['height'],
                                 title_pos="center",
                                 background_color='#b0bab9',
-                          )
+        )
 
     for _val in datas:
 
         # print(">>> _val = %s" % _val)
-        _effect_scale = 1.
+        _effect_scale = 3.
         _symbol_size = 3.
         if "high" in _val:
             _effect_scale += 1.5
-            _symbol_size += 10.
+            _symbol_size += 8.
         elif "norm" in _val:
             _effect_scale += 1.
             _symbol_size += 5.
@@ -169,6 +169,7 @@ def effectscatterByInd(title, datas, size=None):
                     mark_point=['max', 'min'],
                     effect_scale=_effect_scale,
                     symbol_size=_symbol_size,
+                    legend_top='bottom',
                     )
 
     scatter.options['toolbox']['show'] = False

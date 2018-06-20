@@ -816,7 +816,7 @@ def get_imp_projects():
     for _p in pj_lists:
         _pj_desc = {'name': pj_lists[_p]}
         _personal.clearData()
-        _personal.scanProject(_p)
+        _personal.scanProject(_p, u'项目开发')
         if _personal.getNumbOfMember() == 0:
             logging.log(logging.WARN, ">>> project<%s> no personals" % _p)
             continue
@@ -1075,11 +1075,11 @@ def calDateMonthly(nMonth):
     if nMonth > 0:
         _n_month = nMonth - 1
     if _ed_date.month > _n_month:
-        _st_date = (datetime.datetime(_ed_date.year, _ed_date.month - _n_month, 1)).strftime("%Y-%m-%d 00:00:00")
+        _st_date = (datetime.datetime(_ed_date.year, _ed_date.month - _n_month, 1)).strftime("%Y-%m-%d")
     else:
-        _st_date = (datetime.datetime(_ed_date.year, 1, 1)).strftime("%Y-%m-%d 00:00:00")
+        _st_date = (datetime.datetime(_ed_date.year, 1, 1)).strftime("%Y-%m-%d")
 
-    _ed_date = _ed_date.strftime("%Y-%m-%d 23:59:59")
+    _ed_date = _ed_date.strftime("%Y-%m-%d")
 
     print(">>> %s --> %s" % (_st_date, _ed_date))
 
@@ -1093,6 +1093,7 @@ def isDateBef(dateA, dateB):
     :param dateB: 日期B
     :return: 判断结果
     """
+    # logging.log(logging.WARN,">>> isDateBef dateA=%s, dateB=%s" % (dateA, dateB))
     _time1 = datetime.datetime.strptime(dateA, "%Y-%m-%d")
     _time2 = datetime.datetime.strptime(dateB, "%Y-%m-%d")
     return _time1 < _time2
@@ -1105,6 +1106,7 @@ def isDateAft(dateA, dateB):
     :param dateB: 日期B
     :return: 判断结果
     """
+    # logging.log(logging.WARN,">>> isDateAft dateA=%s, dateB=%s" % (dateA, dateB))
     _time1 = datetime.datetime.strptime(dateA, "%Y-%m-%d")
     _time2 = datetime.datetime.strptime(dateB, "%Y-%m-%d")
     return _time1 > _time2
