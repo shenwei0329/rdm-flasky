@@ -151,7 +151,9 @@
                                     </p>
                                 </td>
                                 <td>
+                                {% if _p['total_task']>0 %}
                                     <p>{{ _p['pic'] | safe }}</p>
+                                {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
