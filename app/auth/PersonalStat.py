@@ -6,6 +6,9 @@
 import mongodb_class
 import sys
 import member
+import handler
+import server
+import echart_handler
 
 import logging
 
@@ -34,6 +37,9 @@ class Personal:
         self.members = {}
         self.mongodb = mongodb_class.mongoDB()
         self.landmark = landmark
+        self.nodes = []
+        self.links = []
+        self.plan_links = []
         if date is None:
             self.st_date = "2018-01-01"
             self.ed_date = "2018-12-31"
@@ -98,11 +104,20 @@ class Personal:
                 if self.members[_issue['users']] not in dpt:
                     continue
             if _issue['users'] not in self.personal:
-                self.personal[_issue['users']] = member.Member(_issue['users'])
+                self.personal[_issue['users']] = member.Member(_issue['users'], self.members[_issue['users']])
             _task = {}
             for _i in ['issue', 'summary', 'status', 'org_time',
                        'agg_time', 'spent_time', 'sprint', 'created', 'updated']:
                 _task[_i] = _issue[_i]
+
+            _issue_class = _issue['issue'].split('-')[0]
+            if _issue_class in ['CPSJ', 'FAST', 'HUBBLE', 'ROOOT']:
+                _task['ext'] = False
+                if _issue in server.extTask:
+                    _task['ext'] = True
+            else:
+                _task['ext'] = True
+
             self.personal[_issue['users']].add_task(_task)
 
     def _getWorklogListByPersonal(self, project):
@@ -331,7 +346,77 @@ class Personal:
         _personal = ()
         for _p in self.personal:
             if _p not in spi_for_honor:
-                _personal += (_p, int(self.personal[_p].get_quota()),),
+                _q, _ext_q = self.personal[_p].get_quota()
+                _personal += (_p, int(_q + _ext_q),),
 
         return sorted(_personal, key=lambda x: x[1], reverse=True)
+
+    def _add_link(self, source, target, value):
+        _link = {'source': source, 'target': target, 'value': value}
+        if _link not in self.links:
+            self.links.append(_link)
+
+    def _add_plan_link(self, source, target, value):
+        _link = {'source': source, 'target': target, 'value': value}
+        if _link not in self.links:
+            self.plan_links.append(_link)
+
+    def buildSanKey(self, date):
+
+        self.nodes = []
+        self.links = []
+
+        for _date in date:
+
+            year = _date['year']
+            month = _date['month']
+
+            _v = handler.calOneMonth(year, month)
+            _st_date = _v['st_date']
+            _ed_date = _v['ed_date']
+            _str = "%d-%02d" % (year, month)
+
+            logging.log(logging.WARN, ">>> PersonalStat.buildSanKey: %s,%s,%s" % (_st_date, _ed_date, _str))
+
+            if {'name': u'产品研发'} not in self.nodes:
+                self.nodes.append({'name': u'产品研发'})
+            if {'name': u'项目支撑'} not in self.nodes:
+                self.nodes.append({'name': u'项目支撑'})
+
+            if {'name': _str} not in self.nodes:
+                self.nodes.append({'name': _str})
+            if {'name': _str+u'【支撑】'} not in self.nodes:
+                self.nodes.append({'name': _str+u'【支撑】'})
+
+            _month_quota = 0.
+            _ext_month_quota = 0.
+            _plan_month_quota = 0.
+            _plan_ext_month_quota = 0.
+
+            for _p in self.personal:
+                _node = {'name': _p}
+                if _node not in self.nodes:
+                    self.nodes.append(_node)
+                self.personal[_p].cal_plan_quota(_st_date, _ed_date)
+                self.personal[_p].cal_quota(_st_date, _ed_date)
+
+                _q, _ext_q = self.personal[_p].get_quota()
+                _month_quota += _q
+                _ext_month_quota += _ext_q
+                self._add_link(_p, "%d-%02d" % (year, month), _q)
+                self._add_link(_p, u"%d-%02d【支撑】" % (year, month), _ext_q)
+
+                _q, _ext_q = self.personal[_p].get_plan_quota()
+                _plan_month_quota += _q
+                _plan_ext_month_quota += _ext_q
+                self._add_plan_link(_p, "%d-%02d" % (year, month), _q)
+                self._add_plan_link(_p, u"%d-%02d【支撑】" % (year, month), _ext_q)
+
+            self._add_link("%d-%02d" % (year, month), u'产品研发', _month_quota)
+            self._add_link(u"%d-%02d【支撑】" % (year, month), u'项目支撑', _ext_month_quota)
+
+            self._add_plan_link("%d-%02d" % (year, month), u'产品研发', _plan_month_quota)
+            self._add_plan_link(u"%d-%02d【支撑】" % (year, month), u'项目支撑', _plan_ext_month_quota)
+
+        return echart_handler.sankey_charts('', self.nodes, self.links)
 

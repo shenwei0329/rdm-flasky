@@ -140,15 +140,10 @@
                             <tr>
                                 <td style="text-align:left">{{ _v['项目名称'] }}</td>
                                 <td style="text-align:center">{{ _v['项目经理'] }}</td>
-                                <td style="text-align:center">{{ _v['数量'] }}</td>
+                                <td style="text-align:center">{{ _v['已解决'] }}</td>
                                 <td style="text-align:left">{{ _v['备注'] }}</td>
                             </tr>
                             {% endfor %}
-                            <tr>
-                                <td></td>
-                                <td style="text-align:right"><b>总计：</b></td>
-                                <td style="text-align:center">{{ ext_personals_count }}</td>
-                            </tr>
                         </table>
                         {% if user["role"] <= 4 %}
                         <br/>

@@ -190,6 +190,12 @@ def set_manager_context():
                                                         [{"x": _xo, "y": _yo}, {"x": _xs, "y": _ys}],
                                                         size={'width': 640, 'height': 420})
     _context['pic_diff'] = echart_handler.effectscatter('职级-时间差', [{"x": _xd, "y": _yd}], size={'width': 640, 'height': 420})
+    _context['pic_sankey'] = pdPersonals.buildSanKey([{'year': 2018, 'month': 1},
+                                                      {'year': 2018, 'month': 2},
+                                                      {'year': 2018, 'month': 3},
+                                                      {'year': 2018, 'month': 4},
+                                                      {'year': 2018, 'month': 5},
+                                                      ])
 
     return _context
 
@@ -387,10 +393,14 @@ def set_rdm_context():
         """产品研发投入项目开发情况
         """
         _project, _pj_sum, _npj_sum = calPjTaskInd(st_date, ed_date)
-        _st_date_3m, _ed_date_3m = handler.calDateMonthly(3)
+        __v = handler.calDateMonthly(3)
+        _st_date_3m = __v['st_date']
+        _ed_date_3m = __v['ed_date']
         _project_3m, _pj_sum_3m, _npj_sum_3m = calPjTaskInd(_st_date_3m, _ed_date_3m)
 
-        _st_date_1m, _ed_date_1m = handler.calDateMonthly(1)
+        __v = handler.calDateMonthly(1)
+        _st_date_1m = __v['st_date']
+        _ed_date_1m = __v['ed_date']
         _project_1m, _pj_sum_1m, _npj_sum_1m = calPjTaskInd(_st_date_1m, _ed_date_1m)
 
         projectSum(_project)
@@ -448,7 +458,7 @@ def set_rdm_context():
             total_material=_count,
             ext_personals_stat=_ext_personals_stat,
             ext_personals=handler.get_project_info('ext_personals_t'),
-            ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'数量'))),
+            ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'已解决'))/2.),
             pd_count=pdPersonals.getNumbOfMember(),
             pj_count=pjPersonals.getNumbOfMember(),
             rdm_count=rdmPersonals.getNumbOfMember(),
@@ -512,14 +522,19 @@ def set_rdm_context():
     else:
         context = dict(
             user={"role": role.level},
-            total=len(Personals),
+            total=pdPersonals.getNumbOfMember() +
+                  pjPersonals.getNumbOfMember() +
+                  rdmPersonals.getNumbOfMember(),
+            pd_count=pdPersonals.getNumbOfMember(),
+            pj_count=pjPersonals.getNumbOfMember(),
+            rdm_count=rdmPersonals.getNumbOfMember(),
             total_task=pdPersonals.getTotalNumbOfTask() + pjPersonals.getTotalNumbOfTask() + rdmPersonals.getTotalNumbOfTask(),
             total_worklog=pdPersonals.getTotalNumbOfWorkLog() + pjPersonals.getTotalNumbOfWorkLog() + rdmPersonals.getTotalNumbOfWorkLog(),
             total_pj=len(pj),
             total_material=_count,
             ext_personals_stat=_ext_personals_stat,
             ext_personals=handler.get_project_info('ext_personals_t'),
-            ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'数量'))),
+            ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'已解决'))/2.),
         )
 
     return context
@@ -561,6 +576,8 @@ def set_context():
     today = datetime.date.today()
     ed_date = today.strftime("%Y-%m-%d")
 
+    extTask = handler.scan_pj_task(st_date, ed_date)
+
     pdPersonals.setDate(date={'st_date': '2018-01-01', 'ed_date': ed_date}, whichdate="updated")
     for _db in pd_databases:
         pdPersonals.scanProject(_db, u'产品研发中心')
@@ -576,7 +593,6 @@ def set_context():
         rdmPersonals.scanProject(_db, u'研发管理与测试部')
     rdmPersonals.calWorkInd()
 
-    extTask = handler.scan_pj_task(st_date, ed_date)
     _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(st_date, ed_date)
     _act_user = 0
     for _v in _checkon_user:

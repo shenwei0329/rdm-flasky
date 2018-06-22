@@ -1056,34 +1056,50 @@ def diffTimeByLevel(Personals):
     return x, y
 
 
+def calStDate(month, nMonth):
+    """
+    计算指定日期的前nMonth个月
+    :param month: 指定的日期
+    :param nMonth: 前几个月
+    :return: 计算的日期
+    """
+
+    _m = month
+    for _i in range(nMonth):
+        _m = _m - datetime.timedelta(days=_m.day)
+    return _m.replace(day=1)
+
+
 def calDateMonthly(nMonth):
     """
     计算月度日期
-    :param nMonth: 指定是前几个月
+    :param nMonth: 指定是前几个月，1：上一个月，2：前二个月...
     :return: 起止日期
     """
 
     """上月最后一天"""
     _now = datetime.datetime.now()
-    if _now.month > 1:
-        _ed_date = _now - datetime.timedelta(days=_now.day)
-    else:
-        _ed_date = _now
+    _ed_date = _now - datetime.timedelta(days=_now.day)
+    _bg_date = _ed_date
 
     """起始日期"""
-    _n_month = 0
-    if nMonth > 0:
-        _n_month = nMonth - 1
-    if _ed_date.month > _n_month:
-        _st_date = (datetime.datetime(_ed_date.year, _ed_date.month - _n_month, 1)).strftime("%Y-%m-%d")
-    else:
-        _st_date = (datetime.datetime(_ed_date.year, 1, 1)).strftime("%Y-%m-%d")
-
+    _st_date = calStDate(_ed_date, nMonth-1).strftime("%Y-%m-%d")
     _ed_date = _ed_date.strftime("%Y-%m-%d")
 
-    print(">>> %s --> %s" % (_st_date, _ed_date))
+    _month = []
+    _month.append(_bg_date.month)
+    while isDateAft(_bg_date.strftime("%Y-%m-%d"), _st_date):
+        _m = _bg_date.month
+        if _m not in _month:
+            _month.append(_m)
+        # print("%s" % _month)
+        _bg_date = _bg_date - datetime.timedelta(days=_bg_date.day)
 
-    return _st_date, _ed_date
+    """获取排序的月份序列，用于生成sankey的nodes"""
+    _month = sorted(_month)
+    logging.log(logging.WARN, ">>> %s --> %s, %s" % (_st_date, _ed_date, _month))
+
+    return {"st_date": _st_date, "ed_date": _ed_date, "month": _month}
 
 
 def isDateBef(dateA, dateB):
@@ -1111,3 +1127,16 @@ def isDateAft(dateA, dateB):
     _time2 = datetime.datetime.strptime(dateB, "%Y-%m-%d")
     return _time1 > _time2
 
+
+def calOneMonth(year, month):
+    """
+    计算某年某个月份的日期
+    :param year: 年份
+    :param month: 月份
+    :return: {'st_date': 起始日期, 'ed_date': 截止日期}
+    """
+
+    import calendar
+    last_day = calendar.monthrange(year, month)[1]
+
+    return {"st_date": "%d-%02d-01" % (year, month), "ed_date": "%d-%02d-%02d" % (year, month, last_day)}

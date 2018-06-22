@@ -157,7 +157,9 @@ def honor_select(value):
         _context = server.set_honor_context(None, None)
         _context['info'] = u"【本年度】"
     elif value in 'monthly':
-        _st_date, _ed_date = handler.calDateMonthly(3)
+        _v = handler.calDateMonthly(3)
+        _st_date = _v['st_date']
+        _ed_date = _v['ed_date']
         _context = server.set_honor_context(_st_date, _ed_date)
         _context['info'] = u"【近三个月】"
     else:
