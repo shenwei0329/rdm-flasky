@@ -1,6 +1,9 @@
 #!/usr/local/bin/python2.7
 # -*- coding: utf-8 -*-
 #
+# 人员统计（基础）
+# ============
+# 用于管理所有人员信息
 #
 #
 import mongodb_class
@@ -15,13 +18,17 @@ import logging
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+"""特殊人员（不参与统计的）"""
 spi_list = [u'王云枫', u'张嘉麒', u'何坤峰', u'唐高飞']
+"""需要在"光荣榜"屏蔽的人员"""
 spi_for_honor = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟']
+"""在组员分析时需要屏蔽的人员"""
 spi_for_group = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟', u'吴昱珉',
                  u'杨飞', u'柏银', u'王学凯', u'饶定远', u'王宇',
                  u'杨勇', u'李诗', u'金日海', u'雷东东', u'蒲治国'
                  u'何坤峰', u'刘伟'
                  ]
+"""参与项目开发的部门"""
 pj_devel_dpt = [u'行业营销部',
                 u'解决方案与交付中心',
                 u'新型智慧城市及运营商事业部']
@@ -33,19 +40,36 @@ class Personal:
     """
 
     def __init__(self, date=None, landmark=None):
+        """
+        构建
+        :param date: 统计分析的起止日期
+        :param landmark: （或）统计分析需指定的里程碑
+        :return:
+        """
+
+        """人员集"""
         self.personal = {}
+
+        """用于记录人员的归属部门"""
         self.members = {}
+
         self.mongodb = mongodb_class.mongoDB()
         self.landmark = landmark
+
+        """用于做sankey图的参数"""
         self.nodes = []
         self.links = []
         self.plan_links = []
+
+        """初始化统计日期"""
         if date is None:
+            """本系统构建于2018年1月"""
             self.st_date = "2018-01-01"
             self.ed_date = "2018-12-31"
         else:
             self.st_date = date['st_date']
             self.ed_date = date['ed_date']
+        """指定统计用的时标：created/updated"""
         self.whichdate = "created"
 
     def clearData(self):

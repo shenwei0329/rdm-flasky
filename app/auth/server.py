@@ -33,7 +33,10 @@ pj_databases = ['JX',
 rdm_databases = ['RDM',
                  'TESTCENTER']
 
+# 月份
 month = [u'一月', u'二月', u'三月', u'四月', u'五月', u'六月', u'七月', u'八月', u'九月', u'十月', u'十一月', u'十二月']
+
+# 人员职级
 level = [u'职级1',
          u'职级2',
          u'职级3',
@@ -48,6 +51,7 @@ level = [u'职级1',
          u'职级12',
          ]
 
+# 全局日期
 st_date = '2018-01-01'
 ed_date = '2018-12-31'
 
@@ -114,14 +118,23 @@ def calTaskInd(_type):
 
 
 def calTaskIndByDate(_type, _st_date, _ed_date):
+    """
+    按指定时间段统计每个组（产品研发、项目开发、研发管理与测试）的任务量
+    :param _type: 日期项，created/updated
+    :param _st_date: 起始日期
+    :param _ed_date: 截止日期
+    :return: 统计结果
+    """
     global pdPersonals, pjPersonals, rdmPersonals
 
+    """设置统计日期，并完成相关统计"""
     setPersonalDate(_st_date, _ed_date)
 
     _sum = 0
     _personal = {}
     _task = {}
 
+    """计算组员的任务指标"""
     _t, _p = pdPersonals.getTaskIndList(_type)
     _personal['pd'] = _p
     _task['pd'] = _t
@@ -141,28 +154,36 @@ def calTaskIndByDate(_type, _st_date, _ed_date):
 
         # print(">>> %d, %d" % (_task_median, _task_std))
 
+        """每个组的矩阵按 20（列）xN（行）排列，N=[1,10]
+        """
         _dot = {'low': {'x': [], 'y': [], 'label': []},
                 'norm': {'x': [], 'y': [], 'label': []},
                 'high': {'x': [], 'y': [], 'label': []},
                 }
         _cnt = 0
         for _yy in range(1, 11):
+            """取值1～10"""
             if _cnt >= len(_task[_g]):
                 break
             for _xx in range(1, 21):
+                """取值1～20"""
                 if _cnt >= len(_task[_g]):
                     break
+
                 # if _task[_g][_cnt] > _task_median + _task_std:
                 if _task[_g][_cnt] > 40:
+                    """超负荷：具有5天8小时工作量"""
                     _dot['high']['x'].append(_xx)
                     _dot['high']['y'].append(_yy)
                     _dot['high']['label'].append(_personal[_g][_cnt])
                 # elif _task[_g][_cnt] >= _task_median:
                 elif _task[_g][_cnt] >= 24:
+                    """适度：具有3天8小时工作量"""
                     _dot['norm']['x'].append(_xx)
                     _dot['norm']['y'].append(_yy)
                     _dot['norm']['label'].append(_personal[_g][_cnt])
                 else:
+                    """欠计划"""
                     _dot['low']['x'].append(_xx)
                     _dot['low']['y'].append(_yy)
                     _dot['low']['label'].append(_personal[_g][_cnt])
@@ -317,6 +338,12 @@ def set_pd_context():
 
 
 def scan_project_name(project_info, summary):
+    """
+    从summary中寻找项目信息
+    :param project_info: 项目信息
+    :param summary: summary
+    :return: 项目名称
+    """
 
     for _pj in project_info:
         if _pj[u'别名'] in summary:
@@ -347,6 +374,7 @@ def calPjTaskInd(_st_date, _ed_date):
             continue
 
         _issue_updated_date = _issue["updated"].split('T')[0]
+        """判断任务是否在指定的时间段内"""
         if handler.isDateBef(_issue_updated_date, _st_date) and handler.isDateAft(_issue_updated_date, _ed_date):
             continue
 
@@ -362,8 +390,10 @@ def calPjTaskInd(_st_date, _ed_date):
                     _project[_issue['project_alias']][_group] += _issue['spent_time']
             _pj_sum += _issue['spent_time']
         else:
+            """试图从summary中寻找项目信息"""
             _pj_name = scan_project_name(_pj_info, _issue['summary'])
             if _pj_name is not None:
+                """有项目信息"""
                 if _pj_name not in _project:
                     _project[_pj_name] = {_group: _issue['spent_time']}
                 else:
@@ -373,6 +403,7 @@ def calPjTaskInd(_st_date, _ed_date):
                         _project[_pj_name][_group] += _issue['spent_time']
                 _pj_sum += _issue['spent_time']
             else:
+                """无项目信息"""
                 if u'其它' not in _project:
                     _project[u'其它'] = {_group: _issue['spent_time']}
                 else:
@@ -399,17 +430,30 @@ def set_rdm_context():
 
     global pdPersonals, pjPersonals, rdmPersonals, extTask, st_date, ed_date
 
+    """项目归档情况
+    """
+    pj = []
+    _m = handler.get_material()
+    _count = _m.count()
+    for __m in _m:
+        if __m[u'项目名称'] not in pj:
+            pj.append(__m[u'项目名称'])
+
+    _ext_personals_stat = handler.get_project_info('ext_personals_stat')
+
     role = Role.query.filter_by(name=current_user.username).first()
 
     if role.level <= 2:
         """产品研发投入项目开发情况
         """
         _project, _pj_sum, _npj_sum = calPjTaskInd(st_date, ed_date)
+        """近三个月的日期"""
         __v = handler.calDateMonthly(3)
         _st_date_3m = __v['st_date']
         _ed_date_3m = __v['ed_date']
         _project_3m, _pj_sum_3m, _npj_sum_3m = calPjTaskInd(_st_date_3m, _ed_date_3m)
 
+        """上一个月的日期"""
         __v = handler.calDateMonthly(1)
         _st_date_1m = __v['st_date']
         _ed_date_1m = __v['ed_date']
@@ -443,18 +487,6 @@ def set_rdm_context():
         _org_dot_3m, _doing_sum_3m = calTaskIndByDate('doing', _st_date_3m, _ed_date_3m)
         _pd_sum_3m = _spent_doing_sum_3m+_spent_done_sum_3m-_pj_sum_3m-_npj_sum_3m
 
-    """项目归档情况
-    """
-    pj = []
-    _m = handler.get_material()
-    _count = _m.count()
-    for __m in _m:
-        if __m[u'项目名称'] not in pj:
-            pj.append(__m[u'项目名称'])
-
-    _ext_personals_stat = handler.get_project_info('ext_personals_stat')
-
-    if role.level <= 2:
         context = dict(
             user={"role": role.level},
             total=pdPersonals.getNumbOfMember() +
@@ -534,14 +566,16 @@ def set_rdm_context():
     else:
         context = dict(
             user={"role": role.level},
-            total=pdPersonals.getNumbOfMember() +
-                  pjPersonals.getNumbOfMember() +
-                  rdmPersonals.getNumbOfMember(),
+            total=pdPersonals.getNumbOfMember() + pjPersonals.getNumbOfMember() + rdmPersonals.getNumbOfMember(),
             pd_count=pdPersonals.getNumbOfMember(),
             pj_count=pjPersonals.getNumbOfMember(),
             rdm_count=rdmPersonals.getNumbOfMember(),
-            total_task=pdPersonals.getTotalNumbOfTask() + pjPersonals.getTotalNumbOfTask() + rdmPersonals.getTotalNumbOfTask(),
-            total_worklog=pdPersonals.getTotalNumbOfWorkLog() + pjPersonals.getTotalNumbOfWorkLog() + rdmPersonals.getTotalNumbOfWorkLog(),
+            total_task=pdPersonals.getTotalNumbOfTask() +
+                       pjPersonals.getTotalNumbOfTask() +
+                       rdmPersonals.getTotalNumbOfTask(),
+            total_worklog=pdPersonals.getTotalNumbOfWorkLog() +
+                          pjPersonals.getTotalNumbOfWorkLog() +
+                          rdmPersonals.getTotalNumbOfWorkLog(),
             total_pj=len(pj),
             total_material=_count,
             ext_personals_stat=_ext_personals_stat,
