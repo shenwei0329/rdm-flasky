@@ -897,7 +897,7 @@ def nTaskByLevel(Personals):
     """
     各职级的执行任务情况
     :param Personals: 人员表
-    :return: 数据
+    :return: 数据，X：职级，Y：员工名称
     """
 
     x = []
@@ -923,7 +923,7 @@ def spentTimeByLevel(Personals):
     """
     各职级的执行任务的用时情况
     :param Personals: 人员表
-    :return: 数据
+    :return: 数据，X：职级，Y：花费时间总计
     """
 
     x = []
