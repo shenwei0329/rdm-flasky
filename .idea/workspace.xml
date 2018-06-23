@@ -67,10 +67,10 @@
       <file leaf-file-name="handler.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/auth/handler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.29275906">
-              <caret line="858" column="48" selection-start-line="858" selection-start-column="48" selection-end-line="858" selection-end-column="48" />
+            <state vertical-scroll-proportion="0.44984025">
+              <caret line="876" column="78" selection-start-line="876" selection-start-column="78" selection-end-line="876" selection-end-column="78" />
               <folding>
-                <marker date="1529719662000" expanded="true" signature="6520:6642" placeholder="select KQ_AM... checkon_t" />
+                <marker date="1529719989000" expanded="true" signature="6520:6642" placeholder="select KQ_AM... checkon_t" />
               </folding>
             </state>
           </provider>
@@ -548,6 +548,13 @@
       <option name="number" value="Default" />
       <updated>1526142532671</updated>
     </task>
+    <task id="LOCAL-00001" summary="for test!">
+      <created>1529719682069</created>
+      <option name="number" value="00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1529719682069</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -556,6 +563,7 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19140452" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23438193" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -576,6 +584,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="for test!" />
+    <option name="LAST_COMMIT_MESSAGE" value="for test!" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -942,10 +954,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/auth/handler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.29275906">
-          <caret line="858" column="48" selection-start-line="858" selection-start-column="48" selection-end-line="858" selection-end-column="48" />
+        <state vertical-scroll-proportion="0.44984025">
+          <caret line="876" column="78" selection-start-line="876" selection-start-column="78" selection-end-line="876" selection-end-column="78" />
           <folding>
-            <marker date="1529719662000" expanded="true" signature="6520:6642" placeholder="select KQ_AM... checkon_t" />
+            <marker date="1529719989000" expanded="true" signature="6520:6642" placeholder="select KQ_AM... checkon_t" />
           </folding>
         </state>
       </provider>

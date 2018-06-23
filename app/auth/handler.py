@@ -859,6 +859,8 @@ def scan_pj_task(st_date, ed_date):
     logging.log(logging.WARN, ">>> scan_pj_task.ext_date: %s-%s" % (st_date, ed_date))
     _task = []
     for _pd_g in pd_list:
+        """从summary内容查找带有"入侵"的issue
+        """
         mongo_db.connect_db(_pd_g)
         _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
                                                   "summary": {'$regex': ".*入侵.*"},
@@ -869,6 +871,8 @@ def scan_pj_task(st_date, ed_date):
         for _r in _rec:
             _task.append(_r)
 
+        """查找"项目入侵"epic，然后查找epic_link属于该epic的issue
+        """
         ext_epic = mongo_db.handler("issue", "find_one", {"issue_type": "epic", "summary": u"项目入侵"})
         _res = mongo_db.handler("issue", "find", {"issue_type": {"$ne": ["epic", "story"]},
                                                   "spent_time": {'$ne': None},
