@@ -205,6 +205,12 @@ def set_manager_context():
 
 
 def setPersonalDate(_st_date, _ed_date):
+    """
+    设置人员的统计起止日期，并完成任务、工作指标计算
+    :param _st_date: 开始日期
+    :param _ed_date: 截止日期
+    :return:
+    """
 
     global pdPersonals, pjPersonals, rdmPersonals
 
@@ -212,10 +218,14 @@ def setPersonalDate(_st_date, _ed_date):
     pjPersonals.setDate(date={'st_date': _st_date, 'ed_date': _ed_date}, whichdate="updated")
     rdmPersonals.setDate(date={'st_date': _st_date, 'ed_date': _ed_date}, whichdate="updated")
 
+    """计算人员的任务量
+    """
     pdPersonals.calTaskInd()
     pjPersonals.calTaskInd()
     rdmPersonals.calTaskInd()
 
+    """计算人员的工作量
+    """
     pdPersonals.calWorkInd()
     pjPersonals.calWorkInd()
     rdmPersonals.calWorkInd()
@@ -243,18 +253,16 @@ def set_honor_context(_st_date, _ed_date):
     _pj_work_ind = pjPersonals.getWorkIndList()
     _rdm_work_ind = rdmPersonals.getWorkIndList()
 
-    _pd_count = 18
-    _pd_numb_list = _pd_count/6
-    """int(float(len(_pd_work_ind))*0.2 + 0.5)
+    """设置上榜人员个数,按每行6人显示
     """
-    _pj_count = 6
-    _pj_numb_list = _pj_count/6
-    """int(float(len(_pj_work_ind))*0.35 + 0.5)
-    """
-    _rdm_count = 6
-    _rdm_numb_list = _rdm_count/6
-    """int(float(len(_rdm_work_ind))*0.2 + 0.5)
-    """
+    _pd_count = handler.conf.get('HONOR', 'pd_number_member')
+    _pd_numb_list = _pd_count/handler.conf.get('HONOR', 'number_column')
+
+    _pj_count = handler.conf.get('HONOR', 'pj_number_member')
+    _pj_numb_list = _pj_count/handler.conf.get('HONOR', 'number_column')
+
+    _rdm_count = handler.conf.get('HONOR', 'rdm_number_member')
+    _rdm_numb_list = _rdm_count/handler.conf.get('HONOR', 'number_column')
 
     _pd_list = []
     _pj_list = []
@@ -262,24 +270,24 @@ def set_honor_context(_st_date, _ed_date):
 
     for _i in range(_pd_numb_list):
         _personal = []
-        for _j in range(6):
-            _item = _pd_work_ind[_i*6 + _j]
+        for _j in range(handler.conf.get('HONOR', 'number_column')):
+            _item = _pd_work_ind[_i*handler.conf.get('HONOR', 'number_column') + _j]
             # logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
             _personal.append({'name': _item[0], 'quota': _item[1]})
         _pd_list.append(_personal)
 
     for _i in range(_pj_numb_list):
         _personal = []
-        for _j in range(6):
-            _item = _pj_work_ind[_i*6 + _j]
+        for _j in range(handler.conf.get('HONOR', 'number_column')):
+            _item = _pj_work_ind[_i*handler.conf.get('HONOR', 'number_column') + _j]
             # logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
             _personal.append({'name': _item[0], 'quota': _item[1]})
         _pj_list.append(_personal)
 
     for _i in range(_rdm_numb_list):
         _personal = []
-        for _j in range(6):
-            _item = _rdm_work_ind[_i*6 + _j]
+        for _j in range(handler.conf.get('HONOR', 'number_column')):
+            _item = _rdm_work_ind[_i*handler.conf.get('HONOR', 'number_column') + _j]
             # logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
             _personal.append({'name': _item[0], 'quota': _item[1]})
         _rdm_list.append(_personal)

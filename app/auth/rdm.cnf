@@ -22,5 +22,15 @@ url=http://jira.chinacloud.com.cn
 user=shenwei
 password=sw64419
 
+[HONOR]
+number_column=6
+pd_number_member=18
+pj_number_member=6
+rdm_number_member=6
+
+[MANGER]
+
+[RDM]
+
 #
 # Eof

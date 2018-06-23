@@ -22,14 +22,21 @@ import sys
 import PersonalStat
 from echart_handler import pie
 import logging
-
+import ConfigParser
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 print sys.getdefaultencoding()
 
+conf = ConfigParser.ConfigParser()
+conf.read('rdm.cnf')
+
 mongo_db = mongodb_class.mongoDB()
-db = MySQLdb.connect(host="172.16.60.2", user="tk", passwd="53ZkAuoDVc8nsrVG", db="nebula", charset='utf8')
+db = MySQLdb.connect(host=conf.get('MYSQL', 'host'),
+                     user=conf.get('MYSQL', 'user'),
+                     passwd=conf.get('MYSQL', 'password'),
+                     db="nebula",
+                     charset='utf8')
 mysql_db = mysql_hdr.SqlService(db)
 
 """项目状态："""
