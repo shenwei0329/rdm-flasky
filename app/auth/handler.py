@@ -856,7 +856,7 @@ def scan_pj_task(st_date, ed_date):
     :return: 数据
     """
 
-    logging.log(logging.WARN, ">>> ext_date: %s-%s" % (st_date, ed_date))
+    logging.log(logging.WARN, ">>> scan_pj_task.ext_date: %s-%s" % (st_date, ed_date))
     _task = []
     for _pd_g in pd_list:
         mongo_db.connect_db(_pd_g)
