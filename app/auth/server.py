@@ -185,11 +185,15 @@ def set_manager_context():
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     _context['user'] = {'role': role.level}
-    _context['pic'] = echart_handler.effectscatter('职级-任务量', [{"x": _x, "y": _y}], size={'width': 640, 'height': 420})
+    _context['pic'] = echart_handler.effectscatter('职级-任务量',
+                                                   [{"x": _x, "y": _y}],
+                                                   size={'width': 640, 'height': 420})
     _context['pic_time'] = echart_handler.effectscatter('职级-时间',
                                                         [{"x": _xo, "y": _yo}, {"x": _xs, "y": _ys}],
                                                         size={'width': 640, 'height': 420})
-    _context['pic_diff'] = echart_handler.effectscatter('职级-时间差', [{"x": _xd, "y": _yd}], size={'width': 640, 'height': 420})
+    _context['pic_diff'] = echart_handler.effectscatter('职级-时间差',
+                                                        [{"x": _xd, "y": _yd}],
+                                                        size={'width': 640, 'height': 420})
     _context['pic_sankey'] = pdPersonals.buildSanKey([{'year': 2018, 'month': 1},
                                                       {'year': 2018, 'month': 2},
                                                       {'year': 2018, 'month': 3},

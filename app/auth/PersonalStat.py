@@ -49,10 +49,20 @@ class Personal:
         self.whichdate = "created"
 
     def clearData(self):
+        """
+        清除信息【注：已废除】
+        :return:
+        """
         # self.personal = {}
         pass
 
     def setDate(self, date, whichdate=None):
+        """
+        为数据处理设置时间段
+        :param date: 日期
+        :param whichdate: 处理日期类型：created,updated
+        :return:
+        """
         self.st_date = date['st_date']
         self.ed_date = date['ed_date']
         if whichdate is not None:
@@ -251,6 +261,10 @@ class Personal:
         return _done, float(_done*100)/float(len(issues))
 
     def scanMember(self):
+        """
+        获取公司全员信息
+        :return:
+        """
         self.mongodb.connect_db("ext_system")
         _cur = self.mongodb.handler("member", "find", {u'状态': "1"})
         self.members = {}
@@ -264,30 +278,56 @@ class Personal:
         self.calWorkInd()
 
     def getPersonal(self, name=None):
+        """
+        获取全员信息
+        :param name: 或指定名称
+        :return: 信息
+        """
         if name is None:
             return self.personal
         else:
             return self.personal[name]
 
     def getNameList(self):
+        """
+        获取员工名称列表
+        :return: 列表
+        """
         return self.personal.keys()
 
     def getNumbOfTask(self, name):
+        """
+        获取指定员工的任务总数
+        :param name: 员工名称
+        :return: 任务总数
+        """
         return len(self.personal[name].get_task())
 
     def getTotalNumbOfTask(self):
+        """
+        获取员工任务总数
+        :return: 任务总数
+        """
         _count = 0
         for _p in self.personal:
             _count += self.personal[_p].get_task_count()
         return _count
 
     def getTotalNumbOfWorkLog(self):
+        """
+        获取员工工作日志总数
+        :return: 工作日志的总数
+        """
         _count = 0
         for _p in self.personal:
             _count += self.personal[_p].get_work_log_count()
         return _count
 
     def getNumbOfMember(self):
+        """
+        获取员工个数
+        :return: 个数
+        """
         return len(self.personal)
 
     def calWorkInd(self):
@@ -352,28 +392,54 @@ class Personal:
         return sorted(_personal, key=lambda x: x[1], reverse=True)
 
     def _add_link(self, source, target, value):
+        """
+        添加"工作量"链接
+        :param source: 源
+        :param target: 目标
+        :param value: 值
+        :return:
+        """
         _link = {'source': source, 'target': target, 'value': value}
         if _link not in self.links:
             self.links.append(_link)
 
     def _add_plan_link(self, source, target, value):
+        """
+        添加"计划"链接
+        :param source: 源
+        :param target: 目标
+        :param value: 值
+        :return:
+        """
         _link = {'source': source, 'target': target, 'value': value}
         if _link not in self.links:
             self.plan_links.append(_link)
 
     def buildSanKey(self, date):
+        """
+        按指定日期（通常为一个月）构建"个人-任务量-产品研发与项目支撑"的sankey图
+        :param date: 一组日期（通常按一个月为一个单元），如[{'year': 2018, 'month': 3},...]
+        :return: echarts图
+        """
 
         self.nodes = []
         self.links = []
 
         for _date in date:
 
+            """获取指定日期
+            """
             year = _date['year']
             month = _date['month']
 
+            """计算指定日期的起始、截止日期
+            """
             _v = handler.calOneMonth(year, month)
             _st_date = _v['st_date']
             _ed_date = _v['ed_date']
+
+            """节点："系统研发"、"项目支撑"和"日期"（含"【支撑】"的日期）
+            """
             _str = "%d-%02d" % (year, month)
 
             logging.log(logging.WARN, ">>> PersonalStat.buildSanKey: %s,%s,%s" % (_st_date, _ed_date, _str))
@@ -394,6 +460,8 @@ class Personal:
             _plan_ext_month_quota = 0.
 
             for _p in self.personal:
+                """创建个人节点及其工作量链接
+                """
                 _node = {'name': _p}
                 if _node not in self.nodes:
                     self.nodes.append(_node)
@@ -403,18 +471,26 @@ class Personal:
                 _q, _ext_q = self.personal[_p].get_quota()
                 _month_quota += _q
                 _ext_month_quota += _ext_q
+                """建立"个人"与"日期"之间基于工作量的链接
+                """
                 self._add_link(_p, "%d-%02d" % (year, month), _q)
                 self._add_link(_p, u"%d-%02d【支撑】" % (year, month), _ext_q)
 
                 _q, _ext_q = self.personal[_p].get_plan_quota()
+                """建立"个人"与"日期"之间基于计划工作量的链接
+                """
                 _plan_month_quota += _q
                 _plan_ext_month_quota += _ext_q
                 self._add_plan_link(_p, "%d-%02d" % (year, month), _q)
                 self._add_plan_link(_p, u"%d-%02d【支撑】" % (year, month), _ext_q)
 
+            """建立"日期"与"产品研发"之间基于工作量的链接
+            """
             self._add_link("%d-%02d" % (year, month), u'产品研发', _month_quota)
             self._add_link(u"%d-%02d【支撑】" % (year, month), u'项目支撑', _ext_month_quota)
 
+            """建立"日期"与"产品研发"之间基于计划工作量的链接
+            """
             self._add_plan_link("%d-%02d" % (year, month), u'产品研发', _plan_month_quota)
             self._add_plan_link(u"%d-%02d【支撑】" % (year, month), u'项目支撑', _plan_ext_month_quota)
 
