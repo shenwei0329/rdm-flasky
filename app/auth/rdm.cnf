@@ -22,6 +22,14 @@ url=http://jira.chinacloud.com.cn
 user=shenwei
 password=sw64419
 
+[QUOTA]
+high_ratio_level=10
+high_ratio_value=1.3
+middle_ratio_level=5
+middle_ratio_value=1.2
+low_ratio_level=1
+low_ratio_value=1.1
+
 [HONOR]
 number_column=6
 pd_number_member=18

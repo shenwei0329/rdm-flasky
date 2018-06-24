@@ -9,6 +9,9 @@
 #   1）明确本程序用于建立“公司”最基本的（原始的）信息。
 #   2）后续的分析类数据，通过REST-API方式获取
 #
+#   2018.6.23 @成都
+#   1）引入ConfigParser及配置文件
+#   2）程序注释
 #
 
 from __future__ import unicode_literals
@@ -233,7 +236,10 @@ def calHour(_str):
 
 
 def get_pj_state():
-
+    """
+    获取项目统计信息
+    :return: 统计
+    """
     _pj_op = 0
     _pj_done = 0
     _pj_ing = 0
@@ -300,7 +306,12 @@ def getChkOn(st_date, ed_date):
 
 
 def get_task_stat(st_date, ed_date):
-
+    """
+    获取任务统计信息
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 统计，包含产品研发、项目开发和研发管理与测试
+    """
     _count = 0
     _done_count = 0
     personal = {}
@@ -390,7 +401,12 @@ def get_task_stat(st_date, ed_date):
 
 
 def get_hr_stat(st_date, ed_date):
-
+    """
+    获取人力资源统计信息
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 统计
+    """
     _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
     personal = {}
     date = {}
@@ -423,7 +439,12 @@ def get_hr_stat(st_date, ed_date):
 
 
 def get_loan_stat(st_date, ed_date):
-
+    """
+    获取差旅统计信息
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 统计
+    """
     _month_cost_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
     mongo_db.connect_db('ext_system')
@@ -446,7 +467,12 @@ def get_loan_stat(st_date, ed_date):
 
 
 def get_reimbursement_stat(st_date, ed_date):
-
+    """
+    获取报账统计
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 统计
+    """
     _month_cost_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
     mongo_db.connect_db('ext_system')
@@ -469,7 +495,12 @@ def get_reimbursement_stat(st_date, ed_date):
 
 
 def get_ticket_stat(st_date, ed_date):
-
+    """
+    获取机票统计信息
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 统计值
+    """
     _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
     _month_cost_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
@@ -523,6 +554,12 @@ def get_ticket_stat(st_date, ed_date):
 
 
 def is_pj(pj_info, summary):
+    """
+    判断summary是否包含项目信息
+    :param pj_info:
+    :param summary:
+    :return:
+    """
 
     for _pj in pj_info:
 
@@ -533,6 +570,14 @@ def is_pj(pj_info, summary):
 
 
 def get_pd4pj_stat(st_date, ed_date):
+    """
+    获取产品研发对外支撑投入的统计信息
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 统计值
+    """
+
+    issues = scan_pj_task(st_date, ed_date)
 
     pj_info = {}
 
@@ -545,32 +590,13 @@ def get_pd4pj_stat(st_date, ed_date):
 
     mongo_db.close_db()
 
-    issues = []
-    for _grp in ["CPSJ", "FAST", "ROOOT", "HUBBLE"]:
-
-        """mongoDB数据库
-        """
-        mongo_db.connect_db(_grp)
-        _search = {'issue_type': 'epic', 'summary': u'项目入侵'}
-        _epic = mongo_db.handler('issue', 'find_one', _search)
-        if _epic is None:
-            continue
-
-        _search = {'epic_link': _epic['issue'], 'status': u'完成',
-                   "$and": [{"updated": {"$gte": "%s" % st_date}},
-                            {"updated": {"$lte": "%s" % ed_date}}]}
-        _cur = mongo_db.handler('issue', 'find', _search)
-        for _issue in _cur:
-            issues.append(_issue)
-
-        mongo_db.close_db()
-
     _count = 0
     _pj_total_cost = 0.
     _npj_total_cost = 0.
 
     for _issue in issues:
-
+        """检索summary字段是否包含项目信息，以确定投入的项目明细
+        """
         _it = 'spent_time'
         if type(_issue[_it]) is types.NoneType:
             continue
@@ -587,6 +613,10 @@ def get_pd4pj_stat(st_date, ed_date):
 
 
 def get_product_stat():
+    """
+    获取产品统计信息
+    :return: 已发布数、在研数、安装地的数量、交付产品总量
+    """
 
     mongo_db.connect_db('ext_system')
     products = do_search('producting_t', {u"状态": {"$not": {"$eq": u"发布"}}})
@@ -610,7 +640,10 @@ def get_product_stat():
 
 
 def get_contract_stat():
-
+    """
+    获取合同金额
+    :return: 合同数、总计金额
+    """
     mongo_db.connect_db('ext_system')
     contracts = do_search('contract_t', {})
     _count = contracts.count()
@@ -625,7 +658,10 @@ def get_contract_stat():
 
 
 def get_budget_stat():
-
+    """
+    获取项目预算统计
+    :return: 统计值，含总计、每个项目的分项值
+    """
     mongo_db.connect_db('ext_system')
     enginerrings = do_search('enginerring_budget', {})
 
@@ -645,7 +681,10 @@ def get_budget_stat():
 
 
 def get_product_shelves():
-
+    """
+    获取产品货架内容
+    :return: 货架上的产品列表
+    """
     pd = []
     mongo_db.connect_db('ext_system')
     products = do_search('pd_shelves_t', {})
@@ -843,7 +882,10 @@ def get_imp_projects():
 
 
 def get_pj_managers():
-
+    """
+    获取项目经理列表
+    :return: 列表
+    """
     mongo_db.connect_db('ext_system')
     pj_managers = {}
     _lists = mongo_db.handler('pj_deliver_t', 'find', {})
@@ -862,7 +904,6 @@ def scan_pj_task(st_date, ed_date):
     :param ed_date: 截止时间
     :return: 数据
     """
-
     logging.log(logging.WARN, ">>> scan_pj_task.ext_date: %s-%s" % (st_date, ed_date))
     _task = []
     for _pd_g in pd_list:
@@ -895,6 +936,11 @@ def scan_pj_task(st_date, ed_date):
 
 
 def getPersonalByLevel(lvl):
+    """
+    按职级获取人员列表
+    :param lvl: 职级
+    :return: 列表
+    """
 
     mongo_db.connect_db('ext_system')
     return mongo_db.handler('pd_member_level_t', 'find', {u'职级': "%d" % lvl})
