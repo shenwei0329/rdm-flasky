@@ -91,7 +91,7 @@
                             <b style="color:#F00">注：以上日期为阶段完成的时间点；【合同交付】是合同要求的交付日期。</b>
                         </div>
                         <br/>
-                        {% if user["role"] <= 2 %}
+                        {% if user["role"] <= 2 or user["role"] == 66 %}
                         <div class="container">
                         <h3><b>争取项目：</b></h3>
                         <hr>

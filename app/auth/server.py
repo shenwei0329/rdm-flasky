@@ -443,7 +443,7 @@ def set_rdm_context():
 
     role = Role.query.filter_by(name=current_user.username).first()
 
-    if role.level <= 2:
+    if role.level <= 2 or role.level == 66:
         """产品研发投入项目开发情况
         """
         _project, _pj_sum, _npj_sum = calPjTaskInd(st_date, ed_date)

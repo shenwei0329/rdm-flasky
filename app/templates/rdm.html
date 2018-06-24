@@ -34,7 +34,7 @@
                     项目成果数：<b style="color:#F00">{{ total_material }}</b>（项）
                     </p>
                 </div>
-                {% if user["role"] <= 2 %}
+                {% if user["role"] <= 2 or user["role"] == 66 %}
                 <div class="container"><h2><b>资源池工作分布情况</b></h2>
                     <p>
                         注：图中每个点表示一个资源个体（员工），情况分三类：<br/>
