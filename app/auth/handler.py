@@ -26,13 +26,16 @@ import PersonalStat
 from echart_handler import pie
 import logging
 import ConfigParser
+import os
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 print sys.getdefaultencoding()
 
 conf = ConfigParser.ConfigParser()
-conf.read('rdm.cnf')
+conf.read(os.path.split(os.path.realpath(__file__))[0] + '/rdm.cnf')
+
+print(">>> MYSQL: %s,%s,%s" % (conf.get('MYSQL', 'host'), conf.get('MYSQL', 'user'), conf.get('MYSQL', 'password')))
 
 mongo_db = mongodb_class.mongoDB()
 db = MySQLdb.connect(host=conf.get('MYSQL', 'host'),

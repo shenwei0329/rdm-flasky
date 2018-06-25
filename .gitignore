@@ -117,3 +117,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 *.jpg
+*.png
+app/static/personal/董一舟.jpeg
+*.jpeg

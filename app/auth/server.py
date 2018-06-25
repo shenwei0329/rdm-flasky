@@ -150,8 +150,6 @@ def calTaskIndByDate(_type, _st_date, _ed_date):
         """中值"""
         # _task_median = np.median(_task[_g])
         # _task_std = np.std(_task[_g])
-        _sum += sum(_task[_g])
-
         # print(">>> %d, %d" % (_task_median, _task_std))
 
         """每个组的矩阵按 20（列）xN（行）排列，N=[1,10]
@@ -192,7 +190,8 @@ def calTaskIndByDate(_type, _st_date, _ed_date):
 
         dots[_g] = _dot
 
-    return dots, _sum
+    return dots, sum(_task['pd'])
+
 
 
 def set_manager_context():
@@ -215,11 +214,9 @@ def set_manager_context():
     _context['pic_diff'] = echart_handler.effectscatter('职级-时间差',
                                                         [{"x": _xd, "y": _yd}],
                                                         size={'width': 640, 'height': 420})
-    _context['pic_sankey'] = pdPersonals.buildSanKey([{'year': 2018, 'month': 1},
-                                                      {'year': 2018, 'month': 2},
-                                                      {'year': 2018, 'month': 3},
-                                                      {'year': 2018, 'month': 4},
+    _context['pic_sankey'] = pdPersonals.buildSanKey([{'year': 2018, 'month': 4},
                                                       {'year': 2018, 'month': 5},
+                                                      {'year': 2018, 'month': 6},
                                                       ])
 
     return _context
@@ -276,14 +273,14 @@ def set_honor_context(_st_date, _ed_date):
 
     """设置上榜人员个数,按每行6人显示
     """
-    _pd_count = handler.conf.get('HONOR', 'pd_number_member')
-    _pd_numb_list = _pd_count/handler.conf.get('HONOR', 'number_column')
+    _pd_count = handler.conf.getint('HONOR', 'pd_number_member')
+    _pd_numb_list = _pd_count/handler.conf.getint('HONOR', 'number_column')
 
-    _pj_count = handler.conf.get('HONOR', 'pj_number_member')
-    _pj_numb_list = _pj_count/handler.conf.get('HONOR', 'number_column')
+    _pj_count = handler.conf.getint('HONOR', 'pj_number_member')
+    _pj_numb_list = _pj_count/handler.conf.getint('HONOR', 'number_column')
 
-    _rdm_count = handler.conf.get('HONOR', 'rdm_number_member')
-    _rdm_numb_list = _rdm_count/handler.conf.get('HONOR', 'number_column')
+    _rdm_count = handler.conf.getint('HONOR', 'rdm_number_member')
+    _rdm_numb_list = _rdm_count/handler.conf.getint('HONOR', 'number_column')
 
     _pd_list = []
     _pj_list = []
@@ -291,24 +288,24 @@ def set_honor_context(_st_date, _ed_date):
 
     for _i in range(_pd_numb_list):
         _personal = []
-        for _j in range(handler.conf.get('HONOR', 'number_column')):
-            _item = _pd_work_ind[_i*handler.conf.get('HONOR', 'number_column') + _j]
+        for _j in range(handler.conf.getint('HONOR', 'number_column')):
+            _item = _pd_work_ind[_i*handler.conf.getint('HONOR', 'number_column') + _j]
             # logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
             _personal.append({'name': _item[0], 'quota': _item[1]})
         _pd_list.append(_personal)
 
     for _i in range(_pj_numb_list):
         _personal = []
-        for _j in range(handler.conf.get('HONOR', 'number_column')):
-            _item = _pj_work_ind[_i*handler.conf.get('HONOR', 'number_column') + _j]
+        for _j in range(handler.conf.getint('HONOR', 'number_column')):
+            _item = _pj_work_ind[_i*handler.conf.getint('HONOR', 'number_column') + _j]
             # logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
             _personal.append({'name': _item[0], 'quota': _item[1]})
         _pj_list.append(_personal)
 
     for _i in range(_rdm_numb_list):
         _personal = []
-        for _j in range(handler.conf.get('HONOR', 'number_column')):
-            _item = _rdm_work_ind[_i*handler.conf.get('HONOR', 'number_column') + _j]
+        for _j in range(handler.conf.getint('HONOR', 'number_column')):
+            _item = _rdm_work_ind[_i*handler.conf.getint('HONOR', 'number_column') + _j]
             # logging.log(logging.WARN, ">>> %s:%d" % (_item[0], _item[1]))
             _personal.append({'name': _item[0], 'quota': _item[1]})
         _rdm_list.append(_personal)
@@ -375,7 +372,7 @@ def calPjTaskInd(_st_date, _ed_date):
 
         _issue_updated_date = _issue["updated"].split('T')[0]
         """判断任务是否在指定的时间段内"""
-        if handler.isDateBef(_issue_updated_date, _st_date) and handler.isDateAft(_issue_updated_date, _ed_date):
+        if handler.isDateBef(_issue_updated_date, _st_date) or handler.isDateAft(_issue_updated_date, _ed_date):
             continue
 
         _group = _issue['issue'].split('-')[0]
@@ -480,6 +477,8 @@ def set_rdm_context():
         _dot_1m, _spent_doing_sum_1m = calTaskIndByDate('spent_doing', _st_date_1m, _ed_date_1m)
         __dot, _spent_done_sum_1m = calTaskIndByDate('spent_done', _st_date_1m, _ed_date_1m)
         _org_dot_1m, _doing_sum_1m = calTaskIndByDate('doing', _st_date_1m, _ed_date_1m)
+
+        print(">>> _pd_sum_1m: %d,%d,%d,%d" % (_spent_done_sum_1m, _spent_doing_sum_1m, _pj_sum_1m, _npj_sum_1m))
         _pd_sum_1m = _spent_doing_sum_1m+_spent_done_sum_1m-_pj_sum_1m-_npj_sum_1m
 
         _dot_3m, _spent_doing_sum_3m = calTaskIndByDate('spent_doing', _st_date_3m, _ed_date_3m)

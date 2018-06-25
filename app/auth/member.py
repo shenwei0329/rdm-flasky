@@ -203,15 +203,15 @@ class Member:
                     _quota += _org_time
             else:
                 _miu = _org_time / _spent_time
-                if _miu > handler.conf.get('QUOTA', 'high_ratio_level'):
+                if _miu > float(handler.conf.get('QUOTA', 'high_ratio_level')):
                     # 预估时间严重失真
-                    _miu = handler.conf.get('QUOTA', 'high_ratio_value')
-                elif _miu > handler.conf.get('QUOTA', 'middle_ratio_level'):
+                    _miu = float(handler.conf.get('QUOTA', 'high_ratio_value'))
+                elif _miu > float(handler.conf.get('QUOTA', 'middle_ratio_level')):
                     # 预估时间偏离过大
-                    _miu = handler.conf.get('QUOTA', 'middle_ratio_value')
+                    _miu = float(handler.conf.get('QUOTA', 'middle_ratio_value'))
                 elif _miu > handler.conf.get('QUOTA', 'low_ratio_level'):
                     # 经验问题
-                    _miu = handler.conf.get('QUOTA', 'high_ratio_value')
+                    _miu = float(handler.conf.get('QUOTA', 'low_ratio_value'))
                 if _i['ext']:
                     _ext_quota += (_spent_time * _miu)
                 else:
