@@ -1147,11 +1147,13 @@ def calDateMonthly(nMonth):
     _ed_date = _ed_date.strftime("%Y-%m-%d")
 
     _month = []
-    _month.append(_bg_date.month)
+    _month.append({'year': _bg_date.year, 'month': _bg_date.month})
     while isDateAft(_bg_date.strftime("%Y-%m-%d"), _st_date):
         _m = _bg_date.month
-        if _m not in _month:
-            _month.append(_m)
+        _y = _bg_date.year
+        _val = {'month': _m, 'year': _y}
+        if _val not in _month:
+            _month.append(_val)
         # print("%s" % _month)
         _bg_date = _bg_date - datetime.timedelta(days=_bg_date.day)
 

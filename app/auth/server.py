@@ -509,22 +509,28 @@ def set_rdm_context():
             sorted=sorted,
             task_ind_pd=echart_handler.effectscatterByInd('产品研发资源的当前负载执行情况',
                                                           _dot['pd'],
-                                                          size={'width': 860, 'height': 220}),
+                                                          size={'width': 500,
+                                                                'height': 120 + (pdPersonals.getNumbOfMember()/20)*60}),
             task_ind_pj=echart_handler.effectscatterByInd('项目开发资源的当前负载执行情况',
                                                           _dot['pj'],
-                                                          size={'width': 860, 'height': 180}),
+                                                          size={'width': 500,
+                                                                'height': 120 + (pjPersonals.getNumbOfMember()/20)*60}),
             task_ind_rdm=echart_handler.effectscatterByInd('测试资源的当前负载执行情况',
                                                            _dot['rdm'],
-                                                           size={'width': 860, 'height': 120}),
+                                                           size={'width': 500,
+                                                                 'height': 120 + (rdmPersonals.getNumbOfMember()/20)*60}),
             task_ind_pd_org=echart_handler.effectscatterByInd('产品研发资源的当前分配负载情况',
                                                               _org_dot['pd'],
-                                                              size={'width': 860, 'height': 240}),
+                                                              size={'width': 500,
+                                                                    'height': 120 + (pdPersonals.getNumbOfMember()/20)*60}),
             task_ind_pj_org=echart_handler.effectscatterByInd('项目开发资源的当前分配负载情况',
                                                               _org_dot['pj'],
-                                                              size={'width': 860, 'height': 180}),
+                                                              size={'width': 500,
+                                                                    'height': 120 + (pjPersonals.getNumbOfMember()/20)*60}),
             task_ind_rdm_org=echart_handler.effectscatterByInd('测试资源的当前分配负载情况',
                                                                _org_dot['rdm'],
-                                                               size={'width': 860, 'height': 120}),
+                                                               size={'width': 500,
+                                                                     'height': 120 + (rdmPersonals.getNumbOfMember()/20)*60}),
             task_pd=_pd_sum,
             task_pj=_pj_sum,
             task_npj=_npj_sum,
@@ -581,6 +587,9 @@ def set_rdm_context():
             ext_personals=handler.get_project_info('ext_personals_t'),
             ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'已解决'))/2.),
         )
+
+    __v = handler.calDateMonthly(3)
+    context['pic_sankey'] = pdPersonals.buildSanKey(__v['month'])
 
     return context
 
