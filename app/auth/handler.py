@@ -221,7 +221,7 @@ def get_reim_data(st_date, ed_date):
     return addr_data, _date
 
 
-def calHour(_str):
+def cal_hour(_str):
     """
     将时间字符串（HH:MM）转换成工时
     :param _str: 时间字符串
@@ -286,14 +286,14 @@ def getChkOn(st_date, ed_date):
 
         if (_row[0] == '#') or (_row[1] == '#'):
             continue
-        _h = calHour(_row[0])
+        _h = cal_hour(_row[0])
         if (_h is None) or (_h > 12.) or (_h < 6.):
             _h = 9.0
             _seq_am = _seq_am + (9.0,)
         else:
             _seq_am = _seq_am + (_h,)
 
-        _h1 = calHour(_row[1])
+        _h1 = cal_hour(_row[1])
         if (_h1 is None) or (_h1 < 12.):
             _h1 = 17.5
             _seq_pm = _seq_pm + (17.5,)
@@ -938,7 +938,7 @@ def scan_pj_task(st_date, ed_date):
     return _task
 
 
-def getPersonalByLevel(lvl):
+def get_personal_by_level(lvl):
     """
     按职级获取人员列表
     :param lvl: 职级
@@ -949,7 +949,7 @@ def getPersonalByLevel(lvl):
     return mongo_db.handler('pd_member_level_t', 'find', {u'职级': "%d" % lvl})
 
 
-def nTaskByLevel(Personals):
+def xy_task_by_level(Personals):
     """
     各职级的执行任务情况
     :param Personals: 人员表
@@ -963,7 +963,7 @@ def nTaskByLevel(Personals):
     for _lvl in range(13):
 
         print(">>> _lvl = %d" % _lvl)
-        _ps = getPersonalByLevel(_lvl)
+        _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
 
@@ -975,7 +975,7 @@ def nTaskByLevel(Personals):
     return x, y
 
 
-def spentTimeByLevel(Personals):
+def xy_spent_time_by_level(Personals):
     """
     各职级的执行任务的用时情况
     :param Personals: 人员表
@@ -989,7 +989,7 @@ def spentTimeByLevel(Personals):
     for _lvl in range(13):
 
         print(">>> _lvl = %d" % _lvl)
-        _ps = getPersonalByLevel(_lvl)
+        _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
 
@@ -1005,7 +1005,7 @@ def spentTimeByLevel(Personals):
     return x, y
 
 
-def orgTimeByLevel(Personals):
+def xy_org_time_by_level(Personals):
     """
     各职级的执行任务的预估时间情况
     :param Personals: 人员表
@@ -1019,7 +1019,7 @@ def orgTimeByLevel(Personals):
     for _lvl in range(13):
 
         print(">>> _lvl = %d" % _lvl)
-        _ps = getPersonalByLevel(_lvl)
+        _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
 
@@ -1035,7 +1035,7 @@ def orgTimeByLevel(Personals):
     return x, y
 
 
-def spentTimeSumByLevel(Personals):
+def xy_spent_time_sum_by_level(Personals):
     """
     各职级的执行任务的用时情况
     :param Personals: 人员表
@@ -1049,7 +1049,7 @@ def spentTimeSumByLevel(Personals):
     for _lvl in range(13):
 
         print(">>> _lvl = %d" % _lvl)
-        _ps = getPersonalByLevel(_lvl)
+        _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
 
@@ -1062,7 +1062,7 @@ def spentTimeSumByLevel(Personals):
     return x, y
 
 
-def orgTimeSumByLevel(Personals):
+def xy_org_time_sum_by_level(Personals):
     """
     各职级的执行任务的预估时间情况
     :param Personals: 人员表
@@ -1076,7 +1076,7 @@ def orgTimeSumByLevel(Personals):
     for _lvl in range(13):
 
         print(">>> _lvl = %d" % _lvl)
-        _ps = getPersonalByLevel(_lvl)
+        _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
 
@@ -1089,7 +1089,7 @@ def orgTimeSumByLevel(Personals):
     return x, y
 
 
-def diffTimeByLevel(Personals):
+def xy_diff_time_by_level(Personals):
     """
     各职级的执行任务的预估时间情况
     :param Personals: 人员表
@@ -1103,7 +1103,7 @@ def diffTimeByLevel(Personals):
     for _lvl in range(13):
 
         print(">>> _lvl = %d" % _lvl)
-        _ps = getPersonalByLevel(_lvl)
+        _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
 
@@ -1116,7 +1116,7 @@ def diffTimeByLevel(Personals):
     return x, y
 
 
-def calStDate(month, nMonth):
+def cal_st_date(month, nMonth):
     """
     计算指定日期的前nMonth个月
     :param month: 指定的日期
@@ -1130,7 +1130,7 @@ def calStDate(month, nMonth):
     return _m.replace(day=1)
 
 
-def calDateMonthly(nMonth):
+def cal_date_monthly(nMonth):
     """
     计算月度日期
     :param nMonth: 指定是前几个月，1：上一个月，2：前二个月...
@@ -1143,12 +1143,12 @@ def calDateMonthly(nMonth):
     _bg_date = _ed_date
 
     """起始日期"""
-    _st_date = calStDate(_ed_date, nMonth-1).strftime("%Y-%m-%d")
+    _st_date = cal_st_date(_ed_date, nMonth-1).strftime("%Y-%m-%d")
     _ed_date = _ed_date.strftime("%Y-%m-%d")
 
     _month = []
     _month.append({'year': _bg_date.year, 'month': _bg_date.month})
-    while isDateAft(_bg_date.strftime("%Y-%m-%d"), _st_date):
+    while is_date_aft(_bg_date.strftime("%Y-%m-%d"), _st_date):
         _m = _bg_date.month
         _y = _bg_date.year
         _val = {'month': _m, 'year': _y}
@@ -1164,33 +1164,33 @@ def calDateMonthly(nMonth):
     return {"st_date": _st_date, "ed_date": _ed_date, "month": _month}
 
 
-def isDateBef(dateA, dateB):
+def is_date_bef(dateA, dateB):
     """
     判断日期A是否在日期B前
     :param dateA: 日期A
     :param dateB: 日期B
     :return: 判断结果
     """
-    # logging.log(logging.WARN,">>> isDateBef dateA=%s, dateB=%s" % (dateA, dateB))
+    # logging.log(logging.WARN,">>> is_date_bef dateA=%s, dateB=%s" % (dateA, dateB))
     _time1 = datetime.datetime.strptime(dateA, "%Y-%m-%d")
     _time2 = datetime.datetime.strptime(dateB, "%Y-%m-%d")
     return _time1 < _time2
 
 
-def isDateAft(dateA, dateB):
+def is_date_aft(dateA, dateB):
     """
     判断日期A是否在日期B后
     :param dateA: 日期A
     :param dateB: 日期B
     :return: 判断结果
     """
-    # logging.log(logging.WARN,">>> isDateAft dateA=%s, dateB=%s" % (dateA, dateB))
+    # logging.log(logging.WARN,">>> is_date_aft dateA=%s, dateB=%s" % (dateA, dateB))
     _time1 = datetime.datetime.strptime(dateA, "%Y-%m-%d")
     _time2 = datetime.datetime.strptime(dateB, "%Y-%m-%d")
     return _time1 > _time2
 
 
-def calOneMonth(year, month):
+def cal_one_month(year, month):
     """
     计算某年某个月份的日期
     :param year: 年份

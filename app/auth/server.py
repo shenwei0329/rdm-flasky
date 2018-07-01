@@ -65,17 +65,17 @@ rdmPersonals = PersonalStat.Personal()
 extTask = None
 
 
-def calTaskInd(_type):
+def cal_task_ind(_type):
     global pdPersonals, pjPersonals, rdmPersonals
 
     _sum = 0
     _task = {}
     _personal = {}
-    pdPersonals.calTaskInd()
+    pdPersonals.cal_task_ind()
     _task['pd'], _personal['pd'] = pdPersonals.getTaskIndList(_type)
-    pjPersonals.calTaskInd()
+    pjPersonals.cal_task_ind()
     _task['pj'], _personal['pj'] = pjPersonals.getTaskIndList(_type)
-    rdmPersonals.calTaskInd()
+    rdmPersonals.cal_task_ind()
     _task['rdm'], _personal['rdm'] = rdmPersonals.getTaskIndList(_type)
 
     dots = {}
@@ -117,7 +117,7 @@ def calTaskInd(_type):
     return dots, _sum
 
 
-def calTaskIndByDate(_type, _st_date, _ed_date):
+def cal_task_ind_by_date(_type, _st_date, _ed_date):
     """
     按指定时间段统计每个组（产品研发、项目开发、研发管理与测试）的任务量
     :param _type: 日期项，created/updated
@@ -128,7 +128,7 @@ def calTaskIndByDate(_type, _st_date, _ed_date):
     global pdPersonals, pjPersonals, rdmPersonals
 
     """设置统计日期，并完成相关统计"""
-    setPersonalDate(_st_date, _ed_date)
+    set_personal_date(_st_date, _ed_date)
 
     _sum = 0
     _personal = {}
@@ -193,7 +193,6 @@ def calTaskIndByDate(_type, _st_date, _ed_date):
     return dots, sum(_task['pd'])
 
 
-
 def set_manager_context():
 
     _x, _y = handler.nTaskByLevel(pdPersonals)
@@ -222,7 +221,7 @@ def set_manager_context():
     return _context
 
 
-def setPersonalDate(_st_date, _ed_date):
+def set_personal_date(_st_date, _ed_date):
     """
     设置人员的统计起止日期，并完成任务、工作指标计算
     :param _st_date: 开始日期
@@ -238,9 +237,9 @@ def setPersonalDate(_st_date, _ed_date):
 
     """计算人员的任务量
     """
-    pdPersonals.calTaskInd()
-    pjPersonals.calTaskInd()
-    rdmPersonals.calTaskInd()
+    pdPersonals.cal_task_ind()
+    pjPersonals.cal_task_ind()
+    rdmPersonals.cal_task_indh()
 
     """计算人员的工作量
     """
@@ -265,7 +264,7 @@ def set_honor_context(_st_date, _ed_date):
 
     # logging.log(logging.WARN, ">>> server.set_honour_context(%s,%s)" % (_st_date, _ed_date))
 
-    setPersonalDate(_st_date, _ed_date)
+    set_personal_date(_st_date, _ed_date)
 
     _pd_work_ind = pdPersonals.getWorkIndList()
     _pj_work_ind = pjPersonals.getWorkIndList()
@@ -349,7 +348,7 @@ def scan_project_name(project_info, summary):
     return None
 
 
-def calPjTaskInd(_st_date, _ed_date):
+def cal_pj_task_ind(_st_date, _ed_date):
     """
     计算产品研发中心资源投入到非产品事务的指标。
     :param _st_date: 起始日期
@@ -360,7 +359,7 @@ def calPjTaskInd(_st_date, _ed_date):
 
     _pj_info = handler.get_project_info("project_t")
 
-    # logging.log(logging.WARN, ">>> calPjTaskInd( %s, %s )" % (_st_date, _ed_date))
+    # logging.log(logging.WARN, ">>> cal_pj_task_ind( %s, %s )" % (_st_date, _ed_date))
 
     _pj_sum = 0
     _npj_sum = 0
@@ -414,7 +413,7 @@ def calPjTaskInd(_st_date, _ed_date):
     return _project, _pj_sum, _npj_sum
 
 
-def projectSum(_project):
+def project_sum(_project):
 
     for _pj in _project:
         _sum = 0
@@ -443,22 +442,22 @@ def set_rdm_context():
     if role.level <= 2 or role.level == 66:
         """产品研发投入项目开发情况
         """
-        _project, _pj_sum, _npj_sum = calPjTaskInd(st_date, ed_date)
+        _project, _pj_sum, _npj_sum = cal_pj_task_ind(st_date, ed_date)
         """近三个月的日期"""
         __v = handler.calDateMonthly(3)
         _st_date_3m = __v['st_date']
         _ed_date_3m = __v['ed_date']
-        _project_3m, _pj_sum_3m, _npj_sum_3m = calPjTaskInd(_st_date_3m, _ed_date_3m)
+        _project_3m, _pj_sum_3m, _npj_sum_3m = cal_pj_task_ind(_st_date_3m, _ed_date_3m)
 
         """上一个月的日期"""
         __v = handler.calDateMonthly(1)
         _st_date_1m = __v['st_date']
         _ed_date_1m = __v['ed_date']
-        _project_1m, _pj_sum_1m, _npj_sum_1m = calPjTaskInd(_st_date_1m, _ed_date_1m)
+        _project_1m, _pj_sum_1m, _npj_sum_1m = cal_pj_task_ind(_st_date_1m, _ed_date_1m)
 
-        projectSum(_project)
-        projectSum(_project_1m)
-        projectSum(_project_3m)
+        project_sum(_project)
+        project_sum(_project_1m)
+        project_sum(_project_3m)
 
         _npj_sum = _npj_sum/3600
         _pj_sum = _pj_sum/3600
@@ -469,21 +468,21 @@ def set_rdm_context():
 
         """资源池情况
         """
-        _dot, _spent_doing_sum = calTaskIndByDate('spent_doing', st_date, ed_date)
-        __dot, _spent_done_sum = calTaskIndByDate('spent_done', st_date, ed_date)
-        _org_dot, _doing_sum = calTaskIndByDate('doing', st_date, ed_date)
+        _dot, _spent_doing_sum = cal_task_ind_by_date('spent_doing', st_date, ed_date)
+        __dot, _spent_done_sum = cal_task_ind_by_date('spent_done', st_date, ed_date)
+        _org_dot, _doing_sum = cal_task_ind_by_date('doing', st_date, ed_date)
         _pd_sum = _spent_doing_sum+_spent_done_sum-_pj_sum-_npj_sum
 
-        _dot_1m, _spent_doing_sum_1m = calTaskIndByDate('spent_doing', _st_date_1m, _ed_date_1m)
-        __dot, _spent_done_sum_1m = calTaskIndByDate('spent_done', _st_date_1m, _ed_date_1m)
-        _org_dot_1m, _doing_sum_1m = calTaskIndByDate('doing', _st_date_1m, _ed_date_1m)
+        _dot_1m, _spent_doing_sum_1m = cal_task_ind_by_date('spent_doing', _st_date_1m, _ed_date_1m)
+        __dot, _spent_done_sum_1m = cal_task_ind_by_date('spent_done', _st_date_1m, _ed_date_1m)
+        _org_dot_1m, _doing_sum_1m = cal_task_ind_by_date('doing', _st_date_1m, _ed_date_1m)
 
         print(">>> _pd_sum_1m: %d,%d,%d,%d" % (_spent_done_sum_1m, _spent_doing_sum_1m, _pj_sum_1m, _npj_sum_1m))
         _pd_sum_1m = _spent_doing_sum_1m+_spent_done_sum_1m-_pj_sum_1m-_npj_sum_1m
 
-        _dot_3m, _spent_doing_sum_3m = calTaskIndByDate('spent_doing', _st_date_3m, _ed_date_3m)
-        __dot_3m, _spent_done_sum_3m = calTaskIndByDate('spent_done', _st_date_3m, _ed_date_3m)
-        _org_dot_3m, _doing_sum_3m = calTaskIndByDate('doing', _st_date_3m, _ed_date_3m)
+        _dot_3m, _spent_doing_sum_3m = cal_task_ind_by_date('spent_doing', _st_date_3m, _ed_date_3m)
+        __dot_3m, _spent_done_sum_3m = cal_task_ind_by_date('spent_done', _st_date_3m, _ed_date_3m)
+        _org_dot_3m, _doing_sum_3m = cal_task_ind_by_date('doing', _st_date_3m, _ed_date_3m)
         _pd_sum_3m = _spent_doing_sum_3m+_spent_done_sum_3m-_pj_sum_3m-_npj_sum_3m
 
         context = dict(
