@@ -71,11 +71,11 @@ def cal_task_ind(_type):
     _sum = 0
     _task = {}
     _personal = {}
-    pdPersonals.cal_task_ind()
+    pdPersonals.calTaskInd()
     _task['pd'], _personal['pd'] = pdPersonals.getTaskIndList(_type)
-    pjPersonals.cal_task_ind()
+    pjPersonals.calTaskInd()
     _task['pj'], _personal['pj'] = pjPersonals.getTaskIndList(_type)
-    rdmPersonals.cal_task_ind()
+    rdmPersonals.calTaskInd()
     _task['rdm'], _personal['rdm'] = rdmPersonals.getTaskIndList(_type)
 
     dots = {}
@@ -237,9 +237,9 @@ def set_personal_date(_st_date, _ed_date):
 
     """计算人员的任务量
     """
-    pdPersonals.cal_task_ind()
-    pjPersonals.cal_task_ind()
-    rdmPersonals.cal_task_indh()
+    pdPersonals.calTaskInd()
+    pjPersonals.calTaskInd()
+    rdmPersonals.calTaskInd()
 
     """计算人员的工作量
     """
@@ -371,7 +371,7 @@ def cal_pj_task_ind(_st_date, _ed_date):
 
         _issue_updated_date = _issue["updated"].split('T')[0]
         """判断任务是否在指定的时间段内"""
-        if handler.isDateBef(_issue_updated_date, _st_date) or handler.isDateAft(_issue_updated_date, _ed_date):
+        if handler.is_date_bef(_issue_updated_date, _st_date) or handler.is_date_aft(_issue_updated_date, _ed_date):
             continue
 
         _group = _issue['issue'].split('-')[0]
@@ -444,13 +444,13 @@ def set_rdm_context():
         """
         _project, _pj_sum, _npj_sum = cal_pj_task_ind(st_date, ed_date)
         """近三个月的日期"""
-        __v = handler.calDateMonthly(3)
+        __v = handler.cal_date_monthly(3)
         _st_date_3m = __v['st_date']
         _ed_date_3m = __v['ed_date']
         _project_3m, _pj_sum_3m, _npj_sum_3m = cal_pj_task_ind(_st_date_3m, _ed_date_3m)
 
         """上一个月的日期"""
-        __v = handler.calDateMonthly(1)
+        __v = handler.cal_date_monthly(1)
         _st_date_1m = __v['st_date']
         _ed_date_1m = __v['ed_date']
         _project_1m, _pj_sum_1m, _npj_sum_1m = cal_pj_task_ind(_st_date_1m, _ed_date_1m)
@@ -587,7 +587,7 @@ def set_rdm_context():
             ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'已解决'))/2.),
         )
 
-    __v = handler.calDateMonthly(3)
+    __v = handler.cal_date_monthly(3)
     context['pic_sankey'] = pdPersonals.buildSanKey(__v['month'])
 
     return context

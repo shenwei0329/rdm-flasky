@@ -91,7 +91,7 @@ def effectscatter(title, datas, size=None):
                                 width=320,
                                 height=180,
                                 title_pos="center",
-                                background_color='#b0bab9',
+                                background_color='#f0f0f0',
                           )
     else:
         scatter = EffectScatter(
@@ -99,7 +99,7 @@ def effectscatter(title, datas, size=None):
                                 width=size['width'],
                                 height=size['height'],
                                 title_pos="center",
-                                background_color='#b0bab9',
+                                background_color='#f0f0f0',
                           )
     _scale = 1.5
     for _data in datas:
@@ -141,7 +141,7 @@ def effectscatterByInd(title, datas, size=None):
                                 width=320,
                                 height=180,
                                 title_pos="center",
-                                background_color='#b0bab9',
+                                background_color='#f0f0f0',
         )
     else:
         scatter = EffectScatter(
@@ -149,7 +149,7 @@ def effectscatterByInd(title, datas, size=None):
                                 width=size['width'],
                                 height=size['height'],
                                 title_pos="center",
-                                background_color='#b0bab9',
+                                background_color='#f0f0f0',
         )
 
     for _val in datas:
@@ -817,7 +817,7 @@ def sankey_charts(title, nodes, links):
 
     style = Style(
         width=1200, height=800,
-        background_color='#bb9',
+        background_color='#f0f0f0',
     )
     chart = Sankey(title, **style.init_style)
     chart.add("", nodes, links, line_opacity=0.2,

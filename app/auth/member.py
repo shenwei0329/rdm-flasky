@@ -143,7 +143,7 @@ class Member:
         for _i in self.task:
 
             _issue_updated_date = _i["created"].split('T')[0]
-            if handler.isDateBef(_issue_updated_date, st_date) or handler.isDateAft(_issue_updated_date, ed_date):
+            if handler.is_date_bef(_issue_updated_date, st_date) or handler.is_date_aft(_issue_updated_date, ed_date):
                 continue
 
             if _i['org_time'] is None:
@@ -178,7 +178,7 @@ class Member:
         for _i in self.task:
 
             _issue_updated_date = _i["updated"].split('T')[0]
-            if handler.isDateBef(_issue_updated_date, st_date) or handler.isDateAft(_issue_updated_date, ed_date):
+            if handler.is_date_bef(_issue_updated_date, st_date) or handler.is_date_aft(_issue_updated_date, ed_date):
                 continue
 
             """
@@ -243,7 +243,7 @@ class Member:
         for _i in self.task:
 
             _issue_updated_date = _i["updated"].split('T')[0]
-            if handler.isDateBef(_issue_updated_date, st_date) or handler.isDateAft(_issue_updated_date, ed_date):
+            if handler.is_date_bef(_issue_updated_date, st_date) or handler.is_date_aft(_issue_updated_date, ed_date):
                 continue
 
             if _i['org_time'] is not None:
