@@ -195,22 +195,22 @@ def cal_task_ind_by_date(_type, _st_date, _ed_date):
 
 def set_manager_context():
 
-    _x, _y = handler.nTaskByLevel(pdPersonals)
-    _xs, _ys = handler.spentTimeSumByLevel(pdPersonals)
-    _xo, _yo = handler.orgTimeSumByLevel(pdPersonals)
-    _xd, _yd = handler.diffTimeByLevel(pdPersonals)
+    _x, _y = handler.xy_task_by_level(pdPersonals)
+    _xs, _ys = handler.xy_spent_time_sum_by_level(pdPersonals)
+    _xo, _yo = handler.xy_org_time_sum_by_level(pdPersonals)
+    _xd, _yd = handler.xy_diff_time_by_level(pdPersonals)
 
     _context = dict()
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     _context['user'] = {'role': role.level}
-    _context['pic'] = echart_handler.effectscatter('职级-任务量',
+    _context['pic'] = echart_handler.boxplot('职级-任务量',
                                                    [{"x": _x, "y": _y}],
                                                    size={'width': 640, 'height': 420})
-    _context['pic_time'] = echart_handler.effectscatter('职级-时间',
+    _context['pic_time'] = echart_handler.boxplot('职级-时间',
                                                         [{"x": _xo, "y": _yo}, {"x": _xs, "y": _ys}],
                                                         size={'width': 640, 'height': 420})
-    _context['pic_diff'] = echart_handler.effectscatter('职级-时间差',
+    _context['pic_diff'] = echart_handler.boxplot('职级-时间差',
                                                         [{"x": _xd, "y": _yd}],
                                                         size={'width': 640, 'height': 420})
     _context['pic_sankey'] = pdPersonals.buildSanKey([{'year': 2018, 'month': 4},

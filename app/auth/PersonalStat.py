@@ -293,6 +293,7 @@ class Personal:
         _cur = self.mongodb.handler("member", "find", {u'状态': "1"})
         self.members = {}
         for _m in _cur:
+            # logging.log(logging.WARN, u'%s' % _m)
             self.members[_m[u'人员姓名']] = _m[u'部门']
 
     def scanProject(self, project, dpt):

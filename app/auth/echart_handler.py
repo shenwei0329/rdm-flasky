@@ -9,7 +9,7 @@
 
 from __future__ import unicode_literals
 
-from pyecharts import Sankey, Page, Style
+from pyecharts import Sankey, Page, Style, Boxplot
 
 
 def get_geo(title, sub_title, addr_data):
@@ -75,6 +75,51 @@ def bar(title, attr, datas):
 
     bar.options['toolbox']['show'] = False
     return bar.render_embed()
+
+
+def boxplot(title, datas, size=None):
+
+    if size is None:
+        scatter = Boxplot(
+                                title,
+                                width=320,
+                                height=180,
+                                title_pos="center",
+                                background_color='#f0f0f0',
+                          )
+    else:
+        scatter = Boxplot(
+                                title,
+                                width=size['width'],
+                                height=size['height'],
+                                title_pos="center",
+                                background_color='#f0f0f0',
+                          )
+    _values = {}
+    for _data in datas:
+        _idx = 0
+        for _x in _data['x']:
+            if _x not in _values:
+                _values[_x] = []
+            _values[_x].append(_data['y'][_idx])
+            _idx += 1
+
+    _x = []
+    _y = []
+    for _v in _values:
+        _x.append(_v)
+        _y.append(_values[_v])
+
+    scatter.add("", _x, _y,
+                is_visualmap=False,
+                mark_line=['average'],
+                mark_point=['max', 'min'],
+                )
+
+    scatter.options['yAxis'][0]['splitArea'] = True
+    scatter.options['xAxis'][0]['splitArea'] = False
+    scatter.options['toolbox']['show'] = False
+    return scatter.render_embed()
 
 
 def effectscatter(title, datas, size=None):
