@@ -375,15 +375,35 @@ def cal_pj_task_ind(_st_date, _ed_date):
             continue
 
         _group = _issue['issue'].split('-')[0]
+        _month = int(_issue_updated_date.split('-')[1])
 
         if _issue['project_alias'] is not None:
             if _issue['project_alias'] not in _project:
-                _project[_issue['project_alias']] = {_group: _issue['spent_time']}
+                _project[_issue['project_alias']] = {_group: _issue['spent_time'],
+                                                     1: 0,
+                                                     2: 0,
+                                                     3: 0,
+                                                     4: 0,
+                                                     5: 0,
+                                                     6: 0,
+                                                     7: 0,
+                                                     8: 0,
+                                                     9: 0,
+                                                     10: 0,
+                                                     11: 0,
+                                                     12: 0,
+                                                     13: 0,
+                                                     }
+
+                _project[_issue['project_alias']][_month] = _issue['spent_time']
+                _project[_issue['project_alias']][13] = _issue['spent_time']
             else:
                 if _group not in _project[_issue['project_alias']]:
                     _project[_issue['project_alias']][_group] = _issue['spent_time']
                 else:
                     _project[_issue['project_alias']][_group] += _issue['spent_time']
+                _project[_issue['project_alias']][_month] += _issue['spent_time']
+                _project[_issue['project_alias']][13] += _issue['spent_time']
             _pj_sum += _issue['spent_time']
         else:
             """试图从summary中寻找项目信息"""
@@ -391,22 +411,58 @@ def cal_pj_task_ind(_st_date, _ed_date):
             if _pj_name is not None:
                 """有项目信息"""
                 if _pj_name not in _project:
-                    _project[_pj_name] = {_group: _issue['spent_time']}
+                    _project[_pj_name] = {_group: _issue['spent_time'],
+                                          1: 0,
+                                          2: 0,
+                                          3: 0,
+                                          4: 0,
+                                          5: 0,
+                                          6: 0,
+                                          7: 0,
+                                          8: 0,
+                                          9: 0,
+                                          10: 0,
+                                          11: 0,
+                                          12: 0,
+                                          13: 0,
+                                          }
+                    _project[_pj_name][_month] = _issue['spent_time']
+                    _project[_pj_name][13] = _issue['spent_time']
                 else:
                     if _group not in _project[_pj_name]:
                         _project[_pj_name][_group] = _issue['spent_time']
                     else:
                         _project[_pj_name][_group] += _issue['spent_time']
+                    _project[_pj_name][_month] += _issue['spent_time']
+                    _project[_pj_name][13] += _issue['spent_time']
                 _pj_sum += _issue['spent_time']
             else:
                 """无项目信息"""
                 if u'其它' not in _project:
-                    _project[u'其它'] = {_group: _issue['spent_time']}
+                    _project[u'其它'] = {_group: _issue['spent_time'],
+                                         1: 0,
+                                         2: 0,
+                                         3: 0,
+                                         4: 0,
+                                         5: 0,
+                                         6: 0,
+                                         7: 0,
+                                         8: 0,
+                                         9: 0,
+                                         10: 0,
+                                         11: 0,
+                                         12: 0,
+                                         13: 0,
+                                         }
+                    _project[u'其它'][_month] = _issue['spent_time']
+                    _project[u'其它'][13] = _issue['spent_time']
                 else:
                     if _group not in _project[u'其它']:
                         _project[u'其它'][_group] = _issue['spent_time']
                     else:
                         _project[u'其它'][_group] += _issue['spent_time']
+                    _project[u'其它'][_month] += _issue['spent_time']
+                    _project[u'其它'][13] += _issue['spent_time']
                 _npj_sum += _issue['spent_time']
 
     # logging.log(logging.WARN, ">>> return %s, %d, %d" % (_project, _pj_sum, _npj_sum))
@@ -418,7 +474,8 @@ def project_sum(_project):
     for _pj in _project:
         _sum = 0
         for _g in _project[_pj]:
-            _sum += _project[_pj][_g]
+            if not str(_g).isdigit():
+                _sum += _project[_pj][_g]
         _project[_pj][u'合计'] = _sum
 
 

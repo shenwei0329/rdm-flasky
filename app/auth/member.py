@@ -54,7 +54,7 @@ class Member:
         self.ind = None
         self.mongodb = mongodb_class.mongoDB()
         self.email = self._get_email()
-        logging.log(logging.WARN, u">>> Member.__init__(%s,%s,%s)" % (self.name, self.dpt, self.email))
+        # logging.log(logging.WARN, u">>> Member.__init__(%s,%s,%s)" % (self.name, self.dpt, self.email))
 
     def _get_email(self):
         """

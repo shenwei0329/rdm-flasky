@@ -297,6 +297,10 @@ class Personal:
             self.members[_m[u'人员姓名']] = _m[u'部门']
 
     def scanProject(self, project, dpt):
+
+        logging.log(logging.WARN, u">>> PersonalStat.scanProject(%s,%s)@(%s,%s)" %
+                    (project, dpt, self.st_date, self.ed_date))
+
         self.scanMember()
         self._getTaskListByPersonal(project, dpt)
         self._getWorklogListByPersonal(project)

@@ -118,26 +118,67 @@
                     </p>
                 </div>
                 <br/>
-                <div><h3>产品研发资源在非产品类任务的投入明细</h3>
+                <div class="container"><h3>产品研发资源在非产品类任务的投入明细-总计</h3>
                     <button id="btn_desc" type="button" value="show" onclick="btn_onclick(this.value)">显示</button>
-                    <div id="producting_list" style="display: none;">
-                       {% for _pj_name in sorted(pd_project) %}
-                        <p>
-                            “<b>{{ _pj_name }}</b>”项目资源（工时）投入情况：
-                        </p>
+                    <div id="producting_list" style="display: none;">（单位：工时）
                         <table border="1">
-                            <tr style="text-align:center">
-                                {% for _name in sorted(pd_project[_pj_name], reverse=False) %}
-                                    <th width="200px" style="text-align:center">{{ _name }}</th>
+                            <tr>
+                                <th width="300px" style="text-align:center">项目</th>
+                                <th width="120px" style="text-align:center">产品设计组</th>
+                                <th width="120px" style="text-align:center">云产品组</th>
+                                <th width="120px" style="text-align:center">大数据产品组</th>
+                                <th width="120px" style="text-align:center">系统组</th>
+                                <th width="120px" style="text-align:center">合计</th>
+                            </tr>
+                            {% for _pj_name in sorted(pd_project) %}
+                            <tr>
+                                <td>{{ _pj_name }}</td>
+                                {% for _g in ['CPSJ','FAST','HUBBLE','ROOOT','合计'] %}
+                                    <td style="text-align:right">
+                                    {% if _g in pd_project[_pj_name] %}
+                                        {{ pd_project[_pj_name][_g]/3600 }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                    </td>
                                 {% endfor %}
                             </tr>
-                            <tr style="text-align:center">
-                                {% for _name in sorted(pd_project[_pj_name], reverse=False) %}
-                                    <td style="text-align:center">{{ pd_project[_pj_name][_name]/3600 }}</td>
-                                {% endfor %}
-                            </tr>
+                            {% endfor %}
                         </table>
-                        {% endfor %}
+                    </div>
+                </div>
+                <br/>
+                <div class="container"><h3>产品研发资源在非产品类任务的投入明细-月计</h3>
+                    <button id="btn_year_desc" type="button" value="year" onclick="btn_onclick(this.value)">显示</button>
+                    <div id="producting_year_list" style="display: none;">（单位：工时）
+                        <table border="1">
+                            <tr>
+                                <th width="300px" style="text-align:center">项目</th>
+                                <th width="120px" style="text-align:center">一月</th>
+                                <th width="120px" style="text-align:center">二月</th>
+                                <th width="120px" style="text-align:center">三月</th>
+                                <th width="120px" style="text-align:center">四月</th>
+                                <th width="120px" style="text-align:center">五月</th>
+                                <th width="120px" style="text-align:center">六月</th>
+                                <th width="120px" style="text-align:center">七月</th>
+                                <th width="120px" style="text-align:center">八月</th>
+                                <th width="120px" style="text-align:center">九月</th>
+                                <th width="120px" style="text-align:center">十月</th>
+                                <th width="120px" style="text-align:center">十一月</th>
+                                <th width="120px" style="text-align:center">十二月</th>
+                                <th width="120px" style="text-align:center">合计</th>
+                            </tr>
+                            {% for _pj_name in sorted(pd_project) %}
+                            <tr>
+                                <td>{{ _pj_name }}</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {{ pd_project[_pj_name][_g]/3600 }}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </table>
                     </div>
                 </div>
                 {% endif %}
@@ -203,12 +244,22 @@
 
 <script type="text/javascript">
     function btn_onclick(value){
-        if (document.getElementById("producting_list").style.display=='none'){
-            document.getElementById("producting_list").style.display='block';
-            $("#btn_desc").html('隐藏');
+        if (value=='year'){
+            if (document.getElementById("producting_year_list").style.display=='none'){
+                document.getElementById("producting_year_list").style.display='block';
+                $("#btn_year_desc").html('隐藏');
+            }else{
+                document.getElementById("producting_year_list").style.display='none';
+                $("#btn_year_desc").html('显示');
+            }
         }else{
-            document.getElementById("producting_list").style.display='none';
-            $("#btn_desc").html('显示');
+            if (document.getElementById("producting_list").style.display=='none'){
+                document.getElementById("producting_list").style.display='block';
+                $("#btn_desc").html('隐藏');
+            }else{
+                document.getElementById("producting_list").style.display='none';
+                $("#btn_desc").html('显示');
+            }
         }
     }
     function btn_onclick_ext(value){
