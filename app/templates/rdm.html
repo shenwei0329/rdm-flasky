@@ -34,7 +34,7 @@
                     项目成果数：<b style="color:#F00">{{ total_material }}</b>（项）
                     </p>
                 </div>
-                {% if user["role"] <= 2 or user["role"] == 66 %}
+                {% if user["role"] <= 4 or user["role"] == 66 %}
                 <div class="container"><h2><b>资源池工作分布情况</b></h2>
                     <p>
                         注：图中每个点表示一个资源个体（员工），情况分三类：<br/>
@@ -70,7 +70,7 @@
                     </table>
                 </div>
                 <div class="container"><h2><b>产品研发中心支撑项目统计</b></h2>
-                    <table border="1">
+                    <table border="2">
                         <tr style="text-align:center">
                             <th width="333px" style="text-align:center">年度</th>
                             <th width="333px" style="text-align:center">近三个月</th>
@@ -121,7 +121,7 @@
                 <div class="container"><h3>产品研发资源在非产品类任务的投入明细-总计</h3>
                     <button id="btn_desc" type="button" value="show" onclick="btn_onclick(this.value)">显示</button>
                     <div id="producting_list" style="display: none;">（单位：工时）
-                        <table border="1">
+                        <table border="2">
                             <tr>
                                 <th width="300px" style="text-align:center">项目</th>
                                 <th width="120px" style="text-align:center">产品设计组</th>
@@ -136,9 +136,9 @@
                                 {% for _g in ['CPSJ','FAST','HUBBLE','ROOOT','合计'] %}
                                     <td style="text-align:right">
                                     {% if _g in pd_project[_pj_name] %}
-                                        {{ pd_project[_pj_name][_g]/3600 }}
+                                        {{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;
                                     {% else %}
-                                        0
+                                        0&nbsp;&nbsp;
                                     {% endif %}
                                     </td>
                                 {% endfor %}
@@ -151,7 +151,7 @@
                 <div class="container"><h3>产品研发资源在非产品类任务的投入明细-月计</h3>
                     <button id="btn_year_desc" type="button" value="year" onclick="btn_onclick(this.value)">显示</button>
                     <div id="producting_year_list" style="display: none;">（单位：工时）
-                        <table border="1">
+                        <table border="2">
                             <tr>
                                 <th width="300px" style="text-align:center">项目</th>
                                 <th width="120px" style="text-align:center">一月</th>
@@ -173,7 +173,7 @@
                                 <td>{{ _pj_name }}</td>
                                 {% for _g in range(1,14) %}
                                     <td style="text-align:right">
-                                        {{ pd_project[_pj_name][_g]/3600 }}
+                                        {{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;
                                     </td>
                                 {% endfor %}
                             </tr>
@@ -186,7 +186,7 @@
                     <p><h3>资源统计</h3>
                     </p>
                     <div>
-                    <table border="1">
+                    <table border="2">
                             <tr style="text-align:center">
                                 <th width="240px" style="text-align:center">项目</th>
                                 <th width="160px" style="text-align:center">负责人</th>
@@ -208,16 +208,17 @@
                         <button id="btn_ext" type="button" value="show" onclick="btn_onclick_ext(this.value)">显示</button>
                         <div id="ext_personal_list" style="display: none;">
                             <br/>
-                            <table border="1">
+                            <table border="2">
                                 <tr style="text-align:center">
                                     <th width="240px" style="text-align:center">部门</th>
-                                    <th width="200px" style="text-align:center">项目</th>
-                                    <th width="160px" style="text-align:center">负责人</th>
+                                    <th width="160px" style="text-align:center">项目</th>
+                                    <th width="120px" style="text-align:center">负责人</th>
                                     <th width="120px" style="text-align:center">人员</th>
-                                    <th width="220px" style="text-align:center">期限</th>
-                                    <th width="200px" style="text-align:center">供应商</th>
-                                    <th width="240px" style="text-align:center">岗位</th>
-                                    <th width="120px" style="text-align:center">工作地点</th>
+                                    <th width="200px" style="text-align:center">期限</th>
+                                    <th width="180px" style="text-align:center">供应商</th>
+                                    <th width="220px" style="text-align:center">岗位</th>
+                                    <th width="100px" style="text-align:center">工作地点</th>
+                                    <th width="120px" style="text-align:center">备注</th>
                                 </tr>
                                 {% for _v in ext_personals %}
                                 <tr>
@@ -229,6 +230,7 @@
                                     <td style="text-align:center">{{ _v['所属供应商'] }}</td>
                                     <td style="text-align:center">{{ _v['所任岗位角色'] }}</td>
                                     <td style="text-align:center">{{ _v['工作地点'] }}</td>
+                                    <td style="text-align:center">{{ _v['备注'] }}</td>
                                 </tr>
                                 {% endfor %}
                             </table>
