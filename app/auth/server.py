@@ -193,6 +193,34 @@ def cal_task_ind_by_date(_type, _st_date, _ed_date):
     return dots, sum(_task['pd'])
 
 
+def dot_to_boxplot(datas):
+    """
+    将分离的点数据，按boxplot的参数要求，构建X轴数据和Y轴数据组
+    :param datas: 点数据
+    :return: X轴数据组、Y轴数据组
+    """
+
+    """以X轴为基准，汇集具有相同X值的Y轴值
+    """
+    _values = {}
+    for _data in datas:
+        _idx = 0
+        for _x in _data['x']:
+            if _x not in _values:
+                _values[_x] = []
+            _values[_x].append(_data['y'][_idx])
+            _idx += 1
+
+    """分离X和Y轴数值
+    """
+    _x = []
+    _y = []
+    for _v in _values:
+        _x.append(_v)
+        _y.append(_values[_v])
+
+    return _x, _y
+
 def set_manager_context():
 
     _x, _y = handler.xy_task_by_level(pdPersonals)
@@ -203,16 +231,16 @@ def set_manager_context():
     _context = dict()
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
+
     _context['user'] = {'role': role.level}
-    _context['pic'] = echart_handler.boxplot('职级-任务量',
-                                                   [{"x": _x, "y": _y}],
-                                                   size={'width': 640, 'height': 420})
-    _context['pic_time'] = echart_handler.boxplot('职级-时间',
-                                                        [{"x": _xo, "y": _yo}, {"x": _xs, "y": _ys}],
-                                                        size={'width': 640, 'height': 420})
-    _context['pic_diff'] = echart_handler.boxplot('职级-时间差',
-                                                        [{"x": _xd, "y": _yd}],
-                                                        size={'width': 640, 'height': 420})
+
+    __x, __y = dot_to_boxplot([{"x": _x, "y": _y}])
+    _context['pic'] = echart_handler.boxplot('职级-任务量', __x, __y, size={'width': 640, 'height': 420})
+    __x, __y = dot_to_boxplot([{"x": _xs, "y": _ys}])
+    _context['pic_time'] = echart_handler.boxplot('职级-时间', __x, __y, size={'width': 640, 'height': 420})
+    __x, __y = dot_to_boxplot([{"x": _xd, "y": _yd}])
+    _context['pic_diff'] = echart_handler.boxplot('职级-时间差', __x, __y, size={'width': 640, 'height': 420})
+
     _context['pic_sankey'] = pdPersonals.buildSanKey([{'year': 2018, 'month': 4},
                                                       {'year': 2018, 'month': 5},
                                                       {'year': 2018, 'month': 6},
@@ -496,7 +524,7 @@ def set_rdm_context():
 
     role = Role.query.filter_by(name=current_user.username).first()
 
-    if role.level <= 2 or role.level == 66:
+    if role.level <= 4 or role.level == 66:
         """产品研发投入项目开发情况
         """
         _project, _pj_sum, _npj_sum = cal_pj_task_ind(st_date, ed_date)

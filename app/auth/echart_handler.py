@@ -9,11 +9,21 @@
 
 from __future__ import unicode_literals
 
-from pyecharts import Sankey, Page, Style, Boxplot
+from pyecharts import Sankey,\
+    Page,Style,\
+    Boxplot,\
+    HeatMap,\
+    Geo,\
+    Bar,\
+    Bar3D,\
+    EffectScatter,\
+    Scatter,\
+    Scatter3D,\
+    Line,\
+    Pie
 
 
 def get_geo(title, sub_title, addr_data):
-    from pyecharts import Geo
 
     data = []
 
@@ -45,14 +55,22 @@ def get_geo(title, sub_title, addr_data):
         print u"[%s]" % _v,
     print "|"
 
-    geo.add("", attr, value, visual_range=[0, 10], visual_text_color="#fff", symbol_size=15, is_visualmap=True)
+    geo.add("", attr, value,
+            # type="heatmap",
+            visual_range=[0, 10],
+            visual_text_color="#fff",
+            symbol_size=15,
+            is_visualmap=True,
+            # is_piecewise=True,
+            # visual_split_number=6,
+            # is_legend_show=False,
+            )
     # geo.show_config()
     geo.options['toolbox']['show'] = False
     return geo.render_embed()
 
 
 def bar(title, attr, datas):
-    from pyecharts import Bar
 
     # bar
     # attr = ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
@@ -77,7 +95,7 @@ def bar(title, attr, datas):
     return bar.render_embed()
 
 
-def boxplot(title, datas, size=None):
+def boxplot(title, x, y, size=None):
 
     if size is None:
         scatter = Boxplot(
@@ -95,22 +113,11 @@ def boxplot(title, datas, size=None):
                                 title_pos="center",
                                 background_color='#f0f0f0',
                           )
-    _values = {}
-    for _data in datas:
-        _idx = 0
-        for _x in _data['x']:
-            if _x not in _values:
-                _values[_x] = []
-            _values[_x].append(_data['y'][_idx])
-            _idx += 1
+    """计算箱体参数
+    """
+    _yaxis = scatter.prepare_data(y)
 
-    _x = []
-    _y = []
-    for _v in _values:
-        _x.append(_v)
-        _y.append(_values[_v])
-
-    scatter.add("", _x, _y,
+    scatter.add("", x, _yaxis,
                 is_visualmap=False,
                 mark_line=['average'],
                 mark_point=['max', 'min'],
@@ -123,7 +130,6 @@ def boxplot(title, datas, size=None):
 
 
 def effectscatter(title, datas, size=None):
-    from pyecharts import EffectScatter
 
     # import random
     # data = [random.randint(0, 100) for _ in range(80)]
@@ -173,7 +179,6 @@ def effectscatter(title, datas, size=None):
 
 
 def effectscatterByInd(title, datas, size=None):
-    from pyecharts import EffectScatter
 
     # import random
     # data = [random.randint(0, 100) for _ in range(80)]
@@ -226,7 +231,6 @@ def effectscatterByInd(title, datas, size=None):
 
 
 def scatter(title, range_def, data, size=None):
-    from pyecharts import Scatter
 
     # import random
     # data = [random.randint(0, 100) for _ in range(80)]
@@ -260,7 +264,6 @@ def scatter(title, range_def, data, size=None):
 
 
 def scatter3d():
-    from pyecharts import Scatter3D
 
     import random
     data = [[random.randint(0, 100), random.randint(0, 100), random.randint(0, 100)] for _ in range(80)]
@@ -282,7 +285,6 @@ def line(title, data):
     """
 
     """ '#0f000000',"""
-    from pyecharts import Line
 
     line = Line(title,
                 title_pos="center",
@@ -309,7 +311,6 @@ def pie(title, attr, values):
     :param values: 数据
     :return: 图形
     """
-    from pyecharts import Pie
 
     pie = Pie(title, title_pos='center', width=300)
     for _value in values:
@@ -327,536 +328,6 @@ def pie(title, attr, values):
 
     return pie.render_embed()
 
-ENERGY = {
-    "nodes": [
-        {
-            "name": "Agricultural 'waste'"
-        },
-        {
-            "name": "Bio-conversion"
-        },
-        {
-            "name": "Liquid"
-        },
-        {
-            "name": "Losses"
-        },
-        {
-            "name": "Solid"
-        },
-        {
-            "name": "Gas"
-        },
-        {
-            "name": "Biofuel imports"
-        },
-        {
-            "name": "Biomass imports"
-        },
-        {
-            "name": "Coal imports"
-        },
-        {
-            "name": "Coal"
-        },
-        {
-            "name": "Coal reserves"
-        },
-        {
-            "name": "District heating"
-        },
-        {
-            "name": "Industry"
-        },
-        {
-            "name": "Heating and cooling - commercial"
-        },
-        {
-            "name": "Heating and cooling - homes"
-        },
-        {
-            "name": "Electricity grid"
-        },
-        {
-            "name": "Over generation / exports"
-        },
-        {
-            "name": "H2 conversion"
-        },
-        {
-            "name": "Road transport"
-        },
-        {
-            "name": "Agriculture"
-        },
-        {
-            "name": "Rail transport"
-        },
-        {
-            "name": "Lighting & appliances - commercial"
-        },
-        {
-            "name": "Lighting & appliances - homes"
-        },
-        {
-            "name": "Gas imports"
-        },
-        {
-            "name": "Ngas"
-        },
-        {
-            "name": "Gas reserves"
-        },
-        {
-            "name": "Thermal generation"
-        },
-        {
-            "name": "Geothermal"
-        },
-        {
-            "name": "H2"
-        },
-        {
-            "name": "Hydro"
-        },
-        {
-            "name": "International shipping"
-        },
-        {
-            "name": "Domestic aviation"
-        },
-        {
-            "name": "International aviation"
-        },
-        {
-            "name": "National navigation"
-        },
-        {
-            "name": "Marine algae"
-        },
-        {
-            "name": "Nuclear"
-        },
-        {
-            "name": "Oil imports"
-        },
-        {
-            "name": "Oil"
-        },
-        {
-            "name": "Oil reserves"
-        },
-        {
-            "name": "Other waste"
-        },
-        {
-            "name": "Pumped heat"
-        },
-        {
-            "name": "Solar PV"
-        },
-        {
-            "name": "Solar Thermal"
-        },
-        {
-            "name": "Solar"
-        },
-        {
-            "name": "Tidal"
-        },
-        {
-            "name": "UK land based bioenergy"
-        },
-        {
-            "name": "Wave"
-        },
-        {
-            "name": "Wind"
-        }
-    ],
-    "links": [
-        {
-            "source": "Agricultural 'waste'",
-            "target": "Bio-conversion",
-            "value": 124.729
-        },
-        {
-            "source": "Bio-conversion",
-            "target": "Liquid",
-            "value": 0.597
-        },
-        {
-            "source": "Bio-conversion",
-            "target": "Losses",
-            "value": 26.862
-        },
-        {
-            "source": "Bio-conversion",
-            "target": "Solid",
-            "value": 280.322
-        },
-        {
-            "source": "Bio-conversion",
-            "target": "Gas",
-            "value": 81.144
-        },
-        {
-            "source": "Biofuel imports",
-            "target": "Liquid",
-            "value": 35
-        },
-        {
-            "source": "Biomass imports",
-            "target": "Solid",
-            "value": 35
-        },
-        {
-            "source": "Coal imports",
-            "target": "Coal",
-            "value": 11.606
-        },
-        {
-            "source": "Coal reserves",
-            "target": "Coal",
-            "value": 63.965
-        },
-        {
-            "source": "Coal",
-            "target": "Solid",
-            "value": 75.571
-        },
-        {
-            "source": "District heating",
-            "target": "Industry",
-            "value": 10.639
-        },
-        {
-            "source": "District heating",
-            "target": "Heating and cooling - commercial",
-            "value": 22.505
-        },
-        {
-            "source": "District heating",
-            "target": "Heating and cooling - homes",
-            "value": 46.184
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Over generation / exports",
-            "value": 104.453
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Heating and cooling - homes",
-            "value": 113.726
-        },
-        {
-            "source": "Electricity grid",
-            "target": "H2 conversion",
-            "value": 27.14
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Industry",
-            "value": 342.165
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Road transport",
-            "value": 37.797
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Agriculture",
-            "value": 4.412
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Heating and cooling - commercial",
-            "value": 40.858
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Losses",
-            "value": 56.691
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Rail transport",
-            "value": 7.863
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Lighting & appliances - commercial",
-            "value": 90.008
-        },
-        {
-            "source": "Electricity grid",
-            "target": "Lighting & appliances - homes",
-            "value": 93.494
-        },
-        {
-            "source": "Gas imports",
-            "target": "Ngas",
-            "value": 40.719
-        },
-        {
-            "source": "Gas reserves",
-            "target": "Ngas",
-            "value": 82.233
-        },
-        {
-            "source": "Gas",
-            "target": "Heating and cooling - commercial",
-            "value": 0.129
-        },
-        {
-            "source": "Gas",
-            "target": "Losses",
-            "value": 1.401
-        },
-        {
-            "source": "Gas",
-            "target": "Thermal generation",
-            "value": 151.891
-        },
-        {
-            "source": "Gas",
-            "target": "Agriculture",
-            "value": 2.096
-        },
-        {
-            "source": "Gas",
-            "target": "Industry",
-            "value": 48.58
-        },
-        {
-            "source": "Geothermal",
-            "target": "Electricity grid",
-            "value": 7.013
-        },
-        {
-            "source": "H2 conversion",
-            "target": "H2",
-            "value": 20.897
-        },
-        {
-            "source": "H2 conversion",
-            "target": "Losses",
-            "value": 6.242
-        },
-        {
-            "source": "H2",
-            "target": "Road transport",
-            "value": 20.897
-        },
-        {
-            "source": "Hydro",
-            "target": "Electricity grid",
-            "value": 6.995
-        },
-        {
-            "source": "Liquid",
-            "target": "Industry",
-            "value": 121.066
-        },
-        {
-            "source": "Liquid",
-            "target": "International shipping",
-            "value": 128.69
-        },
-        {
-            "source": "Liquid",
-            "target": "Road transport",
-            "value": 135.835
-        },
-        {
-            "source": "Liquid",
-            "target": "Domestic aviation",
-            "value": 14.458
-        },
-        {
-            "source": "Liquid",
-            "target": "International aviation",
-            "value": 206.267
-        },
-        {
-            "source": "Liquid",
-            "target": "Agriculture",
-            "value": 3.64
-        },
-        {
-            "source": "Liquid",
-            "target": "National navigation",
-            "value": 33.218
-        },
-        {
-            "source": "Liquid",
-            "target": "Rail transport",
-            "value": 4.413
-        },
-        {
-            "source": "Marine algae",
-            "target": "Bio-conversion",
-            "value": 4.375
-        },
-        {
-            "source": "Ngas",
-            "target": "Gas",
-            "value": 122.952
-        },
-        {
-            "source": "Nuclear",
-            "target": "Thermal generation",
-            "value": 839.978
-        },
-        {
-            "source": "Oil imports",
-            "target": "Oil",
-            "value": 504.287
-        },
-        {
-            "source": "Oil reserves",
-            "target": "Oil",
-            "value": 107.703
-        },
-        {
-            "source": "Oil",
-            "target": "Liquid",
-            "value": 611.99
-        },
-        {
-            "source": "Other waste",
-            "target": "Solid",
-            "value": 56.587
-        },
-        {
-            "source": "Other waste",
-            "target": "Bio-conversion",
-            "value": 77.81
-        },
-        {
-            "source": "Pumped heat",
-            "target": "Heating and cooling - homes",
-            "value": 193.026
-        },
-        {
-            "source": "Pumped heat",
-            "target": "Heating and cooling - commercial",
-            "value": 70.672
-        },
-        {
-            "source": "Solar PV",
-            "target": "Electricity grid",
-            "value": 59.901
-        },
-        {
-            "source": "Solar Thermal",
-            "target": "Heating and cooling - homes",
-            "value": 19.263
-        },
-        {
-            "source": "Solar",
-            "target": "Solar Thermal",
-            "value": 19.263
-        },
-        {
-            "source": "Solar",
-            "target": "Solar PV",
-            "value": 59.901
-        },
-        {
-            "source": "Solid",
-            "target": "Agriculture",
-            "value": 0.882
-        },
-        {
-            "source": "Solid",
-            "target": "Thermal generation",
-            "value": 400.12
-        },
-        {
-            "source": "Solid",
-            "target": "Industry",
-            "value": 46.477
-        },
-        {
-            "source": "Thermal generation",
-            "target": "Electricity grid",
-            "value": 525.531
-        },
-        {
-            "source": "Thermal generation",
-            "target": "Losses",
-            "value": 787.129
-        },
-        {
-            "source": "Thermal generation",
-            "target": "District heating",
-            "value": 79.329
-        },
-        {
-            "source": "Tidal",
-            "target": "Electricity grid",
-            "value": 9.452
-        },
-        {
-            "source": "UK land based bioenergy",
-            "target": "Bio-conversion",
-            "value": 182.01
-        },
-        {
-            "source": "Wave",
-            "target": "Electricity grid",
-            "value": 19.013
-        },
-        {
-            "source": "Wind",
-            "target": "Electricity grid",
-            "value": 289.366
-        }
-    ]
-}
-
-
-def create_charts():
-    page = Page()
-
-    style = Style(
-        width=800, height=800,
-        background_color='#b0bab9',
-    )
-
-    nodes = [
-        {'name': 'category1'}, {'name': 'category2'}, {'name': 'category3'},
-        {'name': 'category4'}, {'name': 'category5'}, {'name': 'category6'},
-    ]
-
-    links = [
-        {'source': 'category1', 'target': 'category3', 'value': 10},
-        {'source': 'category2', 'target': 'category3', 'value': 20},
-        {'source': 'category3', 'target': 'category4', 'value': 10},
-        {'source': 'category4', 'target': 'category5', 'value': 15},
-        {'source': 'category3', 'target': 'category5', 'value': 10},
-        {'source': 'category4', 'target': 'category6', 'value': 2},
-        {'source': 'category3', 'target': 'category6', 'value': 10}
-    ]
-    chart = Sankey("桑基图-默认", **style.init_style)
-    chart.add("sankey", nodes, links, line_opacity=0.2,
-              line_curve=0.5, line_color='source', is_label_show=True,
-              label_pos='right')
-    chart.options['toolbox']['show'] = False
-    page.add(chart)
-
-    chart = Sankey("桑基图-自定义", **style.init_style)
-    chart.add("sankey", nodes=ENERGY['nodes'], links=ENERGY['links'],
-              line_opacity=0.2, line_curve=0.5, line_color='source',
-              is_label_show=True, label_pos='right')
-    chart.options['toolbox']['show'] = False
-    page.add(chart)
-
-    return page.render_embed()
-
 
 def sankey_charts(title, nodes, links):
 
@@ -868,5 +339,43 @@ def sankey_charts(title, nodes, links):
     chart.add("", nodes, links, line_opacity=0.2,
               line_curve=0.5, line_color='source', is_label_show=True,
               label_pos='right')
+    chart.options['toolbox']['show'] = False
+    return chart.render_embed()
+
+
+def heatmap_is_calendar(title, year, datas, size=None):
+    """
+    输出日历热力图
+    :param title: 标题
+    :param year: 年份，如"2018"
+    :param datas: 数据，格式：[[date_str, date_value],..]
+    :param size: 图片尺寸
+    :return: 图
+    """
+
+    if size is None:
+        style = Style(
+            width=960, height=420,
+            background_color='#f0f0f0',
+        )
+    else:
+        style = Style(
+            width=size['width'], height=size['height'],
+            background_color='#f0f0f0',
+        )
+    chart = HeatMap(title, **style.init_style)
+    chart.add("",
+              datas,
+              is_calendar_heatmap=True,
+              visual_text_color='#000',
+              visual_range_text=['', ''],
+              calendar_cell_size=['auto', 30],
+              is_visualmap=True,
+              calendar_date_range=year,
+              visual_orient="horizontal",
+              visual_pos="center",
+              visual_top="80%",
+              is_piecewise=True,
+              )
     chart.options['toolbox']['show'] = False
     return chart.render_embed()
