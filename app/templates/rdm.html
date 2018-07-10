@@ -35,12 +35,13 @@
                     </p>
                 </div>
                 {% if user["role"] <= 4 or user["role"] == 66 %}
-                <div class="container"><h2><b>资源池工作分布情况</b></h2>
+                <div class="container"><h2><b>近两周的资源池任务分布情况</b></h2>
                     <p>
                         注：图中每个点表示一个资源个体（员工），情况分三类：<br/>
                         >：“大圈”表示负载饱和（承担的任务量超过40个工时）；<br/>
                         >：“中圈”表示负载适中（承担的任务量在24至40个工时之间）；<br/>
-                        >：“小圈”表示负载欠缺（承担的任务量小于24个工时）。
+                        >：“小圈”表示负载欠缺（承担的任务量小于24个工时），
+                        两种解释：1）任务分配不足；2）执行效率高，即能快速完成分配的任务。
                     </p>
                     <table border="2">
                         <tr>
@@ -136,7 +137,7 @@
                                 {% for _g in ['CPSJ','FAST','HUBBLE','ROOOT','合计'] %}
                                     <td style="text-align:right">
                                     {% if _g in pd_project[_pj_name] %}
-                                        {{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;
+                                        <b style="color:#F00">{{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;</b>
                                     {% else %}
                                         0&nbsp;&nbsp;
                                     {% endif %}
@@ -173,7 +174,11 @@
                                 <td>{{ _pj_name }}</td>
                                 {% for _g in range(1,14) %}
                                     <td style="text-align:right">
-                                        {{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;
+                                        {% if pd_project[_pj_name][_g]>0 %}
+                                            <b style="color:#F00">{{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
                                     </td>
                                 {% endfor %}
                             </tr>

@@ -10,6 +10,7 @@ import numpy as np
 from flask_login import current_user
 from ..models import Role
 import PersonalStat
+import redis_class
 import logging
 
 import sys
@@ -109,7 +110,11 @@ def cal_task_ind(_type):
                 else:
                     _dot['low']['x'].append(_xx)
                     _dot['low']['y'].append(_yy)
-                    # print(u">>> G(%s)-LOW.<%s>" % (_g, _personal[_g][_cnt]))
+
+                    """
+                    logging.log(logging.WARN, u"cal_task_ind: G(%s)-LOW.<%s>" % (_g, _personal[_g][_cnt]))
+                    """
+
                 _cnt += 1
 
         dots[_g] = _dot
@@ -185,7 +190,12 @@ def cal_task_ind_by_date(_type, _st_date, _ed_date):
                     _dot['low']['x'].append(_xx)
                     _dot['low']['y'].append(_yy)
                     _dot['low']['label'].append(_personal[_g][_cnt])
-                    # print(u">>> G(%s)-LOW.<%s>" % (_g, _personal[_g][_cnt]))
+
+                    """
+                    logging.log(logging.WARN, u"cal_task_ind_by_date(%s,%s): G(%s)-LOW.<%s>" %
+                                (_st_date, _ed_date, _g, _personal[_g][_cnt]))
+                    """
+
                 _cnt += 1
 
         dots[_g] = _dot
@@ -524,7 +534,10 @@ def set_rdm_context():
 
     role = Role.query.filter_by(name=current_user.username).first()
 
+    """
     if role.level <= 4 or role.level == 66:
+    """
+    if True:
         """产品研发投入项目开发情况
         """
         _project, _pj_sum, _npj_sum = cal_pj_task_ind(st_date, ed_date)
@@ -553,6 +566,15 @@ def set_rdm_context():
 
         """资源池情况
         """
+        # 近2周内的工作状态
+        __week_date = handler.cal_date_weekly(2)
+        _dot_1w, _spent_doing_sum_1w = cal_task_ind_by_date('spent_doing',
+                                                            __week_date['st_date'],
+                                                            __week_date['ed_date'])
+        _org_dot_1w, _doing_sum_1w = cal_task_ind_by_date('doing',
+                                                          __week_date['st_date'],
+                                                          __week_date['ed_date'])
+
         _dot, _spent_doing_sum = cal_task_ind_by_date('spent_doing', st_date, ed_date)
         __dot, _spent_done_sum = cal_task_ind_by_date('spent_done', st_date, ed_date)
         _org_dot, _doing_sum = cal_task_ind_by_date('doing', st_date, ed_date)
@@ -592,27 +614,27 @@ def set_rdm_context():
             pd_project=_project,
             sorted=sorted,
             task_ind_pd=echart_handler.effectscatterByInd('产品研发资源的当前负载执行情况',
-                                                          _dot['pd'],
+                                                          _dot_1w['pd'],
                                                           size={'width': 500,
                                                                 'height': 120 + (pdPersonals.getNumbOfMember()/20)*60}),
             task_ind_pj=echart_handler.effectscatterByInd('项目开发资源的当前负载执行情况',
-                                                          _dot['pj'],
+                                                          _dot_1w['pj'],
                                                           size={'width': 500,
                                                                 'height': 120 + (pjPersonals.getNumbOfMember()/20)*60}),
             task_ind_rdm=echart_handler.effectscatterByInd('测试资源的当前负载执行情况',
-                                                           _dot['rdm'],
+                                                           _dot_1w['rdm'],
                                                            size={'width': 500,
                                                                  'height': 120 + (rdmPersonals.getNumbOfMember()/20)*60}),
             task_ind_pd_org=echart_handler.effectscatterByInd('产品研发资源的当前分配负载情况',
-                                                              _org_dot['pd'],
+                                                              _org_dot_1w['pd'],
                                                               size={'width': 500,
                                                                     'height': 120 + (pdPersonals.getNumbOfMember()/20)*60}),
             task_ind_pj_org=echart_handler.effectscatterByInd('项目开发资源的当前分配负载情况',
-                                                              _org_dot['pj'],
+                                                              _org_dot_1w['pj'],
                                                               size={'width': 500,
                                                                     'height': 120 + (pjPersonals.getNumbOfMember()/20)*60}),
             task_ind_rdm_org=echart_handler.effectscatterByInd('测试资源的当前分配负载情况',
-                                                               _org_dot['rdm'],
+                                                               _org_dot_1w['rdm'],
                                                                size={'width': 500,
                                                                      'height': 120 + (rdmPersonals.getNumbOfMember()/20)*60}),
             task_pd=_pd_sum,
@@ -652,25 +674,6 @@ def set_rdm_context():
                                             _npj_sum_3m]]
                                           )
         )
-    else:
-        context = dict(
-            user={"role": role.level},
-            total=pdPersonals.getNumbOfMember() + pjPersonals.getNumbOfMember() + rdmPersonals.getNumbOfMember(),
-            pd_count=pdPersonals.getNumbOfMember(),
-            pj_count=pjPersonals.getNumbOfMember(),
-            rdm_count=rdmPersonals.getNumbOfMember(),
-            total_task=pdPersonals.getTotalNumbOfTask() +
-                       pjPersonals.getTotalNumbOfTask() +
-                       rdmPersonals.getTotalNumbOfTask(),
-            total_worklog=pdPersonals.getTotalNumbOfWorkLog() +
-                          pjPersonals.getTotalNumbOfWorkLog() +
-                          rdmPersonals.getTotalNumbOfWorkLog(),
-            total_pj=len(pj),
-            total_material=_count,
-            ext_personals_stat=_ext_personals_stat,
-            ext_personals=handler.get_project_info('ext_personals_t'),
-            ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'已解决'))/2.),
-        )
 
     __v = handler.cal_date_monthly(3)
     context['pic_sankey'] = pdPersonals.buildSanKey(__v['month'])
@@ -706,8 +709,7 @@ def cal_ext_task_desc():
     return _stat
 
 
-def set_context():
-
+def init_data():
     global Personals, pdPersonals, pjPersonals, rdmPersonals, pd_databases,\
         pj_databases, rdm_databases, st_date, ed_date, today, extTask
 
@@ -730,6 +732,17 @@ def set_context():
     for _db in rdm_databases:
         rdmPersonals.scanProject(_db, u'研发管理与测试部')
     rdmPersonals.calWorkInd()
+
+
+def set_context():
+
+    global Personals, pdPersonals, pjPersonals, rdmPersonals, pd_databases,\
+        pj_databases, rdm_databases, st_date, ed_date, today, extTask
+
+    today = datetime.date.today()
+    ed_date = today.strftime("%Y-%m-%d")
+
+    init_data()
 
     _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(st_date, ed_date)
     _act_user = 0
@@ -908,3 +921,7 @@ def set_context():
         chkonwork=echart_handler.scatter(u'工作时长', [0, 12], _checkon_work),
     )
     return context
+
+
+# 初始化环境数据
+init_data()

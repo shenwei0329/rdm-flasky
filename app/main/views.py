@@ -10,12 +10,18 @@ import datetime
 from ..models import Role
 from ..auth import handler
 import sys
+from ..auth import redis_class
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 my_context = None
 set_time = None
+
+# 主页面“正文”缓存
+key_index = redis_class.KeyLiveClass('index')
+# 研发管理“正文”缓存
+key_rdm = redis_class.KeyLiveClass('rdm')
 
 
 @main.route('/')
@@ -25,12 +31,11 @@ def index():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    if my_context is None:
+    if not key_index.alive(3600):
         my_context = server.set_context()
-        set_time = datetime.datetime.now()
-    elif (datetime.datetime.now() - set_time).seconds > 3600*8:
-        set_time = datetime.datetime.now()
-        my_context = server.set_context()
+        key_index.set(my_context)
+    else:
+        my_context = key_index.get()
 
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
@@ -46,15 +51,16 @@ def rdm():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    if my_context is None:
-        my_context = server.set_context()
-        set_time = datetime.datetime.now()
+    if not key_rdm.alive(3600):
+        my_context = server.set_rdm_context()
+        key_rdm.set(my_context)
+    else:
+        my_context = key_rdm.get()
 
-    _context = server.set_rdm_context()
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
-    _context['user'] = {'role': role.level}
-    return render_template('rdm.html', **_context)
+    my_context['user'] = {'role': role.level}
+    return render_template('rdm.html', **my_context)
 
 
 @main.route('/product')

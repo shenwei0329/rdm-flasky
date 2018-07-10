@@ -12,6 +12,7 @@ import member
 import handler
 import server
 import echart_handler
+import redis_class
 
 import logging
 

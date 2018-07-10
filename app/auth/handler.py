@@ -1130,6 +1130,19 @@ def cal_st_date(month, nMonth):
     return _m.replace(day=1)
 
 
+def cal_date_weekly(nWeek):
+    """
+    计算月度日期
+    :param nWeek: 指定是前几周，1：上周，2：前二周...
+    :return: 起止日期
+    """
+    _now = datetime.datetime.now()
+    _st_date = _now - datetime.timedelta(days=7*nWeek)
+    _ed_date = _now.strftime("%Y-%m-%d")
+    _st_date = _st_date.strftime("%Y-%m-%d")
+    return {"st_date": _st_date, "ed_date": _ed_date}
+
+
 def cal_date_monthly(nMonth):
     """
     计算月度日期

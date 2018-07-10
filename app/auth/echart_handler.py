@@ -9,6 +9,8 @@
 
 from __future__ import unicode_literals
 
+import logging
+
 from pyecharts import Sankey,\
     Page,Style,\
     Boxplot,\
@@ -204,7 +206,6 @@ def effectscatterByInd(title, datas, size=None):
 
     for _val in datas:
 
-        # print(">>> _val = %s" % _val)
         _effect_scale = 3.
         _symbol_size = 3.
         if "high" in _val:
@@ -213,6 +214,8 @@ def effectscatterByInd(title, datas, size=None):
         elif "norm" in _val:
             _effect_scale += 1.
             _symbol_size += 5.
+        else:
+            logging.log(logging.WARN, u">>> effectscatterByInd: %s" % datas[_val]['label'])
 
         scatter.add("", datas[_val]['x'], datas[_val]['y'],
                     is_visualmap=False,
