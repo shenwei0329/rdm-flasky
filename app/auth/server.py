@@ -66,6 +66,13 @@ rdmPersonals = PersonalStat.Personal()
 extTask = None
 
 
+    if not key_index.alive(3600):
+        my_context = server.set_context()
+        key_index.set(my_context)
+    else:
+        my_context = key_index.get()
+
+
 def cal_task_ind(_type):
     global pdPersonals, pjPersonals, rdmPersonals
 

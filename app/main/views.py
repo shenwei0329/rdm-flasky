@@ -18,10 +18,35 @@ sys.setdefaultencoding('utf-8')
 my_context = None
 set_time = None
 
+"""所有内容的"正文"都通过Redis获取，"正文"由数据分析处理的中间层生成并放入。
+   缓存的"正文"数据应该是全集的（由权限控制具体展现内容）
+"""
 # 主页面“正文”缓存
 key_index = redis_class.KeyLiveClass('index')
 # 研发管理“正文”缓存
 key_rdm = redis_class.KeyLiveClass('rdm')
+# 产品管理"正文"缓存
+key_product = redis_class.KeyLiveClass('product')
+# 在研产品"正文"缓存
+key_product_ing = redis_class.KeyLiveClass('product_ing')
+key_product_select = redis_class.KeyLiveClass('product_ing_select')
+# 项目管理"正文"缓存
+key_project = redis_class.KeyLiveClass('project')
+# 光荣榜"正文"缓存
+key_honor = redis_class.KeyLiveClass('honor')
+key_honor_3m = redis_class.KeyLiveClass('honor_3m')
+# 管理员"正文"缓存
+key_manage = redis_class.KeyLiveClass('manage')
+
+
+def get_context(key):
+
+    _context = key.get()
+    _role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % _role.level)
+    _context['user'] = {'role': _role.level}
+
+    return _context
 
 
 @main.route('/')
@@ -31,17 +56,7 @@ def index():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    if not key_index.alive(3600):
-        my_context = server.set_context()
-        key_index.set(my_context)
-    else:
-        my_context = key_index.get()
-
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
-    my_context['user'] = {'role': role.level}
-
-    return render_template('index.html', **my_context)
+    return render_template('index.html', **get_context(key_index))
 
 
 @main.route('/rdm')
@@ -51,16 +66,7 @@ def rdm():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    if not key_rdm.alive(3600):
-        my_context = server.set_rdm_context()
-        key_rdm.set(my_context)
-    else:
-        my_context = key_rdm.get()
-
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
-    my_context['user'] = {'role': role.level}
-    return render_template('rdm.html', **my_context)
+    return render_template('rdm.html', **get_context(key_rdm))
 
 
 @main.route('/product')
@@ -68,11 +74,7 @@ def product():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    _context = server.set_pd_context()
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
-    _context['user'] = {'role': role.level}
-    return render_template('product.html', **_context)
+    return render_template('product.html', **get_context(key_product))
 
 
 @main.route('/producting')
@@ -80,11 +82,7 @@ def producting():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    _context = server.set_pding_context()
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
-    _context['user'] = {'role': role.level}
-    return render_template('producting.html', **_context)
+    return render_template('producting.html', **get_context(key_product_ing))
 
 
 @main.route('/pd_select/<value>')
@@ -92,6 +90,7 @@ def pd_select(value):
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
+    """
     _desc = handler.get_pd_project_desc(value)
     _context = server.set_pding_context()
     _context['pd_code'] = value.lower()
@@ -105,7 +104,8 @@ def pd_select(value):
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     _context['user'] = {'role': role.level}
-    return render_template('product_desc.html', **_context)
+    """
+    return render_template('product_desc.html', **get_context(key_product_select[value]))
 
 
 @main.route('/project')
@@ -113,6 +113,7 @@ def project():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
+    """
     role = Role.query.filter_by(name=current_user.username).first()
     _pj = handler.get_project_info('pj_deliver_t')
     _val = handler.get_project_info('pj_ing_t')
@@ -132,8 +133,8 @@ def project():
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     context['user'] = {'role': role.level}
-
-    return render_template('project.html', **context)
+    """
+    return render_template('project.html', **get_context(key_project))
 
 
 @main.route('/honor')
@@ -143,12 +144,14 @@ def honor():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
+    """
     _context = server.set_honor_context(None, None)
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     _context['user'] = {'role': role.level}
     _context['info'] = u"【本年度】"
-    return render_template('honor.html', **_context)
+    """
+    return render_template('honor.html', **get_context(key_honor))
 
 
 @main.route('/honor_select/<value>')
@@ -157,6 +160,7 @@ def honor_select(value):
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
+    """
     print(">>> value: %s" % value)
 
     if value in 'yearly':
@@ -175,7 +179,10 @@ def honor_select(value):
     role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % role.level)
     _context['user'] = {'role': role.level}
-    return render_template('honor_desc.html', **_context)
+    """
+    if value in 'yearly':
+        return render_template('honor_desc.html', **get_context(key_honor))
+    return render_template('honor_desc.html', **get_context(key_honor_3m))
 
 
 @main.route('/manager')
@@ -184,6 +191,7 @@ def manager():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
+    """
     _context = server.set_manager_context()
-
-    return render_template('manager.html', **_context)
+    """
+    return render_template('manager.html', **get_context(key_manage))
