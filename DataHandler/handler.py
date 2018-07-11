@@ -35,6 +35,8 @@ print sys.getdefaultencoding()
 conf = ConfigParser.ConfigParser()
 conf.read(os.path.split(os.path.realpath(__file__))[0] + '/rdm.cnf')
 
+extTask = None
+
 print(">>> MYSQL: %s,%s,%s" % (conf.get('MYSQL', 'host'), conf.get('MYSQL', 'user'), conf.get('MYSQL', 'password')))
 
 mongo_db = mongodb_class.mongoDB()
@@ -249,7 +251,7 @@ def get_pj_state():
 
     mongo_db.connect_db('ext_system')
     projects = do_search('project_t', {u'状态': {'$ne': u'挂起'}})
-    _pj_count = projects.count()
+    _pj_count = len(projects)
     for _pj in projects:
         if _pj[u'状态'] in [u'在建', u'验收']:
             _pj_ing += 1
@@ -623,9 +625,9 @@ def get_product_stat():
 
     mongo_db.connect_db('ext_system')
     products = do_search('producting_t', {u"状态": {"$not": {"$eq": u"发布"}}})
-    _ing_count = products.count()
+    _ing_count = len(products)
     products = do_search('pd_shelves_t', {})
-    _ed_count = products.count()
+    _ed_count = len(products)
 
     _count = []
     _addr = []
@@ -649,7 +651,7 @@ def get_contract_stat():
     """
     mongo_db.connect_db('ext_system')
     contracts = do_search('contract_t', {})
-    _count = contracts.count()
+    _count = len(contracts)
     _total = 0.
     for _r in contracts:
         if (len(_r[u'金额']) > 0) and ((_r[u'金额'].replace('.', '')).isdigit()):
@@ -823,7 +825,11 @@ def do_search(table, search):
     :param search: 条件
     :return: 数据列表
     """
-    return mongo_db.handler(table, "find", search)
+    _value = []
+    _cur = mongo_db.handler(table, "find", search)
+    for _v in _cur:
+        _value.append(_v)
+    return _value
 
 
 def search_one_table(table, search):
@@ -865,7 +871,7 @@ def get_imp_projects():
     for _p in pj_lists:
         _pj_desc = {'name': pj_lists[_p]}
         _personal.clearData()
-        _personal.scanProject(_p, u'项目开发')
+        _personal.scanProject(_p, u'项目开发', extTask)
         if _personal.getNumbOfMember() == 0:
             logging.log(logging.WARN, ">>> project<%s> no personals" % _p)
             continue

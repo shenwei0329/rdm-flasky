@@ -7,16 +7,34 @@ import handler
 import pandas as pd
 import datetime
 import numpy as np
-from flask_login import current_user
-from ..models import Role
 import PersonalStat
 import redis_class
-import logging
 
 import sys
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
+"""所有内容的"正文"都通过Redis获取，"正文"由数据分析处理的中间层生成并放入。
+   缓存的"正文"数据应该是全集的（由权限控制具体展现内容）
+"""
+# 主页面“正文”缓存
+key_index = redis_class.KeyLiveClass('index')
+# 研发管理“正文”缓存
+key_rdm = redis_class.KeyLiveClass('rdm')
+# 产品管理"正文"缓存
+key_product = redis_class.KeyLiveClass('product')
+# 在研产品"正文"缓存
+key_product_ing = redis_class.KeyLiveClass('product_ing')
+key_product_select_FAST = redis_class.KeyLiveClass('product_ing_select.FAST')
+key_product_select_HUBBLE = redis_class.KeyLiveClass('product_ing_select.HUBBLE')
+# 项目管理"正文"缓存
+key_project = redis_class.KeyLiveClass('project')
+# 光荣榜"正文"缓存
+key_honor = redis_class.KeyLiveClass('honor')
+key_honor_3m = redis_class.KeyLiveClass('honor_3m')
+# 管理员"正文"缓存
+key_manage = redis_class.KeyLiveClass('manage')
 
 # 产品研发中心
 pd_databases = ['CPSJ',
@@ -57,20 +75,93 @@ st_date = '2018-01-01'
 ed_date = '2018-12-31'
 
 """产品研发中心人员"""
-pdPersonals = PersonalStat.Personal()
+pdPersonals = None
 """项目开发人员"""
-pjPersonals = PersonalStat.Personal()
+pjPersonals = None
 """研发管理与测试人员"""
-rdmPersonals = PersonalStat.Personal()
+rdmPersonals = None
 """产品研发中心对外支撑任务"""
 extTask = None
 
 
-    if not key_index.alive(3600):
-        my_context = server.set_context()
-        key_index.set(my_context)
-    else:
-        my_context = key_index.get()
+def build_index():
+    key_index.set(set_context())
+
+
+def build_rdm():
+    key_rdm.set(set_rdm_context())
+
+
+def build_product():
+    key_product.set(set_pd_context())
+
+
+def build_producting():
+    key_product_ing.set(set_pding_context())
+
+
+def build_pd_select():
+
+    value = 'FAST'
+    _desc = handler.get_pd_project_desc(value)
+    _context = set_pding_context()
+    _context['pd_code'] = value.lower()
+    _context['pd_landmark'] = u"%s" % _desc[u'里程碑']
+    _context['pd_step'] = u"%s" % _desc[u'当前阶段']
+    _context['total_task'] = _desc[u'任务总数']
+    _context['ed_task'] = _desc[u'已完成任务数']
+    _context['ratio'] = _desc[u'任务完成率']
+    _context['personals'] = handler.get_personal_stat(value)
+    key_product_select_FAST.set(_context)
+
+    value = 'HUBBLE'
+    _desc = handler.get_pd_project_desc(value)
+    _context = set_pding_context()
+    _context['pd_code'] = value.lower()
+    _context['pd_landmark'] = u"%s" % _desc[u'里程碑']
+    _context['pd_step'] = u"%s" % _desc[u'当前阶段']
+    _context['total_task'] = _desc[u'任务总数']
+    _context['ed_task'] = _desc[u'已完成任务数']
+    _context['ratio'] = _desc[u'任务完成率']
+    _context['personals'] = handler.get_personal_stat(value)
+    key_product_select_HUBBLE.set(_context)
+
+
+def build_project():
+    _pj = handler.get_project_info('pj_deliver_t')
+    _val = handler.get_project_info('pj_ing_t')
+    _imp_pj = handler.get_imp_projects()
+    _pj_managers = handler.get_pj_managers()
+    _context = dict(
+        projects=_pj,
+        pj_count=len(_pj),
+        pre_projects=_val,
+        pre_pj_count=len(_val),
+        pre_quota=handler.get_sum(_val, u'规模'),
+        imp_projects=_imp_pj,
+        pj_managers=_pj_managers,
+        pj_manager_count=len(_pj_managers),
+    )
+    key_project.set(_context)
+
+
+def build_honor():
+    _context = set_honor_context(None, None)
+    _context['info'] = u"【本年度】"
+    key_honor.set(_context)
+
+
+def build_honor_select():
+    _v = handler.cal_date_monthly(3)
+    _st_date = _v['st_date']
+    _ed_date = _v['ed_date']
+    _context = set_honor_context(_st_date, _ed_date)
+    _context['info'] = u"【近三个月】"
+    key_honor_3m.set(_context)
+
+
+def build_manager():
+    key_manage.set(set_manager_context())
 
 
 def cal_task_ind(_type):
@@ -246,10 +337,6 @@ def set_manager_context():
     _xd, _yd = handler.xy_diff_time_by_level(pdPersonals)
 
     _context = dict()
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
-
-    _context['user'] = {'role': role.level}
 
     __x, __y = dot_to_boxplot([{"x": _x, "y": _y}])
     _context['pic'] = echart_handler.boxplot('职级-任务量', __x, __y, size={'width': 640, 'height': 420})
@@ -539,11 +626,6 @@ def set_rdm_context():
 
     _ext_personals_stat = handler.get_project_info('ext_personals_stat')
 
-    role = Role.query.filter_by(name=current_user.username).first()
-
-    """
-    if role.level <= 4 or role.level == 66:
-    """
     if True:
         """产品研发投入项目开发情况
         """
@@ -600,7 +682,6 @@ def set_rdm_context():
         _pd_sum_3m = _spent_doing_sum_3m+_spent_done_sum_3m-_pj_sum_3m-_npj_sum_3m
 
         context = dict(
-            user={"role": role.level},
             total=pdPersonals.getNumbOfMember() +
                   pjPersonals.getNumbOfMember() +
                   rdmPersonals.getNumbOfMember(),
@@ -717,27 +798,37 @@ def cal_ext_task_desc():
 
 
 def init_data():
-    global Personals, pdPersonals, pjPersonals, rdmPersonals, pd_databases,\
-        pj_databases, rdm_databases, st_date, ed_date, today, extTask
+    global pdPersonals, pjPersonals, rdmPersonals, pd_databases, pj_databases, rdm_databases,\
+        st_date, ed_date, today, extTask
 
     today = datetime.date.today()
     ed_date = today.strftime("%Y-%m-%d")
 
+    """产品研发中心人员"""
+    pdPersonals = PersonalStat.Personal()
+    """项目开发人员"""
+    pjPersonals = PersonalStat.Personal()
+    """研发管理与测试人员"""
+    rdmPersonals = PersonalStat.Personal()
+    """产品研发中心对外支撑任务"""
+
     extTask = handler.scan_pj_task(st_date, ed_date)
+    if extTask is None:
+        return
 
     pdPersonals.setDate(date={'st_date': '2018-01-01', 'ed_date': ed_date}, whichdate="updated")
     for _db in pd_databases:
-        pdPersonals.scanProject(_db, u'产品研发中心')
+        pdPersonals.scanProject(_db, u'产品研发中心', extTask)
     pdPersonals.calWorkInd()
 
     pjPersonals.setDate(date={'st_date': '2018-01-01', 'ed_date': ed_date}, whichdate="updated")
     for _db in pj_databases:
-        pjPersonals.scanProject(_db, u'项目开发')
+        pjPersonals.scanProject(_db, u'项目开发', extTask)
     pjPersonals.calWorkInd()
 
     rdmPersonals.setDate(date={'st_date': '2018-01-01', 'ed_date': ed_date}, whichdate="updated")
     for _db in rdm_databases:
-        rdmPersonals.scanProject(_db, u'研发管理与测试部')
+        rdmPersonals.scanProject(_db, u'研发管理与测试部', extTask)
     rdmPersonals.calWorkInd()
 
 
@@ -748,8 +839,6 @@ def set_context():
 
     today = datetime.date.today()
     ed_date = today.strftime("%Y-%m-%d")
-
-    init_data()
 
     _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(st_date, ed_date)
     _act_user = 0
@@ -896,11 +985,8 @@ def set_context():
         "workHourCost": "%0.2f" % (_total_work_hour*2.5/(26.*8.)),
     }
 
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
     context = dict(
         report={"started_at": st_date, "ended_at": ed_date},
-        user={"role": role.level},
         pjStat=pjStat,
         contractStat=contractStat,
         pdStat=pdStat,
@@ -930,5 +1016,33 @@ def set_context():
     return context
 
 
-# 初始化环境数据
-init_data()
+def main():
+    global extTask
+
+    print(">>> init_data <<<")
+    # 初始化环境数据
+    init_data()
+    handler.extTask = extTask
+
+    print(">>> build_index <<<")
+    build_index()
+    print(">>> build_honor <<<")
+    build_honor()
+    print(">>> build_honor_select <<<")
+    build_honor_select()
+    print(">>> build_product <<<")
+    build_product()
+    print(">>> build_producting <<<")
+    build_producting()
+    print(">>> build_pd_select <<<")
+    build_pd_select()
+    print(">>> build_project <<<")
+    build_project()
+    print(">>> build_rdm <<<")
+    build_rdm()
+    print(">>> build_manager <<<")
+    build_manager()
+
+
+if __name__ == '__main__':
+    main()

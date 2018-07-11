@@ -10,9 +10,7 @@ import mongodb_class
 import sys
 import member
 import handler
-import server
 import echart_handler
-import redis_class
 
 import logging
 
@@ -93,11 +91,12 @@ class Personal:
         if whichdate is not None:
             self.whichdate = whichdate
 
-    def _getTaskListByPersonal(self, project, dpt):
+    def _getTaskListByPersonal(self, project, dpt, extTask):
         """
         按组列出 人员-任务
         :param project: 项目
         :param dpt: 部门
+        :param extTask:
         :return:
         """
 
@@ -148,7 +147,7 @@ class Personal:
             _issue_class = _issue['issue'].split('-')[0]
             if _issue_class in ['CPSJ', 'FAST', 'HUBBLE', 'ROOOT']:
                 _task['ext'] = False
-                if _issue in server.extTask:
+                if _issue in extTask:
                     _task['ext'] = True
             else:
                 _task['ext'] = True
@@ -297,13 +296,13 @@ class Personal:
             # logging.log(logging.WARN, u'%s' % _m)
             self.members[_m[u'人员姓名']] = _m[u'部门']
 
-    def scanProject(self, project, dpt):
+    def scanProject(self, project, dpt, extTask):
 
         logging.log(logging.WARN, u">>> PersonalStat.scanProject(%s,%s)@(%s,%s)" %
                     (project, dpt, self.st_date, self.ed_date))
 
         self.scanMember()
-        self._getTaskListByPersonal(project, dpt)
+        self._getTaskListByPersonal(project, dpt, extTask)
         self._getWorklogListByPersonal(project)
         self.calWorkInd()
 
