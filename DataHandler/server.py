@@ -695,7 +695,11 @@ def cal_pj_task_ind(_st_date, _ed_date):
 
 
 def product_sum(_product):
-
+    """
+    设置产品研发工作量的总计值
+    :param _product: 研发工作量明细
+    :return:
+    """
     _sum = 0
     for _g in _product:
         if not str(_g).isdigit():
@@ -704,7 +708,11 @@ def product_sum(_product):
 
 
 def project_sum(_project):
-
+    """
+    设置项目开发工作量的总计值
+    :param _project: 项目开发工作量明细
+    :return:
+    """
     for _pj in _project:
         _sum = 0
         for _g in _project[_pj]:
@@ -713,12 +721,27 @@ def project_sum(_project):
         _project[_pj][u'合计'] = _sum
 
 
+def cal_pd_task_work_hour(pd_list, _st_date, _ed_date):
+    """
+    计算产品研发投入
+    :param pd_list: 产品名列表
+    :param _st_date: 起始日期
+    :param _ed_date: 截止日期
+    :return: 统计值
+    """
+    _pd = {}
+    _sum = 0
+    for _p in pd_list:
+        _task = handler.scan_pd_task(_p, _st_date, _ed_date)
+        _pd[_p], __sum = cal_pd_task_ind(_task)
+        product_sum(_pd[_p])
+        _sum += __sum
+    return _pd, _sum
+
+
 def set_rdm_context():
 
     global pdPersonals, pjPersonals, rdmPersonals, extTask, st_date, ed_date
-
-    pd_task_for_fast = handler.scan_pd_task('FAST', st_date, ed_date)
-    pd_task_for_hubble = handler.scan_pd_task('HUBBLE', st_date, ed_date)
 
     """项目归档情况
     """
@@ -731,36 +754,47 @@ def set_rdm_context():
 
     _ext_personals_stat = handler.get_project_info('ext_personals_stat')
 
-    """产品研发投入项目开发情况
-    """
-    _pd_fast, _pd_fast_sum = cal_pd_task_ind(pd_task_for_fast)
-    product_sum(_pd_fast)
-    _pd_hubble, _pd_hubble_sum = cal_pd_task_ind(pd_task_for_hubble)
-    product_sum(_pd_hubble)
-
-    _project, _pj_sum, _npj_sum = cal_pj_task_ind(st_date, ed_date)
     """近三个月的日期"""
     __v = handler.cal_date_monthly(3)
     _st_date_3m = __v['st_date']
     _ed_date_3m = __v['ed_date']
-    _project_3m, _pj_sum_3m, _npj_sum_3m = cal_pj_task_ind(_st_date_3m, _ed_date_3m)
 
     """上一个月的日期"""
     __v = handler.cal_date_monthly(1)
     _st_date_1m = __v['st_date']
     _ed_date_1m = __v['ed_date']
-    _project_1m, _pj_sum_1m, _npj_sum_1m = cal_pj_task_ind(_st_date_1m, _ed_date_1m)
 
+    """产品研发投入产品开发情况
+    """
+    _pd_cost, _pd_sum = cal_pd_task_work_hour(['FAST', 'HUBBLE'], st_date, ed_date)
+    _pd_sum = _pd_sum/3600
+
+    # 产品前三个月的情况
+    _pd_cost_3m, _pd_sum_3m = cal_pd_task_work_hour(['FAST', 'HUBBLE'], _st_date_3m, _ed_date_3m)
+    _pd_sum_3m = _pd_sum_3m/3600
+
+    # 产品前一个月的情况
+    _pd_cost_1m, _pd_sum_1m = cal_pd_task_work_hour(['FAST', 'HUBBLE'], _st_date_1m, _ed_date_1m)
+    _pd_sum_1m = _pd_sum_1m/3600
+
+    """产品研发投入项目开发情况
+    """
+    _project, _pj_sum, _npj_sum = cal_pj_task_ind(st_date, ed_date)
     project_sum(_project)
-    project_sum(_project_1m)
-    project_sum(_project_3m)
-
     _npj_sum = _npj_sum/3600
     _pj_sum = _pj_sum/3600
-    _npj_sum_1m = _npj_sum_1m/3600
-    _pj_sum_1m = _pj_sum_1m/3600
+
+    # 近三个月的外部支撑情况
+    _project_3m, _pj_sum_3m, _npj_sum_3m = cal_pj_task_ind(_st_date_3m, _ed_date_3m)
+    project_sum(_project_3m)
     _npj_sum_3m = _npj_sum_3m/3600
     _pj_sum_3m = _pj_sum_3m/3600
+
+    # 近一个月的外部支撑情况
+    _project_1m, _pj_sum_1m, _npj_sum_1m = cal_pj_task_ind(_st_date_1m, _ed_date_1m)
+    project_sum(_project_1m)
+    _npj_sum_1m = _npj_sum_1m/3600
+    _pj_sum_1m = _pj_sum_1m/3600
 
     """资源池情况
     """
@@ -776,19 +810,10 @@ def set_rdm_context():
     _dot, _spent_doing_sum = cal_task_ind_by_date('spent_doing', st_date, ed_date)
     __dot, _spent_done_sum = cal_task_ind_by_date('spent_done', st_date, ed_date)
     _org_dot, _doing_sum = cal_task_ind_by_date('doing', st_date, ed_date)
-    _pd_sum = (_pd_fast_sum + _pd_hubble_sum)/3600
 
     _dot_1m, _spent_doing_sum_1m = cal_task_ind_by_date('spent_doing', _st_date_1m, _ed_date_1m)
     __dot, _spent_done_sum_1m = cal_task_ind_by_date('spent_done', _st_date_1m, _ed_date_1m)
     _org_dot_1m, _doing_sum_1m = cal_task_ind_by_date('doing', _st_date_1m, _ed_date_1m)
-
-    print(">>> _pd_sum_1m: %d,%d,%d,%d" % (_spent_done_sum_1m, _spent_doing_sum_1m, _pj_sum_1m, _npj_sum_1m))
-    _pd_sum_1m = _spent_doing_sum_1m+_spent_done_sum_1m-_pj_sum_1m-_npj_sum_1m
-
-    _dot_3m, _spent_doing_sum_3m = cal_task_ind_by_date('spent_doing', _st_date_3m, _ed_date_3m)
-    __dot_3m, _spent_done_sum_3m = cal_task_ind_by_date('spent_done', _st_date_3m, _ed_date_3m)
-    _org_dot_3m, _doing_sum_3m = cal_task_ind_by_date('doing', _st_date_3m, _ed_date_3m)
-    _pd_sum_3m = _spent_doing_sum_3m+_spent_done_sum_3m-_pj_sum_3m-_npj_sum_3m
 
     context = dict(
             total=pdPersonals.getNumbOfMember() +
@@ -870,7 +895,7 @@ def set_rdm_context():
                                             _pj_sum_3m,
                                             _npj_sum_3m]]
                                           ),
-            product_task={'FAST': _pd_fast, 'HUBBLE': _pd_hubble},
+            product_task=_pd_cost,
         )
 
     __v = handler.cal_date_monthly(3)

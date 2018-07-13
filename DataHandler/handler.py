@@ -929,8 +929,8 @@ def scan_pd_task(pd_name, st_date, ed_date):
         _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
                                                   "spent_time": {'$ne': None},
                                                   "epic_link": {'$ne': ext_epic['issue']},
-                                                  "$and": [{"created": {"$gte": "%s" % st_date}},
-                                                           {"created": {"$lt": "%s" % ed_date}}]})
+                                                  "$and": [{"updated": {"$gte": "%s" % st_date}},
+                                                           {"updated": {"$lt": "%s" % ed_date}}]})
         for _r in _rec:
             if _r not in extTask:
                 if _pd_g in ['CPSJ', 'ROOOT']:
