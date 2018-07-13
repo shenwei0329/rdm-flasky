@@ -1,4 +1,12 @@
-#coding=utf-8
+#!/usr/local/bin/python2.7
+# -*- coding: utf-8 -*-
+#
+#   研发管理MIS系统：数据分析处理器
+#   ===============================
+#   2018.5.9 @Chengdu
+#   2018.7.11 @Chengdu 从web服务中分离
+#
+#
 
 from __future__ import unicode_literals
 
@@ -9,11 +17,15 @@ import datetime
 import numpy as np
 import PersonalStat
 import redis_class
+import logging
 
 import sys
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
+logging.basicConfig(format='%(asctime)s --%(lineno)s -- %(levelname)s:%(message)s',
+                    filename='server.log', level=logging.WARN)
 
 """所有内容的"正文"都通过Redis获取，"正文"由数据分析处理的中间层生成并放入。
    缓存的"正文"数据应该是全集的（由权限控制具体展现内容）
@@ -85,23 +97,44 @@ extTask = None
 
 
 def build_index():
+    """
+    构建“主页”内容
+    :return: 主页内容
+    """
     key_index.set(set_context())
 
 
 def build_rdm():
+    """
+    构建“研发管理”内容
+    :return: 内容
+    """
     key_rdm.set(set_rdm_context())
 
 
 def build_product():
+    """
+    构建“产品信息”内容
+    :return: 内容
+    """
     key_product.set(set_pd_context())
 
 
 def build_producting():
+    """
+    构建“在研产品”内容
+    :return: 内容
+    """
     key_product_ing.set(set_pding_context())
 
 
 def build_pd_select():
+    """
+    构建“在研产品明细”内容
+    :return: 内容
+    """
 
+    # FAST产品单元
     value = 'FAST'
     _desc = handler.get_pd_project_desc(value)
     _context = set_pding_context()
@@ -114,6 +147,7 @@ def build_pd_select():
     _context['personals'] = handler.get_personal_stat(value)
     key_product_select_FAST.set(_context)
 
+    # HUBBLE产品单元
     value = 'HUBBLE'
     _desc = handler.get_pd_project_desc(value)
     _context = set_pding_context()
@@ -128,6 +162,10 @@ def build_pd_select():
 
 
 def build_project():
+    """
+    构建“项目管理”内容
+    :return: 内容
+    """
     _pj = handler.get_project_info('pj_deliver_t')
     _val = handler.get_project_info('pj_ing_t')
     _imp_pj = handler.get_imp_projects()
@@ -146,12 +184,20 @@ def build_project():
 
 
 def build_honor():
+    """
+    构建“年度光荣榜”内容
+    :return: 内容
+    """
     _context = set_honor_context(None, None)
     _context['info'] = u"【本年度】"
     key_honor.set(_context)
 
 
 def build_honor_select():
+    """
+    构建“近三个月光荣榜”内容
+    :return: 内容
+    """
     _v = handler.cal_date_monthly(3)
     _st_date = _v['st_date']
     _ed_date = _v['ed_date']
@@ -161,10 +207,20 @@ def build_honor_select():
 
 
 def build_manager():
+    """
+    构建“管理员”内容
+    注：目前用于数据模型测试
+    :return: 内容
+    """
     key_manage.set(set_manager_context())
 
 
 def cal_task_ind(_type):
+    """
+    计算个人的任务指标
+    :param _type: 制定参考值，如doing\done\spent_doing\spent_done\
+    :return: 指标
+    """
     global pdPersonals, pjPersonals, rdmPersonals
 
     _sum = 0
@@ -329,6 +385,7 @@ def dot_to_boxplot(datas):
 
     return _x, _y
 
+
 def set_manager_context():
 
     _x, _y = handler.xy_task_by_level(pdPersonals)
@@ -451,7 +508,12 @@ def set_honor_context(_st_date, _ed_date):
     )
     return _context
 
+
 def set_pd_context():
+    """
+    生成产品货架、发布等内容
+    :return: 内容
+    """
 
     _pd = handler.get_product_shelves()
     _dl = handler.get_product_deliver()
@@ -478,6 +540,37 @@ def scan_project_name(project_info, summary):
             return _pj[u'名称']
     # print(u">>> summary: %s" % summary)
     return None
+
+
+def cal_pd_task_ind(pd_task):
+    """
+    计算产品研发中心资源投入到非产品事务的指标。
+    :param pd_task: 产品任务集
+    :return: 统计指标
+    """
+    _pd_sum = 0
+    _pd = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0}
+    for _issue in pd_task:
+
+        if _issue["updated"] is None:
+            continue
+
+        _issue_updated_date = _issue["updated"].split('T')[0]
+        _group = _issue['issue'].split('-')[0]
+        _month = int(_issue_updated_date.split('-')[1])
+
+        if _group not in _pd:
+            _pd[_group] = _issue['spent_time']
+        else:
+            _pd[_group] += _issue['spent_time']
+        _pd[_month] += _issue['spent_time']
+        _pd[13] += _issue['spent_time']
+
+        _pd_sum += _issue['spent_time']
+
+    for _v in _pd:
+        _pd[_v] = _pd[_v] / 3600
+    return _pd, _pd_sum
 
 
 def cal_pj_task_ind(_st_date, _ed_date):
@@ -601,6 +694,15 @@ def cal_pj_task_ind(_st_date, _ed_date):
     return _project, _pj_sum, _npj_sum
 
 
+def product_sum(_product):
+
+    _sum = 0
+    for _g in _product:
+        if not str(_g).isdigit():
+            _sum += _product[_g]
+    _product[u'合计'] = _sum
+
+
 def project_sum(_project):
 
     for _pj in _project:
@@ -615,6 +717,9 @@ def set_rdm_context():
 
     global pdPersonals, pjPersonals, rdmPersonals, extTask, st_date, ed_date
 
+    pd_task_for_fast = handler.scan_pd_task('FAST', st_date, ed_date)
+    pd_task_for_hubble = handler.scan_pd_task('HUBBLE', st_date, ed_date)
+
     """项目归档情况
     """
     pj = []
@@ -626,62 +731,66 @@ def set_rdm_context():
 
     _ext_personals_stat = handler.get_project_info('ext_personals_stat')
 
-    if True:
-        """产品研发投入项目开发情况
-        """
-        _project, _pj_sum, _npj_sum = cal_pj_task_ind(st_date, ed_date)
-        """近三个月的日期"""
-        __v = handler.cal_date_monthly(3)
-        _st_date_3m = __v['st_date']
-        _ed_date_3m = __v['ed_date']
-        _project_3m, _pj_sum_3m, _npj_sum_3m = cal_pj_task_ind(_st_date_3m, _ed_date_3m)
+    """产品研发投入项目开发情况
+    """
+    _pd_fast, _pd_fast_sum = cal_pd_task_ind(pd_task_for_fast)
+    product_sum(_pd_fast)
+    _pd_hubble, _pd_hubble_sum = cal_pd_task_ind(pd_task_for_hubble)
+    product_sum(_pd_hubble)
 
-        """上一个月的日期"""
-        __v = handler.cal_date_monthly(1)
-        _st_date_1m = __v['st_date']
-        _ed_date_1m = __v['ed_date']
-        _project_1m, _pj_sum_1m, _npj_sum_1m = cal_pj_task_ind(_st_date_1m, _ed_date_1m)
+    _project, _pj_sum, _npj_sum = cal_pj_task_ind(st_date, ed_date)
+    """近三个月的日期"""
+    __v = handler.cal_date_monthly(3)
+    _st_date_3m = __v['st_date']
+    _ed_date_3m = __v['ed_date']
+    _project_3m, _pj_sum_3m, _npj_sum_3m = cal_pj_task_ind(_st_date_3m, _ed_date_3m)
 
-        project_sum(_project)
-        project_sum(_project_1m)
-        project_sum(_project_3m)
+    """上一个月的日期"""
+    __v = handler.cal_date_monthly(1)
+    _st_date_1m = __v['st_date']
+    _ed_date_1m = __v['ed_date']
+    _project_1m, _pj_sum_1m, _npj_sum_1m = cal_pj_task_ind(_st_date_1m, _ed_date_1m)
 
-        _npj_sum = _npj_sum/3600
-        _pj_sum = _pj_sum/3600
-        _npj_sum_1m = _npj_sum_1m/3600
-        _pj_sum_1m = _pj_sum_1m/3600
-        _npj_sum_3m = _npj_sum_3m/3600
-        _pj_sum_3m = _pj_sum_3m/3600
+    project_sum(_project)
+    project_sum(_project_1m)
+    project_sum(_project_3m)
 
-        """资源池情况
-        """
-        # 近2周内的工作状态
-        __week_date = handler.cal_date_weekly(2)
-        _dot_1w, _spent_doing_sum_1w = cal_task_ind_by_date('spent_doing',
-                                                            __week_date['st_date'],
-                                                            __week_date['ed_date'])
-        _org_dot_1w, _doing_sum_1w = cal_task_ind_by_date('doing',
-                                                          __week_date['st_date'],
-                                                          __week_date['ed_date'])
+    _npj_sum = _npj_sum/3600
+    _pj_sum = _pj_sum/3600
+    _npj_sum_1m = _npj_sum_1m/3600
+    _pj_sum_1m = _pj_sum_1m/3600
+    _npj_sum_3m = _npj_sum_3m/3600
+    _pj_sum_3m = _pj_sum_3m/3600
 
-        _dot, _spent_doing_sum = cal_task_ind_by_date('spent_doing', st_date, ed_date)
-        __dot, _spent_done_sum = cal_task_ind_by_date('spent_done', st_date, ed_date)
-        _org_dot, _doing_sum = cal_task_ind_by_date('doing', st_date, ed_date)
-        _pd_sum = _spent_doing_sum+_spent_done_sum-_pj_sum-_npj_sum
+    """资源池情况
+    """
+    # 近2周内的工作状态
+    __week_date = handler.cal_date_weekly(2)
+    _dot_1w, _spent_doing_sum_1w = cal_task_ind_by_date('spent_doing',
+                                                        __week_date['st_date'],
+                                                        __week_date['ed_date'])
+    _org_dot_1w, _doing_sum_1w = cal_task_ind_by_date('doing',
+                                                      __week_date['st_date'],
+                                                      __week_date['ed_date'])
 
-        _dot_1m, _spent_doing_sum_1m = cal_task_ind_by_date('spent_doing', _st_date_1m, _ed_date_1m)
-        __dot, _spent_done_sum_1m = cal_task_ind_by_date('spent_done', _st_date_1m, _ed_date_1m)
-        _org_dot_1m, _doing_sum_1m = cal_task_ind_by_date('doing', _st_date_1m, _ed_date_1m)
+    _dot, _spent_doing_sum = cal_task_ind_by_date('spent_doing', st_date, ed_date)
+    __dot, _spent_done_sum = cal_task_ind_by_date('spent_done', st_date, ed_date)
+    _org_dot, _doing_sum = cal_task_ind_by_date('doing', st_date, ed_date)
+    _pd_sum = (_pd_fast_sum + _pd_hubble_sum)/3600
 
-        print(">>> _pd_sum_1m: %d,%d,%d,%d" % (_spent_done_sum_1m, _spent_doing_sum_1m, _pj_sum_1m, _npj_sum_1m))
-        _pd_sum_1m = _spent_doing_sum_1m+_spent_done_sum_1m-_pj_sum_1m-_npj_sum_1m
+    _dot_1m, _spent_doing_sum_1m = cal_task_ind_by_date('spent_doing', _st_date_1m, _ed_date_1m)
+    __dot, _spent_done_sum_1m = cal_task_ind_by_date('spent_done', _st_date_1m, _ed_date_1m)
+    _org_dot_1m, _doing_sum_1m = cal_task_ind_by_date('doing', _st_date_1m, _ed_date_1m)
 
-        _dot_3m, _spent_doing_sum_3m = cal_task_ind_by_date('spent_doing', _st_date_3m, _ed_date_3m)
-        __dot_3m, _spent_done_sum_3m = cal_task_ind_by_date('spent_done', _st_date_3m, _ed_date_3m)
-        _org_dot_3m, _doing_sum_3m = cal_task_ind_by_date('doing', _st_date_3m, _ed_date_3m)
-        _pd_sum_3m = _spent_doing_sum_3m+_spent_done_sum_3m-_pj_sum_3m-_npj_sum_3m
+    print(">>> _pd_sum_1m: %d,%d,%d,%d" % (_spent_done_sum_1m, _spent_doing_sum_1m, _pj_sum_1m, _npj_sum_1m))
+    _pd_sum_1m = _spent_doing_sum_1m+_spent_done_sum_1m-_pj_sum_1m-_npj_sum_1m
 
-        context = dict(
+    _dot_3m, _spent_doing_sum_3m = cal_task_ind_by_date('spent_doing', _st_date_3m, _ed_date_3m)
+    __dot_3m, _spent_done_sum_3m = cal_task_ind_by_date('spent_done', _st_date_3m, _ed_date_3m)
+    _org_dot_3m, _doing_sum_3m = cal_task_ind_by_date('doing', _st_date_3m, _ed_date_3m)
+    _pd_sum_3m = _spent_doing_sum_3m+_spent_done_sum_3m-_pj_sum_3m-_npj_sum_3m
+
+    context = dict(
             total=pdPersonals.getNumbOfMember() +
                   pjPersonals.getNumbOfMember() +
                   rdmPersonals.getNumbOfMember(),
@@ -760,7 +869,8 @@ def set_rdm_context():
                                           [[_pd_sum_3m,
                                             _pj_sum_3m,
                                             _npj_sum_3m]]
-                                          )
+                                          ),
+            product_task={'FAST': _pd_fast, 'HUBBLE': _pd_hubble},
         )
 
     __v = handler.cal_date_monthly(3)
@@ -840,7 +950,8 @@ def set_context():
     today = datetime.date.today()
     ed_date = today.strftime("%Y-%m-%d")
 
-    _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(st_date, ed_date)
+    """因考勤数据过多，故仅计算近8周内的"""
+    _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(8)
     _act_user = 0
     for _v in _checkon_user:
         if _checkon_user[_v] > 0:
@@ -894,13 +1005,13 @@ def set_context():
 
     hrStat = {
         "cost_time": _persion_cost,
-        "cost": "%0.2f" % (float(_persion_cost) * 2.5/(26. * 8.)),
+        "cost": "%0.2f" % (float(_persion_cost) * 2.5/(22. * 8.)),
         "pd_count": pd_count,
         "pd_cost_time": pd_cost,
-        "pd_cost": "%0.2f" % (float(pd_cost) * 2.5 / (26. * 8.)),
+        "pd_cost": "%0.2f" % (float(pd_cost) * 2.5 / (22. * 8.)),
         "pd_n_cost_time": pd_n_cost,
-        "pd_n_cost": "%0.2f" % (float(pd_n_cost) * 2.5 / (26. * 8.)),
-        "pd_cost_total": "%0.2f" % (float(pd_cost+pd_n_cost) * 2.5 / (26. * 8.)),
+        "pd_n_cost": "%0.2f" % (float(pd_n_cost) * 2.5 / (22. * 8.)),
+        "pd_cost_total": "%0.2f" % (float(pd_cost+pd_n_cost) * 2.5 / (22. * 8.)),
         "pd_cost_time_total": pd_cost + pd_n_cost,
         "pd_pj_task_numb": _pj_task_stat['count'],
         "pd_pj_time": "%0.2f" % (_pj_task_stat['spent'] / 3600.),
@@ -926,39 +1037,38 @@ def set_context():
     _ration = (float(len(persion))/float(_act_user))
     hrStat['ratio'] = "%0.2f" % (float(cost)*100./(_total_work_hour*_ration))
 
+    _reg_user = pdPersonals.getNumbOfMember() + pjPersonals.getNumbOfMember() + rdmPersonals.getNumbOfMember()
     # 任务统计
     taskStat = {
         "total": count,
-        "persion_count": pdPersonals.getNumbOfMember() +
-                         pjPersonals.getNumbOfMember() +
-                         rdmPersonals.getNumbOfMember(),
-        "persion_ratio": "%0.2f" % (float(len(persion)*100)/float(_act_user)),
+        "persion_count": _reg_user,
+        "persion_ratio": "%0.2f" % (float(_reg_user*100)/float(_act_user)),
         "done": done_count,
         "cost_time": "%0.2f" % cost,
         "cost_base": "2.5",
-        "cost": "%0.2f" % (float(cost) * 2.5/(26. * 8.)),
+        "cost": "%0.2f" % (float(cost) * 2.5/(22. * 8.)),
         "ratio": "%0.2f" % (float(done_count*100)/float(count)),
 
         "pd_count": g_stat['pd'][0],
         "pd_persion": pdPersonals.getNumbOfMember(), # g_stat['pd'][1],
         "pd_cost_time": "%0.2f" % g_stat['pd'][2],
-        "pd_cost": "%0.2f" % (float(g_stat['pd'][2]) * 2.5 / (26. * 8.)),
+        "pd_cost": "%0.2f" % (float(g_stat['pd'][2]) * 2.5 / (22. * 8.)),
 
         "pj_group": "甘孜、嘉兴、四川公安等",
         "pj_count": g_stat['pj'][0],
         "pj_persion": pjPersonals.getNumbOfMember(), # g_stat['pj'][1],
         "pj_cost_time": "%0.2f" % g_stat['pj'][2],
-        "pj_cost": "%0.2f" % (float(g_stat['pj'][2]) * 2.5 / (26. * 8.)),
+        "pj_cost": "%0.2f" % (float(g_stat['pj'][2]) * 2.5 / (22. * 8.)),
 
         "rdm_count": g_stat['rdm'][0],
         "rdm_persion": rdmPersonals.getNumbOfMember(),
         "rdm_cost_time": "%0.2f" % g_stat['rdm'][2],
-        "rdm_cost": "%0.2f" % (float(g_stat['rdm'][2]) * 2.5 / (26. * 8.)),
+        "rdm_cost": "%0.2f" % (float(g_stat['rdm'][2]) * 2.5 / (22. * 8.)),
 
         "count_total": g_stat['pd'][0]+g_stat['pj'][0]+g_stat['rdm'][0],
         "persion_total": g_stat['pd'][1]+g_stat['pj'][1]+g_stat['rdm'][1],
         "cost_time_total": "%0.2f" % (g_stat['pd'][2]+g_stat['pj'][2]+g_stat['rdm'][2]),
-        "cost_total": "%0.2f" % (float(g_stat['pd'][2]+g_stat['pj'][2]+g_stat['rdm'][2]) * 2.5 / (26. * 8.)),
+        "cost_total": "%0.2f" % (float(g_stat['pd'][2]+g_stat['pj'][2]+g_stat['rdm'][2]) * 2.5 / (22. * 8.)),
 
     }
 
@@ -982,7 +1092,7 @@ def set_context():
         "ratio": "%0.2f" % (float(_act_user)*100./len(_checkon_user)),
         "actUser": _act_user,
         "workHour": _total_work_hour,
-        "workHourCost": "%0.2f" % (_total_work_hour*2.5/(26.*8.)),
+        "workHourCost": "%0.2f" % (_total_work_hour*2.5/(22.*8.)),
     }
 
     context = dict(

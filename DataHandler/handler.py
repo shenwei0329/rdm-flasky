@@ -265,15 +265,16 @@ def get_pj_state():
     return _pj_count, _pj_op, _pj_done, _pj_ing
 
 
-def getChkOn(st_date, ed_date):
+def getChkOn(nWeek):
     """
     获取员工上下班时间序列
-    :param st_date: 起始时间
-    :param ed_date: 结束时间
+    :param nWeek: 近期周数
     :return: 到岗记录时间序列
     """
+    _date = cal_date_weekly(nWeek)
     _sql = 'select KQ_AM, KQ_PM, KQ_NAME from checkon_t' \
-           ' where str_to_date(KQ_DATE,"%%y-%%m-%%d") between "%s" and "%s"' % (st_date, ed_date)
+           ' where str_to_date(KQ_DATE,"%%y-%%m-%%d") between "%s" and "%s"' % \
+           (_date['st_date'], _date['ed_date'])
     _res = mysql_db.do(_sql)
 
     _total_work_hour = 0.
@@ -906,6 +907,41 @@ def get_pj_managers():
     return pj_managers
 
 
+def scan_pd_task(pd_name, st_date, ed_date):
+    """
+    扫描研发任务（排除外部支撑的）
+    :param pd_name: 产品项目名称
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 任务列表
+    """
+    _pd_name = pd_name.upper()
+    logging.log(logging.WARN, ">>> scan_pd_task.ext_date: <%s>: fr %s to %s" % (pd_name, st_date, ed_date))
+    _task = []
+    for _pd_g in pd_list:
+        """从summary内容查找带有"入侵"的issue
+        """
+        if _pd_g not in ['CPSJ', 'ROOOT', _pd_name]:
+            continue
+
+        mongo_db.connect_db(_pd_g)
+        ext_epic = mongo_db.handler("issue", "find_one", {"issue_type": "epic", "summary": u"项目入侵"})
+        _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
+                                                  "spent_time": {'$ne': None},
+                                                  "epic_link": {'$ne': ext_epic['issue']},
+                                                  "$and": [{"created": {"$gte": "%s" % st_date}},
+                                                           {"created": {"$lt": "%s" % ed_date}}]})
+        for _r in _rec:
+            if _r not in extTask:
+                if _pd_g in ['CPSJ', 'ROOOT']:
+                    if (_pd_name in _r['landmark']) or (_pd_name in _r['summary']):
+                        _task.append(_r)
+                else:
+                    _task.append(_r)
+
+    return _task
+
+
 def scan_pj_task(st_date, ed_date):
     """
     获取产品研发中心投入到非产品研发的任务
@@ -913,7 +949,7 @@ def scan_pj_task(st_date, ed_date):
     :param ed_date: 截止时间
     :return: 数据
     """
-    logging.log(logging.WARN, ">>> scan_pj_task.ext_date: %s-%s" % (st_date, ed_date))
+    logging.log(logging.WARN, ">>> scan_pj_task.ext_date: fr %s to %s" % (st_date, ed_date))
     _task = []
     for _pd_g in pd_list:
         """从summary内容查找带有"入侵"的issue
