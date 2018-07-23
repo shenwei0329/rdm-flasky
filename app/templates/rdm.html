@@ -188,6 +188,46 @@
                     </div>
                 </div>
 
+                <br/>
+
+                <div class="container"><h3>测试中心投入明细-月计</h3>
+                    <button id="btn_test_center" type="button" value="year" onclick="btn_onclick_test_center(this.value)">显示</button>
+                    <div id="test_center_list" style="display: none;">（单位：工时）
+                        <table border="2">
+                            <tr>
+                                <th width="300px" style="text-align:center">项目</th>
+                                <th width="120px" style="text-align:center">一月</th>
+                                <th width="120px" style="text-align:center">二月</th>
+                                <th width="120px" style="text-align:center">三月</th>
+                                <th width="120px" style="text-align:center">四月</th>
+                                <th width="120px" style="text-align:center">五月</th>
+                                <th width="120px" style="text-align:center">六月</th>
+                                <th width="120px" style="text-align:center">七月</th>
+                                <th width="120px" style="text-align:center">八月</th>
+                                <th width="120px" style="text-align:center">九月</th>
+                                <th width="120px" style="text-align:center">十月</th>
+                                <th width="120px" style="text-align:center">十一月</th>
+                                <th width="120px" style="text-align:center">十二月</th>
+                                <th width="120px" style="text-align:center">合计</th>
+                            </tr>
+                            {% for _pd_name in sorted(test_task) %}
+                            <tr>
+                                <td>{{ _pd_name }}</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if test_task[_pd_name][_g]>0 %}
+                                            <b style="color:#F00">{{ test_task[_pd_name][_g] }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+
                 <div class="container"><h3>产品研发资源在非产品类任务的投入明细-总计</h3>
                     <button id="btn_desc" type="button" value="show" onclick="btn_onclick(this.value)">显示</button>
                     <div id="producting_list" style="display: none;">（单位：工时）
@@ -348,6 +388,15 @@
             $("#btn_ext").html('隐藏');
         }else{
             document.getElementById("ext_personal_list").style.display='none';
+            $("#btn_ext").html('显示');
+        }
+    }
+    function btn_onclick_test_center(value){
+        if (document.getElementById("test_center_list").style.display=='none'){
+            document.getElementById("test_center_list").style.display='block';
+            $("#btn_ext").html('隐藏');
+        }else{
+            document.getElementById("test_center_list").style.display='none';
             $("#btn_ext").html('显示');
         }
     }

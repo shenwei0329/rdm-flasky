@@ -275,6 +275,7 @@ def getChkOn(nWeek):
     _sql = 'select KQ_AM, KQ_PM, KQ_NAME from checkon_t' \
            ' where str_to_date(KQ_DATE,"%%y-%%m-%%d") between "%s" and "%s"' % \
            (_date['st_date'], _date['ed_date'])
+
     _res = mysql_db.do(_sql)
 
     _total_work_hour = 0.
@@ -584,6 +585,49 @@ def get_pd4pj_stat(st_date, ed_date):
     """
 
     issues = scan_pj_task(st_date, ed_date)
+
+    pj_info = {}
+
+    mongo_db.connect_db('ext_system')
+    projects = do_search('project_t', {})
+
+    for _pj in projects:
+        if _pj[u'别名'] not in pj_info:
+            pj_info[_pj[u'别名']] = [_pj[u'名称'], 0.]
+
+    mongo_db.close_db()
+
+    _count = 0
+    _pj_total_cost = 0.
+    _npj_total_cost = 0.
+
+    for _issue in issues:
+        """检索summary字段是否包含项目信息，以确定投入的项目明细
+        """
+        _it = 'spent_time'
+        if type(_issue[_it]) is types.NoneType:
+            continue
+
+        _count += 1
+
+        if not is_pj(pj_info, _issue['summary']):
+            _npj_total_cost += (float(_issue['spent_time']) / 3600.)
+            continue
+
+        _pj_total_cost += (float(_issue['spent_time']) / 3600.)
+
+    return _count, _pj_total_cost, _npj_total_cost
+
+
+def get_test_center_stat(st_date, ed_date):
+    """
+    获取测试中心的统计信息
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 统计值
+    """
+
+    issues = scan_test_center_task(st_date, ed_date)
 
     pj_info = {}
 
@@ -980,6 +1024,27 @@ def scan_pj_task(st_date, ed_date):
     return _task
 
 
+def scan_test_center_task(st_date, ed_date):
+    """
+    扫描测试中心的任务
+    :param st_date: 起始日期
+    :param ed_date: 截止日期
+    :return: 任务列表
+    """
+    logging.log(logging.WARN, ">>> scan_test_center_task.ext_date: fr %s to %s" % (st_date, ed_date))
+    _task = []
+
+    mongo_db.connect_db("TESTCENTER")
+
+    _rec = mongo_db.handler('issue', 'find', {"issue_type": u'任务',
+                                              "spent_time": {'$ne': None},
+                                              "$and": [{"updated": {"$gte": "%s" % st_date}},
+                                                       {"updated": {"$lt": "%s" % ed_date}}]})
+    for _r in _rec:
+        _task.append(_r)
+    return _task
+
+
 def get_personal_by_level(lvl):
     """
     按职级获取人员列表
@@ -1004,7 +1069,7 @@ def xy_task_by_level(Personals):
     _personals = Personals.getNameList()
     for _lvl in range(13):
 
-        print(">>> _lvl = %d" % _lvl)
+        # print(">>> _lvl = %d" % _lvl)
         _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
@@ -1030,7 +1095,7 @@ def xy_spent_time_by_level(Personals):
     _personals = Personals.getNameList()
     for _lvl in range(13):
 
-        print(">>> _lvl = %d" % _lvl)
+        # print(">>> _lvl = %d" % _lvl)
         _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
@@ -1060,7 +1125,7 @@ def xy_org_time_by_level(Personals):
     _personals = Personals.getNameList()
     for _lvl in range(13):
 
-        print(">>> _lvl = %d" % _lvl)
+        # print(">>> _lvl = %d" % _lvl)
         _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
@@ -1090,7 +1155,7 @@ def xy_spent_time_sum_by_level(Personals):
     _personals = Personals.getNameList()
     for _lvl in range(13):
 
-        print(">>> _lvl = %d" % _lvl)
+        # print(">>> _lvl = %d" % _lvl)
         _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
@@ -1117,7 +1182,7 @@ def xy_org_time_sum_by_level(Personals):
     _personals = Personals.getNameList()
     for _lvl in range(13):
 
-        print(">>> _lvl = %d" % _lvl)
+        # print(">>> _lvl = %d" % _lvl)
         _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue
@@ -1144,7 +1209,7 @@ def xy_diff_time_by_level(Personals):
     _personals = Personals.getNameList()
     for _lvl in range(13):
 
-        print(">>> _lvl = %d" % _lvl)
+        # print(">>> _lvl = %d" % _lvl)
         _ps = get_personal_by_level(_lvl)
         if _ps is None:
             continue

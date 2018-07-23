@@ -568,8 +568,6 @@ def cal_pd_task_ind(pd_task):
 
         _pd_sum += _issue['spent_time']
 
-    for _v in _pd:
-        _pd[_v] = _pd[_v] / 3600
     return _pd, _pd_sum
 
 
@@ -603,8 +601,11 @@ def cal_pj_task_ind(_st_date, _ed_date):
         _month = int(_issue_updated_date.split('-')[1])
 
         if _issue['project_alias'] is not None:
-            if _issue['project_alias'] not in _project:
-                _project[_issue['project_alias']] = {_group: _issue['spent_time'],
+            _pj_name = scan_project_name(_pj_info, _issue['project_alias'])
+            if _pj_name is None:
+                _pj_name = _issue['project_alias']
+            if _pj_name not in _project:
+                _project[_pj_name] = {_group: _issue['spent_time'],
                                                      1: 0,
                                                      2: 0,
                                                      3: 0,
@@ -620,15 +621,15 @@ def cal_pj_task_ind(_st_date, _ed_date):
                                                      13: 0,
                                                      }
 
-                _project[_issue['project_alias']][_month] = _issue['spent_time']
-                _project[_issue['project_alias']][13] = _issue['spent_time']
+                _project[_pj_name][_month] = _issue['spent_time']
+                _project[_pj_name][13] = _issue['spent_time']
             else:
-                if _group not in _project[_issue['project_alias']]:
-                    _project[_issue['project_alias']][_group] = _issue['spent_time']
+                if _group not in _project[_pj_name]:
+                    _project[_pj_name][_group] = _issue['spent_time']
                 else:
-                    _project[_issue['project_alias']][_group] += _issue['spent_time']
-                _project[_issue['project_alias']][_month] += _issue['spent_time']
-                _project[_issue['project_alias']][13] += _issue['spent_time']
+                    _project[_pj_name][_group] += _issue['spent_time']
+                _project[_pj_name][_month] += _issue['spent_time']
+                _project[_pj_name][13] += _issue['spent_time']
             _pj_sum += _issue['spent_time']
         else:
             """试图从summary中寻找项目信息"""
@@ -663,6 +664,7 @@ def cal_pj_task_ind(_st_date, _ed_date):
                 _pj_sum += _issue['spent_time']
             else:
                 """无项目信息"""
+                print(u">>> %s" % _issue['summary'])
                 if u'其它' not in _project:
                     _project[u'其它'] = {_group: _issue['spent_time'],
                                          1: 0,
@@ -694,6 +696,135 @@ def cal_pj_task_ind(_st_date, _ed_date):
     return _project, _pj_sum, _npj_sum
 
 
+def cal_tc_task_ind(_st_date, _ed_date):
+    """
+    计算测试中心资源投入到非产品事务的指标。
+    :param _st_date: 起始日期
+    :param _ed_date: 截止日期
+    :return: 统计指标
+    """
+    _pj_info = handler.get_project_info("project_t")
+
+    # logging.log(logging.WARN, ">>> cal_tc_task_ind( %s, %s )" % (_st_date, _ed_date))
+
+    _project = {}
+    for _issue in handler.scan_test_center_task(_st_date, _ed_date):
+
+        if _issue["updated"] is None:
+            continue
+
+        _issue_updated_date = _issue["updated"].split('T')[0]
+        """判断任务是否在指定的时间段内"""
+        if handler.is_date_bef(_issue_updated_date, _st_date) or handler.is_date_aft(_issue_updated_date, _ed_date):
+            continue
+
+        _month = int(_issue_updated_date.split('-')[1])
+
+        if _issue['project_alias'] is not None:
+            _pj_name = scan_project_name(_pj_info, _issue['project_alias'])
+            if _pj_name is None:
+                _pj_name = _issue['project_alias']
+            if _pj_name not in _project:
+                _project[_pj_name] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0}
+
+                _project[_pj_name][_month] = _issue['spent_time']
+                _project[_pj_name][13] = _issue['spent_time']
+            else:
+                _project[_pj_name][_month] += _issue['spent_time']
+                _project[_pj_name][13] += _issue['spent_time']
+        else:
+            if u'项目' in _issue['components']:
+                """试图从summary中寻找项目信息"""
+                _pj_name = scan_project_name(_pj_info, _issue['components'])
+                if _pj_name is not None:
+                    """有项目信息"""
+                    if _pj_name not in _project:
+                        _project[_pj_name] = {
+                                              1: 0,
+                                              2: 0,
+                                              3: 0,
+                                              4: 0,
+                                              5: 0,
+                                              6: 0,
+                                              7: 0,
+                                              8: 0,
+                                              9: 0,
+                                              10: 0,
+                                              11: 0,
+                                              12: 0,
+                                              13: 0,
+                                              }
+                        _project[_pj_name][_month] = _issue['spent_time']
+                        _project[_pj_name][13] = _issue['spent_time']
+                    else:
+                        _project[_pj_name][_month] += _issue['spent_time']
+                        _project[_pj_name][13] += _issue['spent_time']
+                else:
+                    """无项目信息"""
+                    _pj_name = _issue['components'].replace(u'【项目】', '')
+                    _pj_name = scan_project_name(_pj_info, _pj_name)
+                    if _pj_name is None:
+                        _pj_name = _issue['components'].replace(u'【项目】', '')
+                    if _pj_name not in _project:
+                        _project[_pj_name] = {
+                                              1: 0,
+                                              2: 0,
+                                              3: 0,
+                                              4: 0,
+                                              5: 0,
+                                              6: 0,
+                                              7: 0,
+                                              8: 0,
+                                              9: 0,
+                                              10: 0,
+                                              11: 0,
+                                              12: 0,
+                                              13: 0,
+                                              }
+                        _project[_pj_name][_month] = _issue['spent_time']
+                        _project[_pj_name][13] = _issue['spent_time']
+                    else:
+                        _project[_pj_name][_month] += _issue['spent_time']
+                        _project[_pj_name][13] += _issue['spent_time']
+            else:
+                if u'产品' in _issue['components']:
+                    _pd_name = _issue['components'].replace(u'【产品】', '').upper()
+                    if 'FAST' in _pd_name:
+                        _pd_name = 'FAST'
+                    else:
+                        _pd_name = 'HUBBLE'
+
+                    if _pd_name not in _project:
+                        _project[_pd_name] = {
+                                              1: 0,
+                                              2: 0,
+                                              3: 0,
+                                              4: 0,
+                                              5: 0,
+                                              6: 0,
+                                              7: 0,
+                                              8: 0,
+                                              9: 0,
+                                              10: 0,
+                                              11: 0,
+                                              12: 0,
+                                              13: 0,
+                                              }
+                        _project[_pd_name][_month] = _issue['spent_time']
+                        _project[_pd_name][13] = _issue['spent_time']
+                    else:
+                        _project[_pd_name][_month] += _issue['spent_time']
+                        _project[_pd_name][13] += _issue['spent_time']
+
+    for _pn in _project:
+        for _g in _project[_pn]:
+            if _project[_pn][_g] > 0:
+                _project[_pn][_g] = "%0.2f" % (float(_project[_pn][_g]) / 3600.)
+
+    # logging.log(logging.WARN, ">>> return %s, %d, %d" % (_project, _pj_sum, _npj_sum))
+    return _project
+
+
 def product_sum(_product):
     """
     设置产品研发工作量的总计值
@@ -704,7 +835,11 @@ def product_sum(_product):
     for _g in _product:
         if not str(_g).isdigit():
             _sum += _product[_g]
+        if _product[_g]>0:
+            _product[_g] = "%0.2f" % (float(_product[_g])/3600.)
     _product[u'合计'] = _sum
+    if _sum > 0:
+        _product[u'合计'] = "%0.2f" % (float(_sum)/3600.)
 
 
 def project_sum(_project):
@@ -776,6 +911,11 @@ def set_rdm_context():
     # 产品前一个月的情况
     _pd_cost_1m, _pd_sum_1m = cal_pd_task_work_hour(['FAST', 'HUBBLE'], _st_date_1m, _ed_date_1m)
     _pd_sum_1m = _pd_sum_1m/3600
+
+    """测试中心资源投入
+    """
+    _tc_project = cal_tc_task_ind(st_date, ed_date)
+    project_sum(_tc_project)
 
     """产品研发投入项目开发情况
     """
@@ -896,6 +1036,7 @@ def set_rdm_context():
                                             _npj_sum_3m]]
                                           ),
             product_task=_pd_cost,
+            test_task=_tc_project,
         )
 
     __v = handler.cal_date_monthly(3)
@@ -977,6 +1118,7 @@ def set_context():
 
     """因考勤数据过多，故仅计算近8周内的"""
     _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(8)
+
     _act_user = 0
     for _v in _checkon_user:
         if _checkon_user[_v] > 0:
