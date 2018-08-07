@@ -68,6 +68,9 @@ class Member:
             return _email[u'邮箱地址']
         return None
 
+    def get_dpt(self):
+        return self.dpt
+
     def get_name(self):
         """
         获取个人姓名

@@ -30,7 +30,8 @@ spi_for_group = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟', u'吴昱�
 """参与项目开发的部门"""
 pj_devel_dpt = [u'行业营销部',
                 u'解决方案与交付中心',
-                u'新型智慧城市及运营商事业部']
+                u'新型智慧城市及运营商事业部',
+                u'外包']
 
 
 class Personal:
@@ -76,7 +77,7 @@ class Personal:
         清除信息【注：已废除】
         :return:
         """
-        # self.personal = {}
+        self.personal = {}
         pass
 
     def setDate(self, date, whichdate=None):
@@ -128,7 +129,8 @@ class Personal:
             if _issue['users'] in spi_list:
                 continue
             if _issue['users'] not in self.members:
-                # logging.log(logging.WARN, u">>> user(%s) not in members" % _issue['users'])
+                """有可能是：1）新员工；2）外包人员"""
+                logging.log(logging.WARN, u">>> user(%s) not in members" % _issue['users'])
                 continue
 
             if u"项目开发" in dpt:
@@ -301,9 +303,13 @@ class Personal:
         logging.log(logging.WARN, u">>> PersonalStat.scanProject(%s,%s)@(%s,%s)" %
                     (project, dpt, self.st_date, self.ed_date))
 
+        """获取注册人员"""
         self.scanMember()
+        """按人员统计项目任务"""
         self._getTaskListByPersonal(project, dpt, extTask)
+        """按人员统计工作日志"""
         self._getWorklogListByPersonal(project)
+        """计算工作指标"""
         self.calWorkInd()
 
     def getPersonal(self, name=None):
@@ -352,12 +358,19 @@ class Personal:
             _count += self.personal[_p].get_work_log_count()
         return _count
 
-    def getNumbOfMember(self):
+    def getNumbOfMember(self, ext=False):
         """
         获取员工个数
         :return: 个数
         """
-        return len(self.personal)
+        if not ext:
+            return len(self.personal)
+        else:
+            _cnt = 0
+            for _p in self.personal:
+                if u'外包' in self.personal[_p].get_dpt():
+                    _cnt += 1
+            return _cnt
 
     def calWorkInd(self):
         """
@@ -414,6 +427,10 @@ class Personal:
         """
         _personal = ()
         for _p in self.personal:
+
+            if u'外包' in self.personal[_p].get_dpt():
+                continue
+
             if _p not in spi_for_honor:
                 _q, _ext_q = self.personal[_p].get_quota()
                 _personal += (_p, int(_q + _ext_q),),

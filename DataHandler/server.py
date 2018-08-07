@@ -959,6 +959,9 @@ def set_rdm_context():
             total=pdPersonals.getNumbOfMember() +
                   pjPersonals.getNumbOfMember() +
                   rdmPersonals.getNumbOfMember(),
+            ext_total=pdPersonals.getNumbOfMember(ext=True) +
+                  pjPersonals.getNumbOfMember(ext=True) +
+                  rdmPersonals.getNumbOfMember(ext=True),
             total_task=pdPersonals.getTotalNumbOfTask() +
                        pjPersonals.getTotalNumbOfTask() +
                        rdmPersonals.getTotalNumbOfTask(),
@@ -1205,6 +1208,9 @@ def set_context():
     hrStat['ratio'] = "%0.2f" % (float(cost)*100./(_total_work_hour*_ration))
 
     _reg_user = pdPersonals.getNumbOfMember() + pjPersonals.getNumbOfMember() + rdmPersonals.getNumbOfMember()
+    _reg_user -= (pdPersonals.getNumbOfMember(ext=True) +
+                  pjPersonals.getNumbOfMember(ext=True) +
+                  rdmPersonals.getNumbOfMember(ext=True))
     # 任务统计
     taskStat = {
         "total": count,
