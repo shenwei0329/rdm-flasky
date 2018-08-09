@@ -242,6 +242,8 @@ class Member:
         _done = 0
         _spent_doing = 0
         _spent_done = 0
+        _agg_doing = 0
+        _agg_done = 0
         _ind = {}
         for _i in self.task:
 
@@ -261,10 +263,18 @@ class Member:
                 else:
                     _spent_done += _i['spent_time']
 
+            if _i['agg_time'] is not None:
+                if u'完成' not in _i['status']:
+                    _agg_doing += _i['agg_time']
+                else:
+                    _agg_done += _i['agg_time']
+
         _ind['doing'] = _doing / 3600
         _ind['done'] = _done / 3600
         _ind['spent_doing'] = _spent_doing / 3600
         _ind['spent_done'] = _spent_done / 3600
+        _ind['agg_doing'] = _agg_doing / 3600
+        _ind['agg_done'] = _agg_done / 3600
 
         self.ind = _ind
 

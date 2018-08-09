@@ -414,6 +414,10 @@ class Personal:
                 _ind.append(__ind["spent_doing"])
             elif ind_type == "spent_done":
                 _ind.append(__ind["spent_done"])
+            elif ind_type == "agg_doing":
+                _ind.append(__ind["agg_doing"])
+            elif ind_type == "agg_done":
+                _ind.append(__ind["agg_done"])
             else:
                 continue
             _personal.append(_p)

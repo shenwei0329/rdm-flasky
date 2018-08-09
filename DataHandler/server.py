@@ -940,7 +940,7 @@ def set_rdm_context():
     """
     # 近2周内的工作状态
     __week_date = handler.cal_date_weekly(2)
-    _dot_1w, _spent_doing_sum_1w = cal_task_ind_by_date('spent_doing',
+    _dot_1w, _spent_doing_sum_1w = cal_task_ind_by_date('agg_doing',
                                                         __week_date['st_date'],
                                                         __week_date['ed_date'])
     _org_dot_1w, _doing_sum_1w = cal_task_ind_by_date('doing',
