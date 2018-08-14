@@ -276,7 +276,7 @@ def cal_task_ind(_type):
     return dots, _sum
 
 
-def cal_task_ind_by_date(_type, _st_date, _ed_date):
+def cal_task_ind_by_date(_type, _st_date, _ed_date, be_log=False):
     """
     按指定时间段统计每个组（产品研发、项目开发、研发管理与测试）的任务量
     :param _type: 日期项，created/updated
@@ -334,21 +334,30 @@ def cal_task_ind_by_date(_type, _st_date, _ed_date):
                     _dot['high']['y'].append(_yy)
                     _dot['high']['label'].append(_personal[_g][_cnt])
                 # elif _task[_g][_cnt] >= _task_median:
+
+                    if be_log:
+                        logging.log(logging.WARN, u"cal_task_ind_by_date(%s,%s): G(%s)-High.<%s>" %
+                                (_st_date, _ed_date, _g, _personal[_g][_cnt]))
+
                 elif _task[_g][_cnt] >= 24:
                     """适度：具有3天8小时工作量"""
                     _dot['norm']['x'].append(_xx)
                     _dot['norm']['y'].append(_yy)
                     _dot['norm']['label'].append(_personal[_g][_cnt])
+
+                    if be_log:
+                        logging.log(logging.WARN, u"cal_task_ind_by_date(%s,%s): G(%s)-Mid.<%s>" %
+                                (_st_date, _ed_date, _g, _personal[_g][_cnt]))
+
                 else:
                     """欠计划"""
                     _dot['low']['x'].append(_xx)
                     _dot['low']['y'].append(_yy)
                     _dot['low']['label'].append(_personal[_g][_cnt])
 
-                    """
-                    logging.log(logging.WARN, u"cal_task_ind_by_date(%s,%s): G(%s)-LOW.<%s>" %
+                    if be_log:
+                        logging.log(logging.WARN, u"cal_task_ind_by_date(%s,%s): G(%s)-LOW.<%s>" %
                                 (_st_date, _ed_date, _g, _personal[_g][_cnt]))
-                    """
 
                 _cnt += 1
 
@@ -874,6 +883,18 @@ def cal_pd_task_work_hour(pd_list, _st_date, _ed_date):
     return _pd, _sum
 
 
+def cal_work_hour_sum(cost, rat=1):
+
+    _sum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    for _item in cost:
+        for _m in range(1, 14):
+            print cost[_item][_m]
+            _sum[_m] += float(cost[_item][_m])
+    for _m in range(1, 14):
+        _sum[_m] = "%0.2f" % (_sum[_m]/rat)
+    return _sum
+
+
 def set_rdm_context():
 
     global pdPersonals, pjPersonals, rdmPersonals, extTask, st_date, ed_date
@@ -902,6 +923,7 @@ def set_rdm_context():
     """产品研发投入产品开发情况
     """
     _pd_cost, _pd_sum = cal_pd_task_work_hour(['FAST', 'HUBBLE'], st_date, ed_date)
+    _pd_cost_sum = cal_work_hour_sum(_pd_cost)
     _pd_sum = _pd_sum/3600
 
     # 产品前三个月的情况
@@ -915,11 +937,13 @@ def set_rdm_context():
     """测试中心资源投入
     """
     _tc_project = cal_tc_task_ind(st_date, ed_date)
+    _tc_project_sum = cal_work_hour_sum(_tc_project)
     project_sum(_tc_project)
 
     """产品研发投入项目开发情况
     """
     _project, _pj_sum, _npj_sum = cal_pj_task_ind(st_date, ed_date)
+    _project_sum = cal_work_hour_sum(_project, rat=3600)
     project_sum(_project)
     _npj_sum = _npj_sum/3600
     _pj_sum = _pj_sum/3600
@@ -945,7 +969,9 @@ def set_rdm_context():
                                                         __week_date['ed_date'])
     _org_dot_1w, _doing_sum_1w = cal_task_ind_by_date('doing',
                                                       __week_date['st_date'],
-                                                      __week_date['ed_date'])
+                                                      __week_date['ed_date'],
+                                                      be_log=True
+                                                      )
 
     _dot, _spent_doing_sum = cal_task_ind_by_date('spent_doing', st_date, ed_date)
     __dot, _spent_done_sum = cal_task_ind_by_date('spent_done', st_date, ed_date)
@@ -977,6 +1003,7 @@ def set_rdm_context():
             pj_count=pjPersonals.getNumbOfMember(),
             rdm_count=rdmPersonals.getNumbOfMember(),
             pd_project=_project,
+            pd_project_sum=_project_sum,
             sorted=sorted,
             task_ind_pd=echart_handler.effectscatterByInd('产品研发资源的当前负载执行情况',
                                                           _dot_1w['pd'],
@@ -1039,7 +1066,9 @@ def set_rdm_context():
                                             _npj_sum_3m]]
                                           ),
             product_task=_pd_cost,
+            product_task_sum=_pd_cost_sum,
             test_task=_tc_project,
+            test_task_sum=_tc_project_sum,
         )
 
     __v = handler.cal_date_monthly(3)

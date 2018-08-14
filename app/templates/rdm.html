@@ -188,6 +188,18 @@
                                 {% endfor %}
                             </tr>
                             {% endfor %}
+                            <tr>
+                                <td>合计</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if "0.00" not in product_task_sum[_g] %}
+                                            <b style="color:#F00">{{ product_task_sum[_g] }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
                         </table>
                     </div>
                 </div>
@@ -228,6 +240,18 @@
                                 {% endfor %}
                             </tr>
                             {% endfor %}
+                            <tr>
+                                <td>合计</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if "0.00" not in test_task_sum[_g] %}
+                                            <b style="color:#F00">{{ test_task_sum[_g] }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
                         </table>
                     </div>
                 </div>
@@ -298,6 +322,18 @@
                                 {% endfor %}
                             </tr>
                             {% endfor %}
+                            <tr>
+                                <td>合计</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if "0.00" not in pd_project_sum[_g] %}
+                                            <b style="color:#F00">{{ pd_project_sum[_g] }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
                         </table>
                     </div>
                 </div>
