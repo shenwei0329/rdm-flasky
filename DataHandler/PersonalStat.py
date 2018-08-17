@@ -25,10 +25,11 @@ spi_for_honor = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟']
 spi_for_group = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟', u'吴昱珉',
                  u'杨飞', u'柏银', u'王学凯', u'饶定远', u'王宇',
                  u'杨勇', u'李诗', u'金日海', u'雷东东', u'蒲治国'
-                 u'何坤峰', u'刘伟'
+                 u'何坤峰', u'刘伟', u'许文宝',
                  ]
 """参与项目开发的部门"""
 pj_devel_dpt = [u'行业营销部',
+                u'行业营销事业部',
                 u'解决方案与交付中心',
                 u'新型智慧城市及运营商事业部',
                 u'外包']
@@ -47,6 +48,10 @@ class Personal:
         :return:
         """
 
+        """【注意】personal与members的区别
+            在personal中保存的是与部门相关的人员及其工作数据（任务和工作日志）
+            在members中仅保存公司所有（在职，包含外包）人员信息及其归属部门，注：外包人员归属项目/交付中心
+        """
         """人员集"""
         self.personal = {}
 
@@ -512,6 +517,10 @@ class Personal:
             for _p in self.personal:
                 """创建个人节点及其工作量链接
                 """
+
+                if _p in spi_for_group:
+                    continue
+
                 _node = {'name': _p}
                 if _node not in self.nodes:
                     self.nodes.append(_node)
@@ -546,3 +555,79 @@ class Personal:
 
         return echart_handler.sankey_charts('', self.nodes, self.links)
 
+    def buildSanKeyFrPj(self, date, PjList):
+        """
+        按指定日期（通常为一个月）构建"个人-任务量-项目"的sankey图
+        :param date: 一组日期（通常按一个月为一个单元），如[{'year': 2018, 'month': 3},...]
+        :param PjList: 项目节点
+        :return: echarts图
+        """
+
+        self.nodes = []
+        self.links = []
+
+        for _date in date:
+
+            """获取指定日期
+            """
+            year = _date['year']
+            month = _date['month']
+
+            """计算指定日期的起始、截止日期
+            """
+            _v = handler.cal_one_month(year, month)
+            _st_date = _v['st_date']
+            _ed_date = _v['ed_date']
+
+            for _pj in PjList:
+                """节点："项目"
+                """
+                _str = "%s @%d-%02d" % (_pj, year, month)
+
+                if {'name': _str} not in self.nodes:
+                    self.nodes.append({'name': _str})
+
+            for _p in self.personal:
+                """创建个人节点及其工作量链接
+                """
+                if _p in spi_for_group:
+                    continue
+
+                _node = {'name': _p}
+                if _node not in self.nodes:
+                    self.nodes.append(_node)
+
+                self.personal[_p].cal_plan_quota_for_pj(_st_date, _ed_date)
+                self.personal[_p].cal_quota_for_pj(_st_date, _ed_date)
+
+                _q, _ext_q = self.personal[_p].get_quota()
+                """建立"个人"与"日期"之间基于工作量的链接
+                """
+                for _pj in _q:
+                    _str = "%s @%d-%02d" % (_pj, year, month)
+                    self._add_link(_p, _str, _q[_pj])
+                    """
+                    logging.log(logging.WARN, ">>> PersonalStat.buildFrPjSanKey.addLink: %s,%s,%s" %
+                                (_p, _str, _q))
+                    """
+
+        return echart_handler.sankey_charts('', self.nodes, self.links)
+
+    def build_efficiency(self):
+        """
+        构建员工工作效率数据
+        :return:
+        """
+        _x = [0]
+        _y = [[]]
+        _i = 1
+        for _p in self.personal:
+            if _p in spi_for_group:
+                continue
+            _m = self.personal[_p].get_m()
+            _x.append(_i)
+            _y.append(_m)
+            logging.log(logging.WARN, u"Efficiency: %d: %s" % (_i, _p))
+            _i += 1
+
+        return _x, _y

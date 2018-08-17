@@ -33,7 +33,7 @@ low_ratio_value=1.1
 [HONOR]
 number_column=6
 pd_number_member=12
-pj_number_member=6
+pj_number_member=12
 rdm_number_member=6
 
 [MANGER]

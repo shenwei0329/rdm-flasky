@@ -23,7 +23,7 @@ import types
 import datetime
 import sys
 import PersonalStat
-from echart_handler import pie
+from echart_handler import pie, gauge
 import logging
 import ConfigParser
 import os
@@ -910,6 +910,9 @@ def get_imp_projects():
                 'FT': u'FT基础支撑平台',
                 'HBB17': u'HBB 17课题',
                 'BJXJC': u'BJ新机场',
+                'JTJD': u'金堂禁毒',
+                'HZZ': u'河长制',
+                'AH2': u'安徽2期',
                 }
     _personal = PersonalStat.Personal()
     _pjs = []
@@ -918,8 +921,18 @@ def get_imp_projects():
         _personal.clearData()
         _personal.scanProject(_p, u'项目开发', extTask)
         _pj_desc['personal_count'] = _personal.getNumbOfMember()
+        _pj_desc['total_task'] = 0
+        _pj_desc['wait_task'] = 0
+        _pj_desc['done_task'] = 0
+        _pj_desc['done_task'] = 0
+        _pj_desc['done_task'] = 0
+        _pj_desc['ratio'] = "0.00"
+        mongo_db.connect_db('ext_system')
+        _pj_desc['process'] = gauge("进度执行", mongo_db.handler('pj_doing', 'find', {u'项目简称': _p})[0][u'进度执行'])
+        _pj_desc['budget'] = gauge("预算执行", mongo_db.handler('pj_doing', 'find', {u'项目简称': _p})[0][u'预算执行'])
         if _personal.getNumbOfMember() == 0:
             logging.log(logging.WARN, ">>> project<%s> no personals" % _p)
+            _pjs.append(_pj_desc)
             continue
         mongo_db.connect_db(_p)
         _pj_desc['total_task'] = mongo_db.handler('issue', 'find', {}).count()

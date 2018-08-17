@@ -22,7 +22,8 @@ from pyecharts import Sankey,\
     Scatter,\
     Scatter3D,\
     Line,\
-    Pie
+    Pie,\
+    Gauge
 
 
 def get_geo(title, sub_title, addr_data):
@@ -105,7 +106,7 @@ def boxplot(title, x, y, size=None):
                                 width=320,
                                 height=180,
                                 title_pos="center",
-                                background_color='#f0f0f0',
+                                # background_color='#f0f0f0',
                           )
     else:
         scatter = Boxplot(
@@ -113,7 +114,7 @@ def boxplot(title, x, y, size=None):
                                 width=size['width'],
                                 height=size['height'],
                                 title_pos="center",
-                                background_color='#f0f0f0',
+                                # background_color='#f0f0f0',
                           )
     """计算箱体参数
     """
@@ -121,8 +122,8 @@ def boxplot(title, x, y, size=None):
 
     scatter.add("", x, _yaxis,
                 is_visualmap=False,
-                mark_line=['average'],
-                mark_point=['max', 'min'],
+                # mark_line=['average'],
+                # mark_point=['max', 'min'],
                 )
 
     scatter.options['yAxis'][0]['splitArea'] = True
@@ -193,7 +194,7 @@ def effectscatterByInd(title, datas, size=None):
                                 width=320,
                                 height=180,
                                 title_pos="center",
-                                background_color='#f0f0f0',
+                                # background_color='#f0f0f0',
         )
     else:
         scatter = EffectScatter(
@@ -201,7 +202,7 @@ def effectscatterByInd(title, datas, size=None):
                                 width=size['width'],
                                 height=size['height'],
                                 title_pos="center",
-                                background_color='#f0f0f0',
+                                # background_color='#f0f0f0',
         )
 
     for _val in datas:
@@ -380,5 +381,13 @@ def heatmap_is_calendar(title, year, datas, size=None):
               visual_top="80%",
               is_piecewise=True,
               )
+    chart.options['toolbox']['show'] = False
+    return chart.render_embed()
+
+
+def gauge(title, ratio):
+
+    chart = Gauge(title, title_pos='center', width=240)
+    chart.add("", "", ratio)
     chart.options['toolbox']['show'] = False
     return chart.render_embed()

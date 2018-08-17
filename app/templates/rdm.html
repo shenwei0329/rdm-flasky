@@ -39,21 +39,25 @@
                     </p>
                 </div>
                 {% if user["role"] <= 99 or user["role"] == 66 %}
-                <div class="container"><h2><b>近两周的资源池任务分布情况</b></h2>
+                <div class="container"><h2><b>近两周的资源池任务及效率情况</b></h2>
                     <p>
-                        注：图中每个点表示一个资源个体（员工），情况分三类：<br/>
-                        >：“大圈”表示负载饱和（承担的任务量超过40个工时）；<br/>
-                        >：“中圈”表示负载适中（承担的任务量在24至40个工时之间）；<br/>
-                        >：“小圈”表示负载欠缺（承担的任务量小于24个工时），
-                        两种解释：1）任务分配不足；2）执行效率高，即能快速完成分配的任务。
+                        <b>注1</b>：“任务分配”图中每个点表示一个资源（员工），情况分三类：<br/>
+                        &nbsp;&nbsp;•&nbsp;&nbsp;“大圈”表示负载饱和（承担的任务量超过40个工时）；<br/>
+                        &nbsp;&nbsp;•&nbsp;&nbsp;“中圈”表示负载适中（承担的任务量在24至40个工时之间）；<br/>
+                        &nbsp;&nbsp;•&nbsp;&nbsp;“小圈”表示负载欠缺（承担的任务量小于24个工时）。<br/>
+                        <b>注2</b>：“工作效率”图示了每个资源（员工）的任务执行效率统计特征，效率=估计工时/实际工时。
                     </p>
                     <table border="2">
+                        <tr style="text-align:center">
+                            <th width="400px" style="text-align:center">任务分配情况</th>
+                            <th width="800px" style="text-align:center">执行效率情况</th>
+                        </tr>
                         <tr>
                             <td>
                                 {{ task_ind_pd_org | safe }}
                             </td>
                             <td>
-                                {{ task_ind_pd | safe }}
+                                {{ pd_task_efficiency | safe }}
                             </td>
                         </tr>
                         <tr>
@@ -61,7 +65,7 @@
                                 {{ task_ind_pj_org | safe }}
                             </td>
                             <td>
-                                {{ task_ind_pj | safe }}
+                                {{ pj_task_efficiency | safe }}
                             </td>
                         </tr>
                         <tr>
@@ -69,7 +73,7 @@
                                 {{ task_ind_rdm_org | safe }}
                             </td>
                             <td>
-                                {{ task_ind_rdm | safe }}
+                                {{ test_task_efficiency | safe }}
                             </td>
                         </tr>
                     </table>
@@ -120,6 +124,9 @@
                 <div class="container"><h2><b>近三个月的资源投入组成：</b></h2>
                     <p>
                         {{  pic_sankey | safe }}
+                    </p>
+                    <p>
+                        {{  pic_pj_sankey | safe }}
                     </p>
                 </div>
                 <br/>

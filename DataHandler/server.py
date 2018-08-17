@@ -58,7 +58,8 @@ pd_databases = ['CPSJ',
 pj_databases = ['JX',
                 'GZ',
                 'SCGA',
-                'FT']
+                'FT',
+                'JTJD']
 
 # 研发管理与测试部
 rdm_databases = ['RDM',
@@ -964,7 +965,7 @@ def set_rdm_context():
     """
     # 近2周内的工作状态
     __week_date = handler.cal_date_weekly(2)
-    _dot_1w, _spent_doing_sum_1w = cal_task_ind_by_date('agg_doing',
+    _dot_1w, _spent_doing_sum_1w = cal_task_ind_by_date('spent_doing',
                                                         __week_date['st_date'],
                                                         __week_date['ed_date'])
     _org_dot_1w, _doing_sum_1w = cal_task_ind_by_date('doing',
@@ -1005,29 +1006,17 @@ def set_rdm_context():
             pd_project=_project,
             pd_project_sum=_project_sum,
             sorted=sorted,
-            task_ind_pd=echart_handler.effectscatterByInd('产品研发资源的当前负载执行情况',
-                                                          _dot_1w['pd'],
-                                                          size={'width': 500,
-                                                                'height': 120 + (pdPersonals.getNumbOfMember()/20)*60}),
-            task_ind_pj=echart_handler.effectscatterByInd('项目开发资源的当前负载执行情况',
-                                                          _dot_1w['pj'],
-                                                          size={'width': 500,
-                                                                'height': 120 + (pjPersonals.getNumbOfMember()/20)*60}),
-            task_ind_rdm=echart_handler.effectscatterByInd('测试资源的当前负载执行情况',
-                                                           _dot_1w['rdm'],
-                                                           size={'width': 500,
-                                                                 'height': 120 + (rdmPersonals.getNumbOfMember()/20)*60}),
-            task_ind_pd_org=echart_handler.effectscatterByInd('产品研发资源的当前分配负载情况',
+            task_ind_pd_org=echart_handler.effectscatterByInd('产品研发资源的任务分配情况',
                                                               _org_dot_1w['pd'],
-                                                              size={'width': 500,
+                                                              size={'width': 400,
                                                                     'height': 120 + (pdPersonals.getNumbOfMember()/20)*60}),
-            task_ind_pj_org=echart_handler.effectscatterByInd('项目开发资源的当前分配负载情况',
+            task_ind_pj_org=echart_handler.effectscatterByInd('项目开发资源的任务分配情况',
                                                               _org_dot_1w['pj'],
-                                                              size={'width': 500,
+                                                              size={'width': 400,
                                                                     'height': 120 + (pjPersonals.getNumbOfMember()/20)*60}),
-            task_ind_rdm_org=echart_handler.effectscatterByInd('测试资源的当前分配负载情况',
+            task_ind_rdm_org=echart_handler.effectscatterByInd('测试资源的任务分配情况',
                                                                _org_dot_1w['rdm'],
-                                                               size={'width': 500,
+                                                               size={'width': 400,
                                                                      'height': 120 + (rdmPersonals.getNumbOfMember()/20)*60}),
             task_pd=_pd_sum,
             task_pj=_pj_sum,
@@ -1073,6 +1062,20 @@ def set_rdm_context():
 
     __v = handler.cal_date_monthly(3)
     context['pic_sankey'] = pdPersonals.buildSanKey(__v['month'])
+    context['pic_pj_sankey'] = pjPersonals.buildSanKeyFrPj(__v['month'], ['FT', 'GZ', 'JTJD', 'JX', 'SCGA'])
+
+    _x, _y = pdPersonals.build_efficiency()
+    context['pd_task_efficiency'] = echart_handler.boxplot('产品中心资源执行效率',
+                                                           _x, _y,
+                                                           size={'width': 800, 'height': 200})
+    _x, _y = pjPersonals.build_efficiency()
+    context['pj_task_efficiency'] = echart_handler.boxplot('项目开发资源执行效率',
+                                                           _x, _y,
+                                                           size={'width': 800, 'height': 200})
+    _x, _y = rdmPersonals.build_efficiency()
+    context['test_task_efficiency'] = echart_handler.boxplot('测试资源执行效率',
+                                                             _x, _y,
+                                                             size={'width': 800, 'height': 200})
 
     return context
 
