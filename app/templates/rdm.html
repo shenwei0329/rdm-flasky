@@ -7,9 +7,18 @@
         <div class="head" id="A1">
             <div class="jumbotron">
                 <div class="container">
-                    <div  style="text-align:center">
+                    <div style="text-align:center" id="vueex">
                         <h1><b>研发管理信息系统</b></h1>
+                        <p v-text="msg"></p>
                     </div>
+                    <script>
+                        let vm = new Vue({
+                            el: '#vueex',
+                            data: {
+                                msg: 'Vue版本'
+                            }
+                        })
+                    </script>
                     <p>
                         共有{{ total }}人的工作行为进入系统（其中外包{{ ext_total }}人），记录了{{ total_worklog }}条工作日志。<br/>
                         产品研发中心有{{ pd_count }}人，项目开发有{{ pj_count }}人，

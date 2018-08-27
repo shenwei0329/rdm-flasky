@@ -618,16 +618,19 @@ class Personal:
         构建员工工作效率数据
         :return:
         """
-        _x = [0]
-        _y = [[]]
-        _i = 1
+        _x = []
+        _y = []
+        _i = 0
         for _p in self.personal:
             if _p in spi_for_group:
                 continue
             _m = self.personal[_p].get_m()
-            _x.append(_i)
+            if len(_m) == 0:
+                _m = [0]
+            # _x.append(_i)
+            _x.append(_p)
             _y.append(_m)
-            logging.log(logging.WARN, u"Efficiency: %d: %s" % (_i, _p))
+            logging.log(logging.WARN, u"Efficiency: %d: %s-<%s>" % (_i, _p, _m))
             _i += 1
 
         return _x, _y

@@ -67,6 +67,7 @@ email_str = {
     'marui@chinacloud.com.cn': 'pj_manager',
     'wujing@chinacloud.com.cn': 'pj_manager',
     'zhufeng@chinacloud.com.cn': 'pj_manager',
+    'lixiaolong@chinacloud.com.cn': 'pj_manager',
     'huaicuijing@chinacloud.com.cn': 'user',
     'liangkangli@chinacloud.com.cn': 'user',
     'weilihong@chinacloud.com.cn': 'user',

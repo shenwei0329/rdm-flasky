@@ -221,11 +221,8 @@ def effectscatterByInd(title, datas, size=None):
         scatter.add("", datas[_val]['x'], datas[_val]['y'],
                     is_visualmap=False,
                     visual_range_color=range_color,
-                    mark_line=['average'],
-                    mark_point=['max', 'min'],
                     effect_scale=_effect_scale,
                     symbol_size=_symbol_size,
-                    legend_top='bottom',
                     )
 
     scatter.options['toolbox']['show'] = False

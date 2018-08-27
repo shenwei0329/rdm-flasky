@@ -1,5 +1,6 @@
 import os
 from flask_migrate import Migrate
+from flask_vue import Vue
 from app import create_app, db
 from app.models import User, Role
 import sys
@@ -14,7 +15,7 @@ sys.setdefaultencoding('utf-8')
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db)
-
+Vue(app)
 
 @app.shell_context_processor
 def make_shell_context():
