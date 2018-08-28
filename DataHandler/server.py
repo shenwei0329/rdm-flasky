@@ -1000,7 +1000,7 @@ def set_rdm_context():
             total_material=_count,
             ext_personals_stat=_ext_personals_stat,
             ext_personals=handler.get_project_info('ext_personals_t'),
-            ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'已解决'))/2.),
+            ext_personals_count=int(float(handler.get_sum(_ext_personals_stat, u'外包人员总数量'))/2.),
             pd_count=pdPersonals.getNumbOfMember(),
             pj_count=pjPersonals.getNumbOfMember(),
             rdm_count=rdmPersonals.getNumbOfMember(),
