@@ -15,7 +15,7 @@
                         let vm = new Vue({
                             el: '#vueex',
                             data: {
-                                msg: 'Vue版本'
+                                msg: 'Vue.js版本'
                             }
                         })
                     </script>
@@ -47,7 +47,7 @@
                     项目成果数：<b style="color:#F00">{{ total_material }}</b>（项）
                     </p>
                 </div>
-                {% if user["role"] <= 99 or user["role"] == 66 %}
+
                 <div class="container"><h2><b>近两周的资源池任务及效率情况</b></h2>
                     <p>
                         <b>注1</b>：“任务分配”图中每个点表示一个资源（员工），情况分三类：<br/>
@@ -67,14 +67,6 @@
                             </td>
                             <td>
                                 {{ pd_task_efficiency | safe }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                {{ task_ind_pj_org | safe }}
-                            </td>
-                            <td>
-                                {{ pj_task_efficiency | safe }}
                             </td>
                         </tr>
                         <tr>
@@ -133,9 +125,6 @@
                 <div class="container"><h2><b>近三个月的资源投入组成：</b></h2>
                     <p>
                         {{  pic_sankey | safe }}
-                    </p>
-                    <p>
-                        {{  pic_pj_sankey | safe }}
                     </p>
                 </div>
                 <br/>
@@ -222,9 +211,9 @@
 
                 <br/>
 
-                <div class="container"><h3>测试中心投入明细-月计</h3>
-                    <button id="btn_test_center" type="button" value="year" onclick="btn_onclick_test_center(this.value)">显示</button>
-                    <div id="test_center_list" style="display: none;">（单位：工时）
+                <div id="test_info" class="container"><h3>测试中心投入明细-月计</h3>
+                    <button id="btn_test_center" type="button" v-on:click="say">显示</button>
+                    <div id="test_center_list" ref="test_list" style="display: none;">（单位：工时）
                         <table border="2">
                             <tr>
                                 <th width="300px" style="text-align:center">项目</th>
@@ -270,11 +259,27 @@
                             </tr>
                         </table>
                     </div>
+                    <script>
+                        new Vue({
+                            el: '#test_info',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.test_list.style.display=='none'){
+                                        this.$refs.test_list.style.display='block';
+                                        $("#btn_test_center").html('隐藏');
+                                    }else{
+                                        this.$refs.test_list.style.display='none';
+                                        $("#btn_test_center").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script>
                 </div>
 
-                <div class="container"><h3>产品研发资源在非产品类任务的投入明细-总计</h3>
-                    <button id="btn_desc" type="button" value="show" onclick="btn_onclick(this.value)">显示</button>
-                    <div id="producting_list" style="display: none;">（单位：工时）
+                <div id="pd_info" class="container"><h3>产品研发资源在非产品类任务的投入明细-总计</h3>
+                    <button id="btn_desc" type="button" v-on:click="say">显示</button>
+                    <div id="producting_list" ref="pd_list" style="display: none;">（单位：工时）
                         <table border="2">
                             <tr>
                                 <th width="300px" style="text-align:center">项目</th>
@@ -300,13 +305,30 @@
                             {% endfor %}
                         </table>
                     </div>
+                    <script>
+                        new Vue({
+                            el: '#pd_info',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.pd_list.style.display=='none'){
+                                        this.$refs.pd_list.style.display='block';
+                                        $("#btn_desc").html('隐藏');
+                                    }else{
+                                        this.$refs.pd_list.style.display='none';
+                                        $("#btn_desc").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script>
                 </div>
 
                 <br/>
 
-                <div class="container"><h3>产品研发资源在非产品类任务的投入明细-月计</h3>
-                    <button id="btn_year_desc" type="button" value="year" onclick="btn_onclick(this.value)">显示</button>
-                    <div id="producting_year_list" style="display: none;">（单位：工时）
+                <div id='pd_pj_month' class="container"><h3>产品研发资源在非产品类任务的投入明细-月计</h3>
+                    <button id="btn_year_desc" type="button" v-on:click="say">显示
+                    </button>
+                    <div id="producting_year_list" ref="pd_year_list" style="display: none;">（单位：工时）
                         <table border="2">
                             <tr>
                                 <th width="300px" style="text-align:center">项目</th>
@@ -352,110 +374,28 @@
                             </tr>
                         </table>
                     </div>
+                    <script>
+                        new Vue({
+                            el: '#pd_pj_month',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.pd_year_list.style.display=='none'){
+                                        this.$refs.pd_year_list.style.display='block';
+                                        $("#btn_year_desc").html('隐藏');
+                                    }else{
+                                        this.$refs.pd_year_list.style.display='none';
+                                        $("#btn_year_desc").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script>
                 </div>
 
-                {% endif %}
-
-                <div class="container"><h2><b>外包资源情况</b></h2>
-                    <p><h3>资源统计</h3>
-                    </p>
-                    <div>
-                    <table border="2">
-                            <tr style="text-align:center">
-                                <th width="240px" style="text-align:center">项目</th>
-                                <th width="160px" style="text-align:center">负责人</th>
-                                <th width="120px" style="text-align:center">外包人数</th>
-                                <th width="480px" style="text-align:center">备注</th>
-                            </tr>
-                            {% for _v in ext_personals_stat %}
-                            <tr>
-                                <td style="text-align:left">{{ _v['项目名称'] }}</td>
-                                <td style="text-align:center">{{ _v['项目经理'] }}</td>
-                                <td style="text-align:center">{{ _v['已解决'] }}</td>
-                                <td style="text-align:left">{{ _v['备注'] }}</td>
-                            </tr>
-                            {% endfor %}
-                        </table>
-                        {% if user["role"] <= 99 or user["role"] == 66 %}
-                        <br/>
-                        <h3>资源明细</h3>
-                        <button id="btn_ext" type="button" value="show" onclick="btn_onclick_ext(this.value)">显示</button>
-                        <div id="ext_personal_list" style="display: none;">
-                            <br/>
-                            <table border="2">
-                                <tr style="text-align:center">
-                                    <th width="240px" style="text-align:center">部门</th>
-                                    <th width="160px" style="text-align:center">项目</th>
-                                    <th width="120px" style="text-align:center">负责人</th>
-                                    <th width="120px" style="text-align:center">人员</th>
-                                    <th width="200px" style="text-align:center">期限</th>
-                                    <th width="180px" style="text-align:center">供应商</th>
-                                    <th width="220px" style="text-align:center">岗位</th>
-                                    <th width="100px" style="text-align:center">工作地点</th>
-                                    <th width="120px" style="text-align:center">备注</th>
-                                </tr>
-                                {% for _v in ext_personals %}
-                                <tr>
-                                    <td style="text-align:left">{{ _v['部门'] }}</td>
-                                    <td style="text-align:left">{{ _v['项目'] }}</td>
-                                    <td style="text-align:center">{{ _v['负责人'] }}</td>
-                                    <td style="text-align:center">{{ _v['姓名'] }}</td>
-                                    <td style="text-align:center">{{ _v['使用期限'] }}</td>
-                                    <td style="text-align:center">{{ _v['所属供应商'] }}</td>
-                                    <td style="text-align:center">{{ _v['所任岗位角色'] }}</td>
-                                    <td style="text-align:center">{{ _v['工作地点'] }}</td>
-                                    <td style="text-align:center">{{ _v['备注'] }}</td>
-                                </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
             </div>
         </div>
         <br>
         <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
 </div>
-
-<script type="text/javascript">
-    function btn_onclick(value){
-        if (value=='year'){
-            if (document.getElementById("producting_year_list").style.display=='none'){
-                document.getElementById("producting_year_list").style.display='block';
-                $("#btn_year_desc").html('隐藏');
-            }else{
-                document.getElementById("producting_year_list").style.display='none';
-                $("#btn_year_desc").html('显示');
-            }
-        }else{
-            if (document.getElementById("producting_list").style.display=='none'){
-                document.getElementById("producting_list").style.display='block';
-                $("#btn_desc").html('隐藏');
-            }else{
-                document.getElementById("producting_list").style.display='none';
-                $("#btn_desc").html('显示');
-            }
-        }
-    }
-    function btn_onclick_ext(value){
-        if (document.getElementById("ext_personal_list").style.display=='none'){
-            document.getElementById("ext_personal_list").style.display='block';
-            $("#btn_ext").html('隐藏');
-        }else{
-            document.getElementById("ext_personal_list").style.display='none';
-            $("#btn_ext").html('显示');
-        }
-    }
-    function btn_onclick_test_center(value){
-        if (document.getElementById("test_center_list").style.display=='none'){
-            document.getElementById("test_center_list").style.display='block';
-            $("#btn_test_center").html('隐藏');
-        }else{
-            document.getElementById("test_center_list").style.display='none';
-            $("#btn_test_center").html('显示');
-        }
-    }
-</script>
 
 {% endblock %}

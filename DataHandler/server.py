@@ -105,12 +105,12 @@ def build_index():
     key_index.set(set_context())
 
 
-def build_rdm():
+def build_rdm(_context):
     """
     构建“研发管理”内容
     :return: 内容
     """
-    key_rdm.set(set_rdm_context())
+    key_rdm.set(_context)
 
 
 def build_product():
@@ -167,21 +167,22 @@ def build_project():
     构建“项目管理”内容
     :return: 内容
     """
+    _context = set_rdm_context()
     _pj = handler.get_project_info('pj_deliver_t')
     _val = handler.get_project_info('pj_ing_t')
     _imp_pj = handler.get_imp_projects()
     _pj_managers = handler.get_pj_managers()
-    _context = dict(
-        projects=_pj,
-        pj_count=len(_pj),
-        pre_projects=_val,
-        pre_pj_count=len(_val),
-        pre_quota=handler.get_sum(_val, u'规模'),
-        imp_projects=_imp_pj,
-        pj_managers=_pj_managers,
-        pj_manager_count=len(_pj_managers),
-    )
+    _context['projects'] = _pj
+    _context['pj_count'] = len(_pj)
+    _context['pre_projects'] = _val
+    _context['pre_pj_count'] = len(_val)
+    _context['pre_quota'] = handler.get_sum(_val, u'规模')
+    _context['imp_projects'] = _imp_pj
+    _context['pj_managers'] = _pj_managers
+    _context['pj_manager_count'] = len(_pj_managers)
+
     key_project.set(_context)
+    return _context
 
 
 def build_honor():
@@ -1352,9 +1353,9 @@ def main():
     print(">>> build_pd_select <<<")
     build_pd_select()
     print(">>> build_project <<<")
-    build_project()
+    _cont = build_project()
     print(">>> build_rdm <<<")
-    build_rdm()
+    build_rdm(_cont)
     print(">>> build_manager <<<")
     build_manager()
 
