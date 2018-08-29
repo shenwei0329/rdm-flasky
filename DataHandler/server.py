@@ -964,6 +964,15 @@ def set_rdm_context():
 
     """资源池情况
     """
+    # 本年度
+    _dot, _spent_doing_sum = cal_task_ind_by_date('spent_doing', st_date, ed_date)
+    __dot, _spent_done_sum = cal_task_ind_by_date('spent_done', st_date, ed_date)
+    _org_dot, _doing_sum = cal_task_ind_by_date('doing', st_date, ed_date)
+
+    _dot_1m, _spent_doing_sum_1m = cal_task_ind_by_date('spent_doing', _st_date_1m, _ed_date_1m)
+    __dot, _spent_done_sum_1m = cal_task_ind_by_date('spent_done', _st_date_1m, _ed_date_1m)
+    _org_dot_1m, _doing_sum_1m = cal_task_ind_by_date('doing', _st_date_1m, _ed_date_1m)
+
     # 近2周内的工作状态
     __week_date = handler.cal_date_weekly(2)
     _dot_1w, _spent_doing_sum_1w = cal_task_ind_by_date('spent_doing',
@@ -974,14 +983,6 @@ def set_rdm_context():
                                                       __week_date['ed_date'],
                                                       be_log=True
                                                       )
-
-    _dot, _spent_doing_sum = cal_task_ind_by_date('spent_doing', st_date, ed_date)
-    __dot, _spent_done_sum = cal_task_ind_by_date('spent_done', st_date, ed_date)
-    _org_dot, _doing_sum = cal_task_ind_by_date('doing', st_date, ed_date)
-
-    _dot_1m, _spent_doing_sum_1m = cal_task_ind_by_date('spent_doing', _st_date_1m, _ed_date_1m)
-    __dot, _spent_done_sum_1m = cal_task_ind_by_date('spent_done', _st_date_1m, _ed_date_1m)
-    _org_dot_1m, _doing_sum_1m = cal_task_ind_by_date('doing', _st_date_1m, _ed_date_1m)
 
     context = dict(
             total=pdPersonals.getNumbOfMember() +
@@ -1061,10 +1062,6 @@ def set_rdm_context():
             test_task_sum=_tc_project_sum,
         )
 
-    __v = handler.cal_date_monthly(3)
-    context['pic_sankey'] = pdPersonals.buildSanKey(__v['month'])
-    context['pic_pj_sankey'] = pjPersonals.buildSanKeyFrPj(__v['month'], ['FT', 'GZ', 'JTJD', 'JX', 'SCGA'])
-
     _x, _y = pdPersonals.build_efficiency()
     context['pd_task_efficiency'] = echart_handler.boxplot('产品中心资源执行效率',
                                                            _x, _y,
@@ -1077,6 +1074,10 @@ def set_rdm_context():
     context['test_task_efficiency'] = echart_handler.boxplot('测试资源执行效率',
                                                              _x, _y,
                                                              size={'width': 800, 'height': 200})
+
+    __v = handler.cal_date_monthly(3)
+    context['pic_sankey'] = pdPersonals.buildSanKey(__v['month'])
+    context['pic_pj_sankey'] = pjPersonals.buildSanKeyFrPj(__v['month'], ['FT', 'GZ', 'JTJD', 'JX', 'SCGA'])
 
     return context
 

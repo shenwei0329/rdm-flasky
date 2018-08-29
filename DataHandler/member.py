@@ -260,6 +260,11 @@ class Member:
                 else:
                     _quota += (_spent_time * _miu)
 
+        """
+        print(u">>>[%s]:%s" % (self.name, _m))
+        if u'焦瑶前' in self.name:
+            print(u">>><%s %s> [%s]:%s" % (st_date, ed_date, self.name, _m))
+        """
         self.m = _m
         self.quota = _quota
         self.ext_quota = _ext_quota
@@ -326,6 +331,11 @@ class Member:
 
             _ret[_pj_name] = _quota
 
+        """
+        print(u">>>[%s]:%s" % (self.name, _m))
+        if u'焦瑶前' in self.name:
+            print ">>> !!! :", _m
+        """
         self.m = _m
         self.quota = _ret
         self.ext_quota = _ret
