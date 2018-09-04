@@ -59,7 +59,10 @@ pj_databases = ['JX',
                 'GZ',
                 'SCGA',
                 'FT',
-                'JTJD']
+                'JTJD',
+                'BJXJC',
+                'HBB17',
+                ]
 
 # 研发管理与测试部
 rdm_databases = ['RDM',
@@ -87,6 +90,8 @@ level = [u'职级1',
 st_date = '2018-01-01'
 ed_date = '2018-12-31'
 
+"""全员"""
+allPersonals = None
 """产品研发中心人员"""
 pdPersonals = None
 """项目开发人员"""
@@ -1110,13 +1115,48 @@ def cal_ext_task_desc():
     return _stat
 
 
+def cal_personal_monthly_work_hour(year, mon):
+    """
+    统计所有员工的月计工时数
+    :param year: 年份
+    :param mon: 月份
+    :return: 工时数
+    """
+    global allPersonals, extTask
+
+    _val = {}
+    date = handler.cal_one_month_by_finance(year, mon)
+    allPersonals.setDate(date=date, whichdate="updated")
+    for _db in pd_databases:
+        allPersonals.scanProject(_db, u'产品研发中心', extTask)
+    for _db in pj_databases:
+        allPersonals.scanProject(_db, u'项目开发', extTask)
+    for _db in rdm_databases:
+        allPersonals.scanProject(_db, u'研发管理与测试部', extTask)
+    for _m in allPersonals.getPersonal():
+        _val[_m] = {}
+        _val[_m]['duty'] = handler.cal_personal_checkon(_m, date['st_date'], date['ed_date'])
+        _member = allPersonals.getPersonal(name=_m)
+        _task = _member.get_task()
+        _wh = 0.
+        for _t in _task:
+            if _t['spent_time'] is not None:
+                _wh += _t['spent_time']
+        _wh = _wh/3600.
+        _val[_m]['spent'] = _wh
+
+    return _val
+
+
 def init_data():
-    global pdPersonals, pjPersonals, rdmPersonals, pd_databases, pj_databases, rdm_databases,\
+    global allPersonals, pdPersonals, pjPersonals, rdmPersonals, pd_databases, pj_databases, rdm_databases,\
         st_date, ed_date, today, extTask
 
     today = datetime.date.today()
     ed_date = today.strftime("%Y-%m-%d")
 
+    """全员"""
+    allPersonals = PersonalStat.Personal()
     """产品研发中心人员"""
     pdPersonals = PersonalStat.Personal()
     """项目开发人员"""
@@ -1340,6 +1380,14 @@ def main():
     # 初始化环境数据
     init_data()
     handler.extTask = extTask
+
+    """
+    _v = cal_personal_monthly_work_hour(2018, 7)
+    for __v in _v:
+        print __v, _v[__v]['duty'], _v[__v]['spent']
+
+    return
+    """
 
     print(">>> build_index <<<")
     build_index()

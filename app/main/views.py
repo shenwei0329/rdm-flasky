@@ -121,3 +121,11 @@ def manager():
         return redirect(url_for('auth.login'))
 
     return render_template('manager.html', **get_context(key_manage))
+
+
+@main.route('/finance')
+def finance():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('finance.html', **get_context(key_rdm))

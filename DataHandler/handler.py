@@ -1325,7 +1325,7 @@ def is_date_aft(dateA, dateB):
     # logging.log(logging.WARN,">>> is_date_aft dateA=%s, dateB=%s" % (dateA, dateB))
     _time1 = datetime.datetime.strptime(dateA, "%Y-%m-%d")
     _time2 = datetime.datetime.strptime(dateB, "%Y-%m-%d")
-    return _time1 > _time2
+    return _time1 >= _time2
 
 
 def cal_one_month(year, month):
@@ -1350,10 +1350,10 @@ def cal_one_month_by_finance(year, month):
     :return: {'st_date': 起始日期, 'ed_date': 截止日期}
     """
     _day = int(conf.get('FINANCE', 'day'))
-    if month == 1:
-        return {"st_date": "%d-12-%02d" % (year-1, _day), "ed_date": "%d-%02d-%02d" % (year, month, _day)}
+    if month == 12:
+        return {"st_date": "%d-01-%02d" % (year+1, _day), "ed_date": "%d-%02d-%02d" % (year, month, _day)}
     else:
-        return {"st_date": "%d-%02d-%02d" % (year, month-1, _day), "ed_date": "%d-%02d-%02d" % (year, month, _day)}
+        return {"st_date": "%d-%02d-%02d" % (year, month, _day), "ed_date": "%d-%02d-%02d" % (year, month+1, _day)}
 
 
 def cal_personal_checkon(personal, st_date, ed_date):
@@ -1364,21 +1364,28 @@ def cal_personal_checkon(personal, st_date, ed_date):
     :param ed_date: 出勤截止日期
     :return: 统计工时
     """
+    global mysql_db
     """统计上午出勤工时"""
-    _sql = u'select count(*) from checkon_t where KQ_NAME="%s" and created_at>="%s" and created_at<"%s" and' %\
-           (personal, st_date, ed_date)
-    _sql += u' (KQ_AM_STATE="正常" OR KQ_AM_STATE like "迟到%" OR KQ_AM_STATE="出差")'
+    _sql = u'select KQ_DATE from checkon_t where KQ_NAME="%s" and ' % personal
+    _sql += u'(KQ_AM_STATE="正常" OR KQ_AM_STATE like "迟到%" OR KQ_AM_STATE="出差")'
 
-    _count = mysql_db.count(_sql)
-    _total = _count * 4
+    _total = 0
+    _cur = mysql_db.do(_sql)
+    for _rec in _cur:
+        _date = '20' + _rec[0].split('^')[0][:8]
+        if is_date_aft(_date, st_date) and is_date_bef(_date, ed_date):
+            _total += 4
+            print personal, "AM: ", _date, st_date, ed_date, _total
 
     """统计下午出勤工时"""
-    _sql = u'select count(*) from checkon_t where KQ_NAME="%s" and created_at>="%s" and created_at<"%s" and' % \
-           (personal, st_date, ed_date)
+    _sql = u'select KQ_DATE from checkon_t where KQ_NAME="%s" and ' % personal
     _sql += u' (KQ_PM_STATE="正常" OR KQ_PM_STATE like "迟到%" OR KQ_PM_STATE="出差")'
-
-    _count = mysql_db.count(_sql)
-    _total += _count * 4
+    _cur = mysql_db.do(_sql)
+    for _rec in _cur:
+        _date = '20' + _rec[0].split('^')[0][:8]
+        if is_date_aft(_date, st_date) and is_date_bef(_date, ed_date):
+            _total += 4
+            print personal, "PM: ", _date, st_date, ed_date, _total
 
     return _total
 
