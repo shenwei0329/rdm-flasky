@@ -627,8 +627,9 @@ class Personal:
             _m = self.personal[_p].get_m()
             if len(_m) == 0:
                 _m = [0]
-            # _x.append(_i)
-            _x.append(_p)
+            _x.append(_i)
+            """标注员工名称！！！"""
+            # _x.append(_p)
             _y.append(_m)
             logging.log(logging.WARN, u"Efficiency: %d: %s-<%s>" % (_i, _p, _m))
             _i += 1

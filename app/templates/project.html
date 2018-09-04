@@ -186,8 +186,7 @@
                             <tr>
                                 <th width="200px" style="text-align:center">项目信息</th>
                                 <th width="300px" style="text-align:center">任务情况</th>
-                                <th width="240px" style="text-align:center">进度执行</th>
-                                <th width="240px" style="text-align:center">预算执行</th>
+                                <th width="240px" style="text-align:center">执行情况</th>
                             </tr>
                             {% for _p in imp_projects %}
                             <tr>
@@ -207,9 +206,6 @@
                                 </td>
                                 <td style="text-align:center">
                                 <p>{{ _p['process'] | safe }}</p>
-                                </td>
-                                <td style="text-align:center">
-                                <p>{{ _p['budget'] | safe }}</p>
                                 </td>
                             </tr>
                             {% endfor %}

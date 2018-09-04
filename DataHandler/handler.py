@@ -23,7 +23,7 @@ import types
 import datetime
 import sys
 import PersonalStat
-from echart_handler import pie, gauge
+from echart_handler import pie, bar_x
 import logging
 import ConfigParser
 import os
@@ -928,8 +928,11 @@ def get_imp_projects():
         _pj_desc['done_task'] = 0
         _pj_desc['ratio'] = "0.00"
         mongo_db.connect_db('ext_system')
-        _pj_desc['process'] = gauge("进度执行", mongo_db.handler('pj_doing', 'find', {u'项目简称': _p})[0][u'进度执行'])
-        _pj_desc['budget'] = gauge("预算执行", mongo_db.handler('pj_doing', 'find', {u'项目简称': _p})[0][u'预算执行'])
+        _pj_desc['process'] = bar_x("",
+                                    ["进度执行", "预算执行"],
+                                    [mongo_db.handler('pj_doing', 'find', {u'项目简称': _p})[0][u'进度执行'],
+                                     mongo_db.handler('pj_doing', 'find', {u'项目简称': _p})[0][u'预算执行']]
+                                    )
         if _personal.getNumbOfMember() == 0:
             logging.log(logging.WARN, ">>> project<%s> no personals" % _p)
             _pjs.append(_pj_desc)
@@ -1337,3 +1340,45 @@ def cal_one_month(year, month):
     last_day = calendar.monthrange(year, month)[1]
 
     return {"st_date": "%d-%02d-01" % (year, month), "ed_date": "%d-%02d-%02d" % (year, month, last_day)}
+
+
+def cal_one_month_by_finance(year, month):
+    """
+    计算某年某个月份的财务月统计日期，财务要求从上一月份10日起至本月10日前计算。
+    :param year: 年份
+    :param month: 月份
+    :return: {'st_date': 起始日期, 'ed_date': 截止日期}
+    """
+    _day = int(conf.get('FINANCE', 'day'))
+    if month == 1:
+        return {"st_date": "%d-12-%02d" % (year-1, _day), "ed_date": "%d-%02d-%02d" % (year, month, _day)}
+    else:
+        return {"st_date": "%d-%02d-%02d" % (year, month-1, _day), "ed_date": "%d-%02d-%02d" % (year, month, _day)}
+
+
+def cal_personal_checkon(personal, st_date, ed_date):
+    """
+    统计人员出勤工时
+    :param personal: 人员
+    :param st_date: 出勤起始日期
+    :param ed_date: 出勤截止日期
+    :return: 统计工时
+    """
+    """统计上午出勤工时"""
+    _sql = u'select count(*) from checkon_t where KQ_NAME="%s" and created_at>="%s" and created_at<"%s" and' %\
+           (personal, st_date, ed_date)
+    _sql += u' (KQ_AM_STATE="正常" OR KQ_AM_STATE like "迟到%" OR KQ_AM_STATE="出差")'
+
+    _count = mysql_db.count(_sql)
+    _total = _count * 4
+
+    """统计下午出勤工时"""
+    _sql = u'select count(*) from checkon_t where KQ_NAME="%s" and created_at>="%s" and created_at<"%s" and' % \
+           (personal, st_date, ed_date)
+    _sql += u' (KQ_PM_STATE="正常" OR KQ_PM_STATE like "迟到%" OR KQ_PM_STATE="出差")'
+
+    _count = mysql_db.count(_sql)
+    _total += _count * 4
+
+    return _total
+

@@ -98,6 +98,36 @@ def bar(title, attr, datas):
     return bar.render_embed()
 
 
+def bar_x(title, attr, data):
+
+    bar = Bar(title,
+              width=320,
+              height=180,
+              title_pos="center",
+              # background_color='#b0bab9',
+              )
+    bar.add(attr[0],
+            [attr[0]],
+            [data[0]],
+            # is_stack=False,
+            # legend_top='bottom',
+            is_label_show=True,
+            label_pos='inside',
+            )
+    bar.add(attr[1],
+            [attr[1]],
+            [data[1]],
+            # is_stack=False,
+            # legend_top='bottom',
+            is_label_show=True,
+            label_pos='inside',
+            is_convert=True,
+            )
+
+    bar.options['toolbox']['show'] = False
+    return bar.render_embed()
+
+
 def boxplot(title, x, y, size=None):
 
     if size is None:
