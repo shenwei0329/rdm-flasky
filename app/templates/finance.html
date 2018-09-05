@@ -20,13 +20,16 @@
                         })
                     </script>
                     <p>
-                        说明：本网页的内容是按照公司财务部门提出需求制作。<br/>
+                        本网页的内容是按照公司财务部门提出需求制作。<br/>
+                        以下所指“项目”皆包含产品项目和市场项目，研发人员包括：产品研发中心、测试部人员。<br/>
+                        研发人员在各项目实际投入的工时，将研发人工成本分摊至各项目。<br/>
                     </p>
                 </div>
             </div>
         </div>
         <br>
         <div class="container">
+
                 <div class="container"><h3>产品研发资源在产品类任务的投入明细-总计</h3>
                     <div id="pd_list">（单位：工时）
                         <table border="2">
@@ -108,6 +111,72 @@
                 </div>
 
                 <br/>
+
+                {% if user["role"] <= 2 %}
+
+                <div id='monthly_work_hour' class="container"><h3>研发中心月工时明细表</h3>
+                    <p>
+                        统计范围：研发人员每人每月的工时，如有不在项目上的工时则单列一列（例如“其他”）。
+                    </p>
+                    <div id="month_selectd"><h4><b style="color:#F00">选择月份：</b></h4></div>
+                    <table>
+                        <tr style="text-align:center">
+                            {% for month in range(1,13) %}
+                            <th width="50px" style="text-align:center">
+                                <input name="monthchkbtn" type="checkbox" value="{{ month }}" v-on:click="say({{ month}})">{{ month }}月</input>
+                            </th>
+                            {% endfor %}
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="100"  v-on:click="say(100)">全选</button>
+                            </th>
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="0"  v-on:click="say(0)">全清</button>
+                            </th>
+                            <th width="120px" style="text-align:center">
+                                <button ref="report_btn" type="button" style="display: none; color:#F00" value="200"  v-on:click="say(200)">获取报告</button>
+                            </th>
+                        </tr>
+                    </table>
+                    <script>
+                        new Vue({
+                            el: '#monthly_work_hour',
+                            methods: {
+                                say: function (value){
+                                    var str = "";
+                                    var items = document.getElementsByName("monthchkbtn");
+                                    for (var m = 0; m < 12; m++) {
+                                        if (value==100) {
+                                            items[m].checked = true
+                                        }
+                                        if (value==0) {
+                                            items[m].checked = false
+                                        }
+                                        if (items[m].checked) {
+                                            str += (m+1)+',';
+                                        }
+                                    }
+                                    if (value<200) {
+                                        if (str=="") {
+                                            this.$refs.report_btn.style.display='none';
+                                        }
+                                        else {
+                                            this.$refs.report_btn.style.display='block';
+                                        }
+                                        $("#month_selectd").html('<h4><b style="color:#F00">选择月份：'+
+                                        str+'</b></h4>');
+                                    }
+                                    else {
+                                        alert(">>> 正在建设中 <<<");
+                                    }
+                                }
+                            }
+                        })
+                    </script>
+                </div>
+
+                <br/>
+
+                {% endif %}
 
                 <div id="test_info" class="container"><h3>测试中心投入明细-月计</h3>
                     <button id="btn_test_center" type="button" v-on:click="say">显示</button>

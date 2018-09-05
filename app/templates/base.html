@@ -46,7 +46,7 @@
                 {% if user["role"] == 66 %}
                 <li><a href="{{ url_for('main.manager') }}" style="font-size:12px">管理员</a></li>
                 {% endif %}
-                {% if user["role"] <= 2 %}
+                {% if user["role"] <= 4 %}
                 <li><a href="{{ url_for('main.finance') }}" style="font-size:12px">财务统计</a></li>
                 {% endif %}
                 {% endif %}
