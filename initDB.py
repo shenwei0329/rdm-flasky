@@ -70,6 +70,7 @@ email_str = {
     'lixiaolong@chinacloud.com.cn': 'pj_manager',
     'lixiaowei@chinacloud.com.cn': 'pj_manager',
     'wangwei_sh@chinacloud.com.cn': 'pj_manager',
+    'liuyichun@chinacloud.com.cn': 'pj_manager',
 
     'huaicuijing@chinacloud.com.cn': 'user',
     'liangkangli@chinacloud.com.cn': 'user',
@@ -183,7 +184,7 @@ email_str = {
     'leilei@chinacloud.com.cn': 'user',
     'liuweiping@chinacloud.com.cn': 'user',
     'liuxiaoxiong@chinacloud.com.cn': 'user',
-    'liuyichun@chinacloud.com.cn': 'user',
+    # 'liuyichun@chinacloud.com.cn': 'user',
     'menghongyang@chinacloud.com.cn': 'user',
     'shenguo@chinacloud.com.cn': 'user',
     'sunshasha@chinacloud.com.cn': 'user',
@@ -297,4 +298,25 @@ def init_users():
             db.session.commit()
 
             print(">>> user: %s , password: %s" % (_email, _password))
+
+        else:
+
+            if _email == "liuyichun@chinacloud.com.cn":
+
+                role = Role.query.filter_by(name=_email).first()
+                if role is not None:
+
+                    print(">>> role [%s, %d, %d]" % (_email, role.level, role_str[email_str[_email]]))
+                    db.session.delete(role)
+
+                else:
+                    role = Role()
+                    role.name = _email
+                    role.level = role_str[email_str[_email]]
+                    role.secretkey = '20131226'
+                    db.session.add(role)
+                    db.session.commit()
+
+                    print(">>> role: %s, to %d" % (_email, role.level))
+
 

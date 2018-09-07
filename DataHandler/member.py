@@ -28,8 +28,8 @@
 
 import mongodb_class
 import handler
-import logging
 import sys
+import logging
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -198,11 +198,12 @@ class Member:
         """
         return self.plan_quota, self.ext_plan_quota
 
-    def cal_quota(self, st_date, ed_date):
+    def cal_quota(self, st_date, ed_date, log_enabled=False):
         """
         计算个人完成工作量
         :param st_date: 起始日期
         :param ed_date: 截止日期
+        :param log_enabled: 是否记录日志
         :return:
         """
 
@@ -260,20 +261,19 @@ class Member:
                 else:
                     _quota += (_spent_time * _miu)
 
-        """
-        print(u">>>[%s]:%s" % (self.name, _m))
-        if u'焦瑶前' in self.name:
-            print(u">>><%s %s> [%s]:%s" % (st_date, ed_date, self.name, _m))
-        """
+        if log_enabled:
+            logging.log(logging.WARN, u">>>个人任务完成记录：<%s>-<%s> [%s]:%s" % (st_date, ed_date, self.name, _m))
+
         self.m = _m
         self.quota = _quota
         self.ext_quota = _ext_quota
 
-    def cal_quota_for_pj(self, st_date, ed_date):
+    def cal_quota_for_pj(self, st_date, ed_date, log_enabled=False):
         """
         计算个人完成工作量（面向项目资源）
         :param st_date: 起始日期
         :param ed_date: 截止日期
+        :param log_enabled: 是否记录日志
         :return:
         """
 
@@ -331,11 +331,9 @@ class Member:
 
             _ret[_pj_name] = _quota
 
-        """
-        print(u">>>[%s]:%s" % (self.name, _m))
-        if u'焦瑶前' in self.name:
-            print ">>> !!! :", _m
-        """
+        if log_enabled:
+            logging.log(logging.WARN, u">>>个人任务完成记录：<%s>-<%s> [%s]:%s" % (st_date, ed_date, self.name, _m))
+
         self.m = _m
         self.quota = _ret
         self.ext_quota = _ret

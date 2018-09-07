@@ -289,12 +289,13 @@ def cal_task_ind_by_date(_type, _st_date, _ed_date, be_log=False):
     :param _type: 日期项，created/updated
     :param _st_date: 起始日期
     :param _ed_date: 截止日期
+    :param be_log: 是否记录日志
     :return: 统计结果
     """
     global pdPersonals, pjPersonals, rdmPersonals
 
     """设置统计日期，并完成相关统计"""
-    set_personal_date(_st_date, _ed_date)
+    set_personal_date(_st_date, _ed_date, be_log=be_log)
 
     _sum = 0
     _personal = {}
@@ -426,11 +427,12 @@ def set_manager_context():
     return _context
 
 
-def set_personal_date(_st_date, _ed_date):
+def set_personal_date(_st_date, _ed_date, be_log=False):
     """
     设置人员的统计起止日期，并完成任务、工作指标计算
     :param _st_date: 开始日期
     :param _ed_date: 截止日期
+    :param be_log: 是否记录日志
     :return:
     """
 
@@ -448,9 +450,9 @@ def set_personal_date(_st_date, _ed_date):
 
     """计算人员的工作量
     """
-    pdPersonals.calWorkInd()
-    pjPersonals.calWorkInd()
-    rdmPersonals.calWorkInd()
+    pdPersonals.calWorkInd(be_log=be_log)
+    pjPersonals.calWorkInd(be_log=be_log)
+    rdmPersonals.calWorkInd(be_log=be_log)
 
 
 def set_honor_context(_st_date, _ed_date):
@@ -980,13 +982,15 @@ def set_rdm_context():
 
     # 近2周内的工作状态
     __week_date = handler.cal_date_weekly(2)
+    """
     _dot_1w, _spent_doing_sum_1w = cal_task_ind_by_date('spent_doing',
                                                         __week_date['st_date'],
-                                                        __week_date['ed_date'])
+                                                        __week_date['ed_date'],
+                                                        be_log=True)
+    """
     _org_dot_1w, _doing_sum_1w = cal_task_ind_by_date('doing',
                                                       __week_date['st_date'],
                                                       __week_date['ed_date'],
-                                                      be_log=True
                                                       )
 
     context = dict(

@@ -377,13 +377,13 @@ class Personal:
                     _cnt += 1
             return _cnt
 
-    def calWorkInd(self):
+    def calWorkInd(self, be_log=False):
         """
         计算个人工作量指标
         :return: 个人工作量指标集合
         """
         for _p in self.personal:
-            self.personal[_p].cal_quota(self.st_date, self.ed_date)
+            self.personal[_p].cal_quota(self.st_date, self.ed_date, log_enabled=be_log)
 
     def calTaskInd(self):
         """

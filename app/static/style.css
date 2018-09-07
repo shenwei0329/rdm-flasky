@@ -31,4 +31,9 @@
     min-width:66px;
 }
 
+a.pdflink {
+background: url(images/pdf.png) no-repeat right top;
+padding-right: 18px;
+}
+
 #
