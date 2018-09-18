@@ -72,6 +72,9 @@ email_str = {
     'wangwei_sh@chinacloud.com.cn': 'pj_manager',
     'liuyichun@chinacloud.com.cn': 'pj_manager',
 
+    'xiangxiaoyan@chinacloud.com.cn': 'manager',
+    'tanyingqing@chinacloud.com.cn': 'manager',
+
     'huaicuijing@chinacloud.com.cn': 'user',
     'liangkangli@chinacloud.com.cn': 'user',
     'weilihong@chinacloud.com.cn': 'user',
@@ -204,11 +207,10 @@ email_str = {
     'pengzhi@chinacloud.com.cn': 'user',
     'qinxing@chinacloud.com.cn': 'user',
     'sunbanghui@chinacloud.com.cn': 'user',
-    'tanyingqing@chinacloud.com.cn': 'user',
     'tianxin@chinacloud.com.cn': 'user',
     'wanghui@chinacloud.com.cn': 'user',
     'wudanyang@chinacloud.com.cn': 'user',
-    'xiangxiaoyan@chinacloud.com.cn': 'user',
+    # 'xiangxiaoyan@chinacloud.com.cn': 'user',
     'zhangzhiying@chinacloud.com.cn': 'user',
     'chenzhenzhu@chinacloud.com.cn': 'user',
     'doujiayu@chinacloud.com.cn': 'user',
@@ -301,12 +303,15 @@ def init_users():
 
         else:
 
-            if _email == "liuyichun@chinacloud.com.cn":
+            if _email == "tanyingqing@chinacloud.com.cn" or _email == "xiangxiaoyan@chinacloud.com.cn":
 
                 role = Role.query.filter_by(name=_email).first()
                 if role is not None:
+                    """保险起见，先删除以前的角色，再创建新角色。原因：没找到“修改”功能！
+                    """
 
-                    print(">>> role [%s, %d, %d]" % (_email, role.level, role_str[email_str[_email]]))
+                    print(">>> role [%s, %d, %d] be deleted, try again!" %
+                          (_email, role.level, role_str[email_str[_email]]))
                     db.session.delete(role)
 
                 else:

@@ -7,9 +7,10 @@
         <div class="head" id="A1">
             <div class="jumbotron">
                 <div class="container">
-                    <div  style="text-align:center">
+                    <div style="text-align:center">
                         <h1><b>公司综合信息</b></h1>
                     </div>
+                    <p style="text-align:center">数据统计日期：{{ reportDate }}</p>
                     <p>
                         公司在岗{{ checkStat['actUser'] }}人，信息系统在册{{ taskStat["persion_count"] }}人，
                         执行任务总数{{ taskStat["total"] }}个，完成了{{ taskStat["done"] }}个，

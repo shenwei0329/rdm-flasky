@@ -49,24 +49,13 @@ key_honor_3m = redis_class.KeyLiveClass('honor_3m')
 key_manage = redis_class.KeyLiveClass('manage')
 
 # 产品研发中心
-pd_databases = ['CPSJ',
-                'FAST',
-                'HUBBLE',
-                'ROOOOT']
+pd_databases = handler.pd_list
 
 # 项目开发组
-pj_databases = ['JX',
-                'GZ',
-                'SCGA',
-                'FT',
-                'JTJD',
-                'BJXJC',
-                'HBB17',
-                ]
+pj_databases = handler.pj_list
 
 # 研发管理与测试部
-rdm_databases = ['RDM',
-                 'TESTCENTER']
+rdm_databases = handler.rdm_list
 
 # 月份
 month = [u'一月', u'二月', u'三月', u'四月', u'五月', u'六月', u'七月', u'八月', u'九月', u'十月', u'十一月', u'十二月']
@@ -1347,6 +1336,7 @@ def set_context():
     }
 
     context = dict(
+        reportDate=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         report={"started_at": st_date, "ended_at": ed_date},
         pjStat=pjStat,
         contractStat=contractStat,

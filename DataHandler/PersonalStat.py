@@ -152,7 +152,7 @@ class Personal:
                 _task[_i] = _issue[_i]
 
             _issue_class = _issue['issue'].split('-')[0]
-            if _issue_class in ['CPSJ', 'FAST', 'HUBBLE', 'ROOOT']:
+            if _issue_class in handler.pd_list:
                 _task['ext'] = False
                 if _issue in extTask:
                     _task['ext'] = True
