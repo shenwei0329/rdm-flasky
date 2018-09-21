@@ -43,5 +43,11 @@ rdm_number_member=6
 [FINANCE]
 day=10
 
+[LIST]
+products=["CPSJ","FAST","HUBBLE","ROOOT","ONEX"]
+projects=["JX","GZ","SCGA","FT","JTJD","BJXJC","HBB17"]
+rdm=["RDM","TESTCENTER"]
+
+
 #
 # Eof

@@ -27,6 +27,7 @@ from echart_handler import pie, bar_x
 import logging
 import ConfigParser
 import os
+import json
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -53,9 +54,14 @@ pj_state = [u'在建', u'验收', u'交付', u'发布', u'运维']
 """数据源
 2018.9.18: 增加ONEX
 """
-pd_list = ['CPSJ', 'FAST', 'HUBBLE', 'ROOOT', 'ONEX']
-pj_list = ['JX', 'GZ', 'SCGA', 'FT', 'JTJD', 'BJXJC', 'HBB17']
-rdm_list = ['RDM', 'TESTCENTER']
+pd_list = json.loads(conf.get('LIST', 'products'))
+'''['CPSJ', 'FAST', 'HUBBLE', 'ROOOT', 'ONEX']'''
+
+pj_list = json.loads(conf.get('LIST', 'projects'))
+'''['JX', 'GZ', 'SCGA', 'FT', 'JTJD', 'BJXJC', 'HBB17']'''
+
+rdm_list = json.loads(conf.get('LIST', 'rdm'))
+'''['RDM', 'TESTCENTER']'''
 
 
 def get_trip_count(st_date, ed_date):
