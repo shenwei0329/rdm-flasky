@@ -527,8 +527,13 @@ def get_ticket_stat(st_date, ed_date):
     _ed_date = u"%d年%d月%d日" % (int(_date[0]), int(_date[1]), int(_date[2]))
 
     mongo_db.connect_db('ext_system')
-    _rec = do_search('plane_ticket', {"$and": [{u"起飞时间": {"$gte": "%s" % _st_date}},
+    """
+    Bug：当月份是[10,11,12]时，$lt逻辑有问题，输出的数据为“空”
+    
+        _rec = do_search('plane_ticket', {"$and": [{u"起飞时间": {"$gte": "%s" % _st_date}},
                                                {u"起飞时间": {"$lt": "%s" % _ed_date}}]})
+    """
+    _rec = do_search('plane_ticket', {u"起飞时间": {"$gte": "%s" % _st_date}})
     _cost = 0.
     addr_data = {}
 

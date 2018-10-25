@@ -40,6 +40,8 @@ def get_context(key):
     _role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % _role.level)
     _context['user'] = {'role': _role.level}
+    _context['reportDate'] = key_index.get()['reportDate']
+    print(">>> reportDate[%s]" % _context['reportDate'])
 
     return _context
 
@@ -129,3 +131,11 @@ def finance():
         return redirect(url_for('auth.login'))
 
     return render_template('finance.html', **get_context(key_rdm))
+
+
+@main.route('/finance_select/<value>')
+def finance_select(value):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('honor_desc.html', **get_context(key_rdm))

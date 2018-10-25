@@ -258,6 +258,8 @@ email_str = {
     'xulan@chinacloud.com.cn': 'user',
     'zhangjing_cd@chinacloud.com.cn': 'user',
     'zhaoyibei@chinacloud.com.cn': 'user',
+
+    'chenbeibei@chinacloud.com.cn': 'pj_manager',
 }
 
 
