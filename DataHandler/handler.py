@@ -53,6 +53,7 @@ pj_state = [u'在建', u'验收', u'交付', u'发布', u'运维']
 
 """数据源
 2018.9.18: 增加ONEX
+2018.11.9：按研发虚拟组开展工作，pd_list改为组（或jira上的project）名称
 """
 pd_list = json.loads(conf.get('LIST', 'products'))
 '''['CPSJ', 'FAST', 'HUBBLE', 'ROOOT', 'ONEX']'''
@@ -986,7 +987,7 @@ def get_pj_managers():
 def scan_pd_task(pd_name, st_date, ed_date):
     """
     扫描研发任务（排除外部支撑的）
-    :param pd_name: 产品项目名称
+    :param pd_name: 产品项目名称；2018-11-9：改为产品单元
     :param st_date: 起始日期
     :param ed_date: 截止日期
     :return: 任务列表
@@ -994,27 +995,24 @@ def scan_pd_task(pd_name, st_date, ed_date):
     _pd_name = pd_name.upper()
     logging.log(logging.WARN, ">>> scan_pd_task.ext_date: <%s>: fr %s to %s" % (pd_name, st_date, ed_date))
     _task = []
-    for _pd_g in pd_list:
-        """从summary内容查找带有"入侵"的issue
-        """
-        if _pd_g not in ['CPSJ', 'ROOOT', 'ONEX', _pd_name]:
-            continue
 
-        mongo_db.connect_db(_pd_g)
-        ext_epic = mongo_db.handler("issue", "find_one", {"issue_type": "epic", "summary": u"项目入侵"})
-        if ext_epic is not None:
-            _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
-                                                      "spent_time": {'$ne': None},
-                                                      "epic_link": {'$ne': ext_epic['issue']},
-                                                      "$and": [{"updated": {"$gte": "%s" % st_date}},
-                                                               {"updated": {"$lt": "%s" % ed_date}}]})
-            for _r in _rec:
-                if _r not in extTask:
-                    if _pd_g in ['CPSJ', 'ROOOT', 'ONEX']:
-                        if (_pd_name in _r['landmark']) or (_pd_name in _r['summary']):
-                            _task.append(_r)
-                    else:
-                        _task.append(_r)
+    mongo_db.connect_db(_pd_name)
+    ext_epic = mongo_db.handler("issue", "find_one", {"issue_type": "epic", "summary": u"项目入侵"})
+    if ext_epic is not None:
+        _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
+                                                  "spent_time": {'$ne': None},
+                                                  "epic_link": {'$ne': ext_epic['issue']},
+                                                  "$and": [{"updated": {"$gte": "%s" % st_date}},
+                                                           {"updated": {"$lt": "%s" % ed_date}}]})
+    else:
+        _rec = mongo_db.handler('issue', 'find', {"issue_type": {"$ne": ["epic", "story"]},
+                                                  "spent_time": {'$ne': None},
+                                                  "$and": [{"updated": {"$gte": "%s" % st_date}},
+                                                           {"updated": {"$lt": "%s" % ed_date}}]})
+
+    for _r in _rec:
+        if _r not in extTask:
+            _task.append(_r)
 
     return _task
 

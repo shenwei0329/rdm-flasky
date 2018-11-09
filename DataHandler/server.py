@@ -895,7 +895,7 @@ def cal_work_hour_sum(cost, rat=1):
 
 def set_rdm_context():
 
-    global pdPersonals, pjPersonals, rdmPersonals, extTask, st_date, ed_date
+    global pdPersonals, pjPersonals, rdmPersonals, extTask, st_date, ed_date, pd_databases
 
     """项目归档情况
     """
@@ -920,16 +920,16 @@ def set_rdm_context():
 
     """产品研发投入产品开发情况
     """
-    _pd_cost, _pd_sum = cal_pd_task_work_hour(['FAST', 'HUBBLE'], st_date, ed_date)
+    _pd_cost, _pd_sum = cal_pd_task_work_hour(pd_databases, st_date, ed_date)
     _pd_cost_sum = cal_work_hour_sum(_pd_cost)
     _pd_sum = _pd_sum/3600
 
     # 产品前三个月的情况
-    _pd_cost_3m, _pd_sum_3m = cal_pd_task_work_hour(['FAST', 'HUBBLE'], _st_date_3m, _ed_date_3m)
+    _pd_cost_3m, _pd_sum_3m = cal_pd_task_work_hour(pd_databases, _st_date_3m, _ed_date_3m)
     _pd_sum_3m = _pd_sum_3m/3600
 
     # 产品前一个月的情况
-    _pd_cost_1m, _pd_sum_1m = cal_pd_task_work_hour(['FAST', 'HUBBLE'], _st_date_1m, _ed_date_1m)
+    _pd_cost_1m, _pd_sum_1m = cal_pd_task_work_hour(pd_databases, _st_date_1m, _ed_date_1m)
     _pd_sum_1m = _pd_sum_1m/3600
 
     """测试中心资源投入

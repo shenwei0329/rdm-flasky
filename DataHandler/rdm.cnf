@@ -44,7 +44,7 @@ rdm_number_member=6
 day=10
 
 [LIST]
-products=["CPSJ","FAST","HUBBLE","ROOOT","ONEX"]
+products=["CPSJ","FAST","FASTPULSAR","FASTMIR","FASTWH","HUBBLE","HV","ONEX","ROOOT"]
 projects=["JX","GZ","SCGA","FT","JTJD","BJXJC","HBB17"]
 rdm=["RDM","TESTCENTER"]
 

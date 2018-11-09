@@ -31,37 +31,6 @@
         <br>
         <div class="container">
 
-                <div class="container"><h3>产品研发资源在产品类任务的投入明细-总计</h3>
-                    <div id="pd_list">（单位：工时）
-                        <table border="2">
-                            <tr>
-                                <th width="300px" style="text-align:center">项目</th>
-                                <th width="120px" style="text-align:center">产品设计组</th>
-                                <th width="120px" style="text-align:center">云产品组</th>
-                                <th width="120px" style="text-align:center">大数据产品组</th>
-                                <th width="120px" style="text-align:center">系统组</th>
-                                <th width="120px" style="text-align:center">合计</th>
-                            </tr>
-                            {% for _pd_name in sorted(product_task) %}
-                            <tr>
-                                <td>{{ _pd_name }}</td>
-                                {% for _g in ['CPSJ','FAST','HUBBLE','ROOOT','合计'] %}
-                                    <td style="text-align:right">
-                                    {% if _g in product_task[_pd_name] %}
-                                        <b style="color:#F00">{{ product_task[_pd_name][_g] }}&nbsp;&nbsp;</b>
-                                    {% else %}
-                                        0&nbsp;&nbsp;
-                                    {% endif %}
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                </div>
-
-                <br/>
-
                 <div class="container"><h3>产品研发资源在产品类任务的投入明细-月计</h3>
                     <div id="product_year_list">（单位：工时）
                         <table border="2">
@@ -240,52 +209,6 @@
                                     }else{
                                         this.$refs.test_list.style.display='none';
                                         $("#btn_test_center").html('显示');
-                                    }
-                                }
-                            }
-                        })
-                    </script>
-                </div>
-
-                <div id="pd_info" class="container"><h3>产品研发资源在非产品类任务的投入明细-总计</h3>
-                    <button id="btn_desc" type="button" v-on:click="say">显示</button>
-                    <div id="producting_list" ref="pd_list" style="display: none;">（单位：工时）
-                        <table border="2">
-                            <tr>
-                                <th width="300px" style="text-align:center">项目</th>
-                                <th width="120px" style="text-align:center">产品设计组</th>
-                                <th width="120px" style="text-align:center">云产品组</th>
-                                <th width="120px" style="text-align:center">大数据产品组</th>
-                                <th width="120px" style="text-align:center">系统组</th>
-                                <th width="120px" style="text-align:center">合计</th>
-                            </tr>
-                            {% for _pj_name in sorted(pd_project) %}
-                            <tr>
-                                <td>{{ _pj_name }}</td>
-                                {% for _g in ['CPSJ','FAST','HUBBLE','ROOOT','合计'] %}
-                                    <td style="text-align:right">
-                                    {% if _g in pd_project[_pj_name] %}
-                                        <b style="color:#F00">{{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;</b>
-                                    {% else %}
-                                        0&nbsp;&nbsp;
-                                    {% endif %}
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                    <script>
-                        new Vue({
-                            el: '#pd_info',
-                            methods: {
-                                say: function (){
-                                    if (this.$refs.pd_list.style.display=='none'){
-                                        this.$refs.pd_list.style.display='block';
-                                        $("#btn_desc").html('隐藏');
-                                    }else{
-                                        this.$refs.pd_list.style.display='none';
-                                        $("#btn_desc").html('显示');
                                     }
                                 }
                             }

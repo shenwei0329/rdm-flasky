@@ -260,6 +260,7 @@ email_str = {
     'zhaoyibei@chinacloud.com.cn': 'user',
 
     'chenbeibei@chinacloud.com.cn': 'pj_manager',
+    'dinghao@chinacloud.com.cn': 'pj_manager',
 }
 
 

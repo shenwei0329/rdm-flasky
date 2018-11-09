@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}研发管理信息系统{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+        <div class="head" id="A1">
+            <div class="jumbotron">
+                <div class="container">
+                    <div style="text-align:center" id="vueex">
+                        <h1><b>个人档案</b></h1>
+                        <p v-text="msg"></p>
+                        <p>数据统计日期：{{ reportDate }}</p>
+                    </div>
+                    <script>
+                        let vm = new Vue({
+                            el: '#vueex',
+                            data: {
+                                msg: 'Vue.js版本'
+                            }
+                        })
+                    </script>
+                    <p>
+                        本网页的内容是基于员工日常工作数据形成的“个人业绩”的综合评价。<br/>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="container">
+
+        </div>
+        <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
+</div>
+{% endblock %}

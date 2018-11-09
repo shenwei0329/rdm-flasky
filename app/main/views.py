@@ -32,7 +32,8 @@ key_honor = redis_class.KeyLiveClass('honor')
 key_honor_3m = redis_class.KeyLiveClass('honor_3m')
 # 管理员"正文"缓存
 key_manage = redis_class.KeyLiveClass('manage')
-
+# 个人档案
+key_personal = redis_class.KeyLiveClass('rdm')
 
 def get_context(key):
 
@@ -139,3 +140,12 @@ def finance_select(value):
         return redirect(url_for('auth.login'))
 
     return render_template('honor_desc.html', **get_context(key_rdm))
+
+
+@main.route('/personal')
+def personal():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('personal.html', **get_context(key_personal))
+
