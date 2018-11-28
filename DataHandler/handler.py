@@ -28,6 +28,8 @@ import logging
 import ConfigParser
 import os
 import json
+import echart_handler
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -415,6 +417,45 @@ def get_task_stat(st_date, ed_date):
             'pj': [_pj_count, _pj_personal, _pj_cost],
             'rdm': [_rdm_count, _rdm_personal, _rdm_cost],
             }
+
+
+def get_hr_stat_by_name(p_name, st_date, ed_date):
+    """
+    获取指定项目的时间段的任务量统计
+    :param p_name: 项目名称
+    :param st_date: 起始时间
+    :param ed_date: 截止时间
+    :return:
+    """
+
+    mongo_db.connect_db(p_name)
+    _rec = mongo_db.handler('worklog', 'find', {"$and": [{"created": {"$gte": "%s" % st_date}},
+                                                         {"created": {"$lt": "%s" % ed_date}}]})
+    _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
+    personal = {}
+    date = {}
+
+    for _r in _rec:
+        if 'author' not in _r:
+            continue
+        if _r['author'] not in personal:
+            personal[_r['author']] = 0
+        personal[_r['author']] += _r['timeSpentSeconds']
+        _date = _r['created'].split('T')[0]
+        if _date not in date:
+            date[_date] = 0
+        date[_date] += 1
+
+        _date = datetime.datetime.strptime(_date, "%Y-%m-%d")
+        _month_stat[str(_date.month)] += float(_r['timeSpentSeconds'])/3600.
+
+    mongo_db.close_db()
+
+    _date = []
+    for _d in range(1, 13):
+        _date.append(int(_month_stat[str(_d)]))
+
+    return personal, _date
 
 
 def get_hr_stat(st_date, ed_date):
@@ -963,6 +1004,11 @@ def get_imp_projects():
                               [[_pj_desc['wait_task'],
                                 _pj_desc['total_task']-_pj_desc['done_task'],
                                 _pj_desc['done_task']]])
+
+        _, _month_date = get_hr_stat_by_name(_p, "2018-01-01", "2018-12-30")
+        month = [u'一月', u'二月', u'三月', u'四月', u'五月', u'六月', u'七月', u'八月', u'九月', u'十月', u'十一月', u'十二月']
+        _pj_desc['task_pic'] = echart_handler.bar(u'工时', month, [{'title': u'小时', 'data': _month_date}])
+
         _pjs.append(_pj_desc)
 
     return _pjs

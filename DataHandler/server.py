@@ -563,13 +563,15 @@ def cal_pd_task_ind(pd_task):
             continue
 
         _issue_updated_date = _issue["updated"].split('T')[0]
-        _group = _issue['issue'].split('-')[0]
+        # _group = _issue['issue'].split('-')[0]
         _month = int(_issue_updated_date.split('-')[1])
 
+        """
         if _group not in _pd:
             _pd[_group] = _issue['spent_time']
         else:
             _pd[_group] += _issue['spent_time']
+        """
         _pd[_month] += _issue['spent_time']
         _pd[13] += _issue['spent_time']
 
@@ -872,13 +874,30 @@ def cal_pd_task_work_hour(pd_list, _st_date, _ed_date):
     :return: 统计值
     """
     _pd = {}
+    _pj = {}
     _sum = 0
+    _pj_sum = 0
+    _pd2pj = {'CPSJ': 'FAST', 'FAST': 'FAST', 'FASTMIR': 'FAST', 'FASTPULSAR': 'FAST', 'FASTWH': 'FAST',
+              'HUBBLE': 'HUBBLE', 'HV': 'HUBBLE', 'ONEX': 'FAST', 'ROOOT': 'FAST'}
     for _p in pd_list:
         _task = handler.scan_pd_task(_p, _st_date, _ed_date)
         _pd[_p], __sum = cal_pd_task_ind(_task)
+        if _pd2pj[_p] not in _pj:
+            _pj[_pd2pj[_p]] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0}
+        for _v in _pd[_p]:
+            _pj[_pd2pj[_p]][_v] += _pd[_p][_v]
+
+        print(">>> product_sum[%s]: " % _p)
+        print _pd[_p]
         product_sum(_pd[_p])
+        print(">>> product_pj_sum[%s]: " % _pd2pj[_p])
+        print _pj[_pd2pj[_p]]
         _sum += __sum
-    return _pd, _sum
+
+    for __pj in ['FAST', 'HUBBLE']:
+        product_sum(_pj[__pj])
+
+    return _pd, _sum, _pj
 
 
 def cal_work_hour_sum(cost, rat=1):
@@ -920,16 +939,18 @@ def set_rdm_context():
 
     """产品研发投入产品开发情况
     """
-    _pd_cost, _pd_sum = cal_pd_task_work_hour(pd_databases, st_date, ed_date)
+    _pd_cost, _pd_sum, _pd_pj_cost = cal_pd_task_work_hour(pd_databases, st_date, ed_date)
     _pd_cost_sum = cal_work_hour_sum(_pd_cost)
     _pd_sum = _pd_sum/3600
+    _pd_pj_cost_sum = cal_work_hour_sum(_pd_pj_cost)
+    _pd_pj_sum = _pd_sum
 
     # 产品前三个月的情况
-    _pd_cost_3m, _pd_sum_3m = cal_pd_task_work_hour(pd_databases, _st_date_3m, _ed_date_3m)
+    _pd_cost_3m, _pd_sum_3m, __ = cal_pd_task_work_hour(pd_databases, _st_date_3m, _ed_date_3m)
     _pd_sum_3m = _pd_sum_3m/3600
 
     # 产品前一个月的情况
-    _pd_cost_1m, _pd_sum_1m = cal_pd_task_work_hour(pd_databases, _st_date_1m, _ed_date_1m)
+    _pd_cost_1m, _pd_sum_1m, __ = cal_pd_task_work_hour(pd_databases, _st_date_1m, _ed_date_1m)
     _pd_sum_1m = _pd_sum_1m/3600
 
     """测试中心资源投入
@@ -1055,7 +1076,9 @@ def set_rdm_context():
                                             _npj_sum_3m]]
                                           ),
             product_task=_pd_cost,
+            product_pj_task=_pd_pj_cost,
             product_task_sum=_pd_cost_sum,
+            product_pj_task_sum=_pd_pj_cost_sum,
             test_task=_tc_project,
             test_task_sum=_tc_project_sum,
         )

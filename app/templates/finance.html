@@ -31,11 +31,62 @@
         <br>
         <div class="container">
 
+                <div class="container"><h3>产品研发资源在产品开发项目-月计</h3>
+                    <div id="product_project_year_list">（单位：工时）
+                        <table border="2">
+                            <tr>
+                                <th width="300px" style="text-align:center">项目</th>
+                                <th width="120px" style="text-align:center">一月</th>
+                                <th width="120px" style="text-align:center">二月</th>
+                                <th width="120px" style="text-align:center">三月</th>
+                                <th width="120px" style="text-align:center">四月</th>
+                                <th width="120px" style="text-align:center">五月</th>
+                                <th width="120px" style="text-align:center">六月</th>
+                                <th width="120px" style="text-align:center">七月</th>
+                                <th width="120px" style="text-align:center">八月</th>
+                                <th width="120px" style="text-align:center">九月</th>
+                                <th width="120px" style="text-align:center">十月</th>
+                                <th width="120px" style="text-align:center">十一月</th>
+                                <th width="120px" style="text-align:center">十二月</th>
+                                <th width="120px" style="text-align:center">合计</th>
+                            </tr>
+                            {% for _pd_name in sorted(product_pj_task) %}
+                            <tr>
+                                <td>{{ _pd_name }}</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if product_pj_task[_pd_name][_g]>0 %}
+                                            <b style="color:#F00">{{ product_pj_task[_pd_name][_g] }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td>合计</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if "0.00" not in product_pj_task_sum[_g] %}
+                                            <b style="color:#F00">{{ product_pj_task_sum[_g] }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <br/>
+
                 <div class="container"><h3>产品研发资源在产品类任务的投入明细-月计</h3>
                     <div id="product_year_list">（单位：工时）
                         <table border="2">
                             <tr>
-                                <th width="300px" style="text-align:center">项目</th>
+                                <th width="300px" style="text-align:center">产品单元</th>
                                 <th width="120px" style="text-align:center">一月</th>
                                 <th width="120px" style="text-align:center">二月</th>
                                 <th width="120px" style="text-align:center">三月</th>
