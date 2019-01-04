@@ -219,8 +219,15 @@ def get_reim_data(st_date, ed_date):
 
     for _r in _rec:
         addr_data = addr_filter(addr_data, _r[u'出差起止地点'])
-        _date = datetime.datetime.strptime(_r[u'审批发起时间'], "%Y-%m-%d %H:%M:%S")
-        _month_stat[str(_date.month)] += 1
+        # _date = datetime.datetime.strptime(_r[u'审批发起时间'], "%Y-%m-%d %H:%M:%S")
+        try:
+            _date = datetime.datetime.strptime(_r[u'审批发起时间'].replace(u"年","-").replace(u"月","-").replace(u"日",""),
+                                               "%Y-%m-%d %H:%M:%S")
+        except:
+            _date = datetime.datetime.strptime(_r[u'审批发起时间'].replace(u"年", "-").replace(u"月", "-").replace(u"日", ""),
+                                               "%Y-%m-%d")
+        finally:
+            _month_stat[str(_date.month)] += 1
 
     # 关闭数据库
     mongo_db.close_db()
@@ -540,8 +547,15 @@ def get_reimbursement_stat(st_date, ed_date):
     for _r in _rec:
         _cost += float(_r[u'金额小计'])
 
-        _date = datetime.datetime.strptime(_r[u'审批发起时间'], "%Y-%m-%d %H:%M:%S")
-        _month_cost_stat[str(_date.month)] += float(_r[u'金额小计'])
+        # print(">>> 2019 <<< strptime: %s" % _r[u'审批发起时间'])
+        try:
+            _date = datetime.datetime.strptime(_r[u'审批发起时间'].replace(u"年","-").replace(u"月","-").replace(u"日",""),
+                                               "%Y-%m-%d %H:%M:%S")
+        except:
+            _date = datetime.datetime.strptime(_r[u'审批发起时间'].replace(u"年", "-").replace(u"月", "-").replace(u"日", ""),
+                                               "%Y-%m-%d")
+        finally:
+            _month_cost_stat[str(_date.month)] += float(_r[u'金额小计'])
 
     mongo_db.close_db()
 
@@ -574,8 +588,10 @@ def get_ticket_stat(st_date, ed_date):
     
         _rec = do_search('plane_ticket', {"$and": [{u"起飞时间": {"$gte": "%s" % _st_date}},
                                                {u"起飞时间": {"$lt": "%s" % _ed_date}}]})
-    """
     _rec = do_search('plane_ticket', {u"起飞时间": {"$gte": "%s" % _st_date}})
+    """
+    print(">>> 2019: %s" % _st_date)
+    _rec = do_search('plane_ticket', {u"起飞时间": {"$regex": "%s" % _st_date[:4]}})
     _cost = 0.
     addr_data = {}
 
