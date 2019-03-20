@@ -615,23 +615,25 @@ def cal_pj_task_ind(_st_date, _ed_date):
                 _pj_name = _issue['project_alias']
             if _pj_name not in _project:
                 _project[_pj_name] = {_group: _issue['spent_time'],
-                                                     1: 0,
-                                                     2: 0,
-                                                     3: 0,
-                                                     4: 0,
-                                                     5: 0,
-                                                     6: 0,
-                                                     7: 0,
-                                                     8: 0,
-                                                     9: 0,
-                                                     10: 0,
-                                                     11: 0,
-                                                     12: 0,
-                                                     13: 0,
-                                                     }
+                                      1: 0,
+                                      2: 0,
+                                      3: 0,
+                                      4: 0,
+                                      5: 0,
+                                      6: 0,
+                                      7: 0,
+                                      8: 0,
+                                      9: 0,
+                                      10: 0,
+                                      11: 0,
+                                      12: 0,
+                                      13: 0,
+                                      "member": []
+                                      }
 
                 _project[_pj_name][_month] = _issue['spent_time']
                 _project[_pj_name][13] = _issue['spent_time']
+
             else:
                 if _group not in _project[_pj_name]:
                     _project[_pj_name][_group] = _issue['spent_time']
@@ -640,6 +642,16 @@ def cal_pj_task_ind(_st_date, _ed_date):
                 _project[_pj_name][_month] += _issue['spent_time']
                 _project[_pj_name][13] += _issue['spent_time']
             _pj_sum += _issue['spent_time']
+
+            _project[_pj_name]["member"].append(
+                {
+                    "member": _issue["users"],
+                    "date": _issue["updated"],
+                    "summary": _issue["summary"],
+                    "spent_time": _issue["spent_time"]
+                }
+            )
+
         else:
             """试图从summary中寻找项目信息"""
             _pj_name = scan_project_name(_pj_info, _issue['summary'])
@@ -660,6 +672,7 @@ def cal_pj_task_ind(_st_date, _ed_date):
                                           11: 0,
                                           12: 0,
                                           13: 0,
+                                          "member": []
                                           }
                     _project[_pj_name][_month] = _issue['spent_time']
                     _project[_pj_name][13] = _issue['spent_time']
@@ -671,6 +684,14 @@ def cal_pj_task_ind(_st_date, _ed_date):
                     _project[_pj_name][_month] += _issue['spent_time']
                     _project[_pj_name][13] += _issue['spent_time']
                 _pj_sum += _issue['spent_time']
+                _project[_pj_name]["member"].append(
+                    {
+                        "member": _issue["users"],
+                        "date": _issue["updated"],
+                        "summary": _issue["summary"],
+                        "spent_time": _issue["spent_time"]
+                    }
+                )
             else:
                 """无项目信息"""
                 print(u">>> %s" % _issue['summary'])
@@ -689,6 +710,7 @@ def cal_pj_task_ind(_st_date, _ed_date):
                                          11: 0,
                                          12: 0,
                                          13: 0,
+                                         "member": []
                                          }
                     _project[u'其它'][_month] = _issue['spent_time']
                     _project[u'其它'][13] = _issue['spent_time']
@@ -700,6 +722,15 @@ def cal_pj_task_ind(_st_date, _ed_date):
                     _project[u'其它'][_month] += _issue['spent_time']
                     _project[u'其它'][13] += _issue['spent_time']
                 _npj_sum += _issue['spent_time']
+
+                _project[u'其它']["member"].append(
+                    {
+                        "member": _issue["users"],
+                        "date": _issue["updated"],
+                        "summary": _issue["summary"],
+                        "spent_time": _issue["spent_time"]
+                    }
+                )
 
     # logging.log(logging.WARN, ">>> return %s, %d, %d" % (_project, _pj_sum, _npj_sum))
     return _project, _pj_sum, _npj_sum
