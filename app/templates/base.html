@@ -39,8 +39,8 @@
             <ul class="nav navbar-nav">
                 {% if current_user.is_authenticated %}
                 <li><a href="{{ url_for('main.honor') }}" style="color:#F00; font-size:16px">光荣榜</a></li>
-                <li><a href="{{ url_for('main.product') }}" style="font-size:12px">产品信息汇总</a></li>
-                <li><a href="{{ url_for('main.producting') }}" style="font-size:12px">产品研发情况</a></li>
+                <!--li><a href="{{ url_for('main.product') }}" style="font-size:12px">产品信息汇总</a></li-->
+                <!--li><a href="{{ url_for('main.producting') }}" style="font-size:12px">产品研发情况</a></li-->
                 <li><a href="{{ url_for('main.project') }}" style="font-size:12px">项目开发情况</a></li>
                 <li><a href="{{ url_for('main.rdm') }}" style="font-size:12px">研发管理情况</a></li>
                 {% if user["role"] == 66 %}

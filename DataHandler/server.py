@@ -1170,6 +1170,8 @@ def init_data():
 
     today = datetime.date.today()
     ed_date = today.strftime("%Y-%m-%d")
+    """设定统计的起始时间"""
+    st_date = datetime.date(today.year - 1, today.month, today.day).strftime("%Y-%m-%d")
 
     """全员"""
     allPersonals = PersonalStat.Personal()
