@@ -135,7 +135,7 @@
 
                 {% if user["role"] <= 2 %}
 
-                <div id='monthly_work_hour' class="container"><h3>研发中心月工时明细表</h3>
+                <!--div id='monthly_work_hour' class="container"><h3>研发中心月工时明细表</h3>
                     <p>
                         统计范围：研发人员每人每月的工时，如有不在项目上的工时则单列一列（例如“其他”）。
                     </p>
@@ -195,7 +195,7 @@
                             }
                         })
                     </script>
-                </div>
+                </div-->
 
                 <br/>
 
@@ -267,6 +267,92 @@
                     </script>
                 </div>
 
+                <div id='test_mx' class="container"><h3>测试资源投入明细</h3>
+
+                    <div id="test_mx_selectd"><h4><b style="color:#F00">选择月份：</b></h4></div>
+                    <table>
+                        <tr style="text-align:center">
+                            {% for month in range(1,13) %}
+                            <th width="50px" style="text-align:center">
+                                <input name="test_monthchkbtn" type="checkbox" value="{{ month }}" v-on:click="say({{ month}})">{{ month }}月</input>
+                            </th>
+                            {% endfor %}
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="100"  v-on:click="say(100)">全选</button>
+                            </th>
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="0"  v-on:click="say(0)">全清</button>
+                            </th>
+                            <th width="120px" style="text-align:center">
+                                <button ref="report_btn" type="button" style="display:none;color:#F00" value="200" v-on:click="say(200)">
+                                    <img src="static/images/excel.png"/>&nbsp;获取明细
+                                </button>
+                            </th>
+                        </tr>
+                    </table>
+                    <div id="test_mx_list" ref="test_mx_list" style="display: none;">
+                    </div>
+                    <script>
+                        new Vue({
+                            el: '#test_mx',
+                            methods: {
+                                say: function (value){
+                                    var str = "";
+                                    var items = document.getElementsByName("test_monthchkbtn");
+                                    for (var m = 0; m < 12; m++) {
+                                        if (value==100) {
+                                            items[m].checked = true
+                                        }
+                                        if (value==0) {
+                                            items[m].checked = false
+                                        }
+                                        if (items[m].checked) {
+                                            if (m<10){
+                                                str += '-0'+(m+1)+'-';
+                                            }else{
+                                                str += '-'+(m+1)+'-';
+                                            }
+                                        }
+                                    }
+                                    if (value<200) {
+                                        if (str=="") {
+                                            this.$refs.report_btn.style.display='none';
+                                        }
+                                        else {
+                                            this.$refs.report_btn.style.display='block';
+                                        }
+                                        $("#test_mx_selectd").html('<h4><b style="color:#F00">选择月份：'+
+                                        str+'</b></h4>');
+                                        this.$refs.test_mx_list.style.display='none';
+                                    }
+                                    else {
+                                        htmlobj=$.ajax({url:"/finance_tc_select/"+str,async:false})
+                                        $("#test_mx_list").html(htmlobj.responseText);
+                                        $("#test_mx_list").show()
+                                        this.$refs.test_mx_list.style.display='block';
+                                    }
+                                }
+                            }
+                        })
+                    </script>
+                    <!--script>
+                        new Vue({
+                            el: '#test_mx',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.test_mx_list.style.display=='none'){
+                                        this.$refs.test_mx_list.style.display='block';
+                                        $("#btn_test_mx").html('隐藏');
+                                    }else{
+                                        this.$refs.test_mx_list.style.display='none';
+                                        $("#btn_test_mx").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script-->
+                </div>
+
                 <br/>
 
                 <div id='pd_pj_month' class="container"><h3>产品研发资源在非产品类任务的投入明细-月计</h3>
@@ -336,7 +422,97 @@
                     </script>
                 </div>
 
+                <div id='pd_pj_mx' class="container"><h3>产品研发资源在非产品类任务的资源投入明细</h3>
+
+                    <div id="pd_pj_mx_selectd"><h4><b style="color:#F00">选择月份：</b></h4></div>
+                    <table>
+                        <tr style="text-align:center">
+                            {% for month in range(1,13) %}
+                            <th width="50px" style="text-align:center">
+                                <input name="pd_pj_monthchkbtn" type="checkbox" value="{{ month }}" v-on:click="say({{ month}})">{{ month }}月</input>
+                            </th>
+                            {% endfor %}
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="100"  v-on:click="say(100)">全选</button>
+                            </th>
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="0"  v-on:click="say(0)">全清</button>
+                            </th>
+                            <th width="120px" style="text-align:center">
+                                <button ref="pd_pj_report_btn" type="button" style="display:none;color:#F00" value="200" v-on:click="say(200)">
+                                    <img src="static/images/excel.png"/>&nbsp;获取明细
+                                </button>
+                            </th>
+                        </tr>
+                    </table>
+
+                    <div id="pd_pj_mx_list" ref="pd_pj_mx_list" style="display: none;">
+                    </div>
+                    <script>
+                        new Vue({
+                            el: '#pd_pj_mx',
+                            methods: {
+                                say: function (value){
+                                    var str = "";
+                                    var items = document.getElementsByName("pd_pj_monthchkbtn");
+                                    for (var m = 0; m < 12; m++) {
+                                        if (value==100) {
+                                            items[m].checked = true
+                                        }
+                                        if (value==0) {
+                                            items[m].checked = false
+                                        }
+                                        if (items[m].checked) {
+                                            if (m<10){
+                                                str += '-0'+(m+1)+'-';
+                                            }else{
+                                                str += '-'+(m+1)+'-';
+                                            }
+                                        }
+                                    }
+                                    if (value<200) {
+                                        if (str=="") {
+                                            this.$refs.pd_pj_report_btn.style.display='none';
+                                        }
+                                        else {
+                                            this.$refs.pd_pj_report_btn.style.display='block';
+                                        }
+                                        $("#pd_pj_mx_selectd").html('<h4><b style="color:#F00">选择月份：'+
+                                        str+'</b></h4>');
+                                        this.$refs.pd_pj_mx_list.style.display='none';
+                                    }
+                                    else {
+                                        htmlobj=$.ajax({url:"/finance_pd_pj_select/"+str,async:false})
+                                        $("#pd_pj_mx_list").html(htmlobj.responseText);
+                                        $("#pd_pj_mx_list").show()
+                                        this.$refs.pd_pj_mx_list.style.display='block';
+                                    }
+                                }
+                            }
+                        })
+                    </script>
+                    <!--script>
+                        new Vue({
+                            el: '#pd_pj_mx',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.pd_pj_mx_list.style.display=='none'){
+                                        this.$refs.pd_pj_mx_list.style.display='block';
+                                        $("#btn_mx").html('隐藏');
+                                    }else{
+                                        this.$refs.pd_pj_mx_list.style.display='none';
+                                        $("#btn_mx").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script-->
+                </div>
+
+                <br/>
+
         </div>
+
         <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
 </div>
 {% endblock %}

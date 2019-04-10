@@ -8,6 +8,7 @@ from flask_login import current_user
 from ..models import Role
 import sys
 from ..auth import redis_class
+import logging
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -35,13 +36,16 @@ key_manage = redis_class.KeyLiveClass('manage')
 # 个人档案
 key_personal = redis_class.KeyLiveClass('rdm')
 
-def get_context(key):
+
+def get_context(key, data=None):
 
     _context = key.get()
     _role = Role.query.filter_by(name=current_user.username).first()
     print(">>> role.level = %d" % _role.level)
     _context['user'] = {'role': _role.level}
     _context['reportDate'] = key_index.get()['reportDate']
+    if data is not None:
+        _context['value'] = data
     print(">>> reportDate[%s]" % _context['reportDate'])
 
     return _context
@@ -132,6 +136,22 @@ def finance():
         return redirect(url_for('auth.login'))
 
     return render_template('finance.html', **get_context(key_rdm))
+
+
+@main.route('/finance_tc_select/<value>')
+def finance_tc_select(value):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    logging.log(logging.WARN, ">>> finance_tc_select <%s>" % value)
+    return render_template('finance_tc_select.html', **get_context(key_rdm, data=value))
+
+
+@main.route('/finance_pd_pj_select/<value>')
+def finance_pd_pj_select(value):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    logging.log(logging.WARN, ">>> finance_pd_pj_select <%s>" % value)
+    return render_template('finance_pd_pj_select.html', **get_context(key_rdm, data=value))
 
 
 @main.route('/finance_select/<value>')

@@ -765,13 +765,36 @@ def cal_tc_task_ind(_st_date, _ed_date):
             if _pj_name is None:
                 _pj_name = _issue['project_alias']
             if _pj_name not in _project:
-                _project[_pj_name] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0}
+                _project[_pj_name] = {1: 0,
+                                      2: 0,
+                                      3: 0,
+                                      4: 0,
+                                      5: 0,
+                                      6: 0,
+                                      7: 0,
+                                      8: 0,
+                                      9: 0,
+                                      10: 0,
+                                      11: 0,
+                                      12: 0,
+                                      13: 0,
+                                      'member': []}
 
                 _project[_pj_name][_month] = _issue['spent_time']
                 _project[_pj_name][13] = _issue['spent_time']
             else:
                 _project[_pj_name][_month] += _issue['spent_time']
                 _project[_pj_name][13] += _issue['spent_time']
+
+            _project[_pj_name]["member"].append(
+                {
+                    "member": _issue["users"],
+                    "date": _issue["updated"],
+                    "summary": _issue["summary"],
+                    "spent_time": _issue["spent_time"]
+                }
+            )
+
         else:
             if u'项目' in _issue['components']:
                 """试图从summary中寻找项目信息"""
@@ -793,12 +816,23 @@ def cal_tc_task_ind(_st_date, _ed_date):
                                               11: 0,
                                               12: 0,
                                               13: 0,
+                                              'member': []
                                               }
                         _project[_pj_name][_month] = _issue['spent_time']
                         _project[_pj_name][13] = _issue['spent_time']
                     else:
                         _project[_pj_name][_month] += _issue['spent_time']
                         _project[_pj_name][13] += _issue['spent_time']
+
+                    _project[_pj_name]["member"].append(
+                        {
+                            "member": _issue["users"],
+                            "date": _issue["updated"],
+                            "summary": _issue["summary"],
+                            "spent_time": _issue["spent_time"]
+                        }
+                    )
+
                 else:
                     """无项目信息"""
                     _pj_name = _issue['components'].replace(u'【项目】', '')
@@ -820,12 +854,23 @@ def cal_tc_task_ind(_st_date, _ed_date):
                                               11: 0,
                                               12: 0,
                                               13: 0,
+                                              'member': []
                                               }
                         _project[_pj_name][_month] = _issue['spent_time']
                         _project[_pj_name][13] = _issue['spent_time']
                     else:
                         _project[_pj_name][_month] += _issue['spent_time']
                         _project[_pj_name][13] += _issue['spent_time']
+
+                    _project[_pj_name]["member"].append(
+                        {
+                            "member": _issue["users"],
+                            "date": _issue["updated"],
+                            "summary": _issue["summary"],
+                            "spent_time": _issue["spent_time"]
+                        }
+                    )
+
             else:
                 if u'产品' in _issue['components']:
                     _pd_name = _issue['components'].replace(u'【产品】', '').upper()
@@ -849,6 +894,7 @@ def cal_tc_task_ind(_st_date, _ed_date):
                                               11: 0,
                                               12: 0,
                                               13: 0,
+                                              'member': []
                                               }
                         _project[_pd_name][_month] = _issue['spent_time']
                         _project[_pd_name][13] = _issue['spent_time']
@@ -856,9 +902,18 @@ def cal_tc_task_ind(_st_date, _ed_date):
                         _project[_pd_name][_month] += _issue['spent_time']
                         _project[_pd_name][13] += _issue['spent_time']
 
+                    _project[_pd_name]["member"].append(
+                        {
+                            "member": _issue["users"],
+                            "date": _issue["updated"],
+                            "summary": _issue["summary"],
+                            "spent_time": _issue["spent_time"]
+                        }
+                    )
+
     for _pn in _project:
         for _g in _project[_pn]:
-            if _project[_pn][_g] > 0:
+            if 'member' not in str(_g) and _project[_pn][_g] > 0:
                 _project[_pn][_g] = "%0.2f" % (float(_project[_pn][_g]) / 3600.)
 
     # logging.log(logging.WARN, ">>> return %s, %d, %d" % (_project, _pj_sum, _npj_sum))
@@ -892,7 +947,10 @@ def project_sum(_project):
         _sum = 0
         for _g in _project[_pj]:
             if not str(_g).isdigit():
-                _sum += _project[_pj][_g]
+                try:
+                    _sum += _project[_pj][_g]
+                except:
+                    continue
         _project[_pj][u'合计'] = _sum
 
 
@@ -909,7 +967,8 @@ def cal_pd_task_work_hour(pd_list, _st_date, _ed_date):
     _sum = 0
     _pj_sum = 0
     _pd2pj = {'CPSJ': 'FAST', 'FAST': 'FAST', 'FASTMIR': 'FAST', 'FASTPULSAR': 'FAST', 'FASTWH': 'FAST',
-              'HUBBLE': 'HUBBLE', 'HV': 'HUBBLE', 'ONEX': 'FAST', 'ROOOT': 'FAST'}
+              'HUBBLE': 'HUBBLE', 'HV': 'HUBBLE', 'ONEX': 'FAST', 'ROOOT': 'FAST', 'DAAS': 'HUBBLE',
+              'FASTPT': 'FAST'}
     for _p in pd_list:
         _task = handler.scan_pd_task(_p, _st_date, _ed_date)
         _pd[_p], __sum = cal_pd_task_ind(_task)
