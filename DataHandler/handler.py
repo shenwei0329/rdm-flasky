@@ -588,11 +588,9 @@ def get_ticket_stat(st_date, ed_date):
     
         _rec = do_search('plane_ticket', {"$and": [{u"起飞时间": {"$gte": "%s" % _st_date}},
                                                {u"起飞时间": {"$lt": "%s" % _ed_date}}]})
-        仍然有问题：
-        _rec = do_search('plane_ticket', {u"起飞时间": {"$gte": "%s" % _st_date}})
-        
-        最后改为以年，如2018作为日期选择条件：
+    _rec = do_search('plane_ticket', {u"起飞时间": {"$gte": "%s" % _st_date}})
     """
+    print(">>> 2019: %s" % _st_date)
     _rec = do_search('plane_ticket', {u"起飞时间": {"$regex": "%s" % _st_date[:4]}})
     _cost = 0.
     addr_data = {}

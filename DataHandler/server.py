@@ -968,12 +968,18 @@ def cal_pd_task_work_hour(pd_list, _st_date, _ed_date):
     _pj_sum = 0
     _pd2pj = {'CPSJ': 'FAST', 'FAST': 'FAST', 'FASTMIR': 'FAST', 'FASTPULSAR': 'FAST', 'FASTWH': 'FAST',
               'HUBBLE': 'HUBBLE', 'HV': 'HUBBLE', 'ONEX': 'FAST', 'ROOOT': 'FAST', 'DAAS': 'HUBBLE',
-              'FASTPT': 'FAST'}
+              'FASTPT': 'FAST', "FAS": 'FAST'}
     for _p in pd_list:
+
         _task = handler.scan_pd_task(_p, _st_date, _ed_date)
         _pd[_p], __sum = cal_pd_task_ind(_task)
-        if _pd2pj[_p] not in _pj:
+        
+        if (_p in _pd2pj) and (_pd2pj[_p] not in _pj):
             _pj[_pd2pj[_p]] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0}
+        else:
+            print(u"-->[cal_pd_task_work_hour] %s" % _p)
+            _pd2pj[_p] = 'FAST'
+
         for _v in _pd[_p]:
             _pj[_pd2pj[_p]][_v] += _pd[_p][_v]
 

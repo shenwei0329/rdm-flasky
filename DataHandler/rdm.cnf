@@ -7,7 +7,7 @@ path=/home/shenwei/log/jira_class_epic.log
 
 [DATE]
 #
-jira_scan_start_date=2018-3-1
+jira_scan_start_date=2018-4-1
 
 [DATABASE]
 mongodb=mongodb://root:chinacloud@172.16.60.2:27017/admin
@@ -44,9 +44,11 @@ rdm_number_member=6
 day=10
 
 [LIST]
-products=["CPSJ","FAST","FASTPULSAR","FASTMIR","FASTWH","HUBBLE","HV","ONEX","ROOOT"]
-projects=["JX","GZ","SCGA","FT","JTJD","BJXJC","HBB17","HBJCY","GADATE2","GASJGC","GAYF","GXXW","GZ","GZER","GZERQI","WST"]
+products=["CPSJ","FAST","FASTPULSAR","FASTMIR","FASTWH","HUBBLE","HV","ONEX","ROOOT","DAAS","FASTPT","FAS"]
+#projects=["JX","GZ","SCGA","FT","JTJD","BJXJC","HBB17","HBJCY","HLD"]
+projects=["JX","GZ","SCGA","FT","JTJD","BJXJC","HBB17","HBJCY","GADATE2","GASJGC","GAYF","GXXW","GZ","GZER","GZERQI","WST","HLD","DLHZZ"]
 rdm=["RDM","TESTCENTER"]
+
 
 #
 # Eof
