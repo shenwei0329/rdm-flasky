@@ -50,6 +50,7 @@ def get_context(key, data=None):
     _context['len'] = len
     _context['range'] = range
     _context['int'] = int
+    _context['sorted'] = sorted
 
     return _context
 
