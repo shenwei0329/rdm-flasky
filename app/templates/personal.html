@@ -10,7 +10,7 @@
                     <div style="text-align:center" id="vueex">
                         <h1><b>个人档案</b></h1>
                         <p v-text="msg"></p>
-                        <p>数据统计日期：{{ reportDate }}</p>
+                        <p>数据统计日期：{{ weekdate }}</p>
                     </div>
                     <script>
                         let vm = new Vue({
@@ -27,8 +27,56 @@
             </div>
         </div>
         <br>
-        <div class="container">
-
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;本时间段内，应提交个人工作日志的总人数为 <b>{{ total_count }}</b> 人；
+        其中，提交个人工作日志的有 <b>{{ used_count }}</b> 人，未提交的有 <b>{{ no_count }}</b> 人。</p>
+        <br>
+        <div class="container" id="div_wrap">
+            <div id="div_menu">【员工选择】
+                <table border="1">
+                    <tr style="text-align:center">
+                        <th width="80px" style="text-align:center"></th>
+                        <th width="80px" style="text-align:center"></th>
+                        <th width="80px" style="text-align:center"></th>
+                    </tr>
+                    {% for _i in range( int((len(members)+2)/3) ) %}
+                    <tr>
+                        <td style="text-align:center">
+                            <button style="width:60px;" value="{{members[_i*3]}}" v-on:click="say({{_i*3}})">
+                                {{ members[_i*3] }}</button>
+                        </td>
+                        <td style="text-align:center">
+                            {% if (_i*3+1)<len(members) %}
+                                <button style="width:60px;" value="{{members[_i*3+1]}}" v-on:click="say({{_i*3+1}})">
+                                    {{ members[_i*3+1] }}</button>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:center">
+                            {% if (_i*3+2)<len(members) %}
+                                <button style="width:60px;" value="{{members[_i*3+2]}}" v-on:click="say({{_i*3+2}})">
+                                    {{ members[_i*3+2] }}</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div>
+                <div id="member_summary" >
+                </div>
+            </div>
+            <script>
+                new Vue({
+                    el: '#div_wrap',
+                    methods: {
+                        say: function (value){
+                            var str = value;
+                            htmlobj=$.ajax({url:"/member_select/"+str,async:false})
+                            $("#member_summary").html(htmlobj.responseText);
+                            $("#member_summary").show();
+                        }
+                    }
+                })
+            </script>
         </div>
         <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
 </div>

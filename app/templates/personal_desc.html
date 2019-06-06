@@ -1,0 +1,55 @@
+                        <div>
+                            <h4  style="text-align:center">
+                                &nbsp;&nbsp;&nbsp;&nbsp;员工：<b>{{ members[int(value)] }}</b>，个人信息。
+                                <hr style="height:4px;border:none;border-top:4px groove skyblue;"/>
+                            </h4>
+                            {% if members[int(value)] in list %}
+                                {% for _text in list[members[int(value)]]['text'] %}
+                                <p>{{ _text }}</p>
+                                {% endfor %}
+                            {% endif %}
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>一、工作范围</b></h5>
+                                {% if members[int(value)] in list %}
+                                    <img src="static/member/{{ members[int(value)] }}_工作范围.png" width=260px height=260px  align="middle">
+                                    <br>
+                                    <br>
+                                    <pre>{{ list[members[int(value)]]['row'][0][1][1] }}
+                                    </pre>
+                                {% else %}
+                                    &nbsp;&nbsp;&nbsp;&nbsp;无工作特征。
+                                {% endif %}
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>二、行为特征</b></h5>
+                                {% if members[int(value)] in list %}
+                                <table border="0" width="560px">
+                                    <tr>
+                                        <td width="280px" style="text-align:center">
+                                            <img src="static/member/{{ members[int(value)] }}_工作主题分布.png" width=260px height=260px  align="middle">
+                                        </td>
+                                        <td width="280px" style="text-align:center">
+                                            <img src="static/member/{{ members[int(value)] }}_工作行为分布.png" width=260px height=260px  align="middle">
+                                        </td>
+                                    </tr>
+                                </table>
+                                <br>
+                                {% endif %}
+                                {% if members[int(value)] in list %}
+                                    <pre>{{ list[members[int(value)]]['row'][1][2][1] }}
+                                    </pre>
+                                {% else %}
+                                    &nbsp;&nbsp;&nbsp;&nbsp;无工作特征。
+                                {% endif %}
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>三、工作明细</b></h5>
+                                <table border="1" width="800px" rules=none>
+                                    {% for _d in log[members[int(value)]] %}
+                                    <tr>
+                                            <td width="120px" style="text-align:left"><b>&nbsp;&nbsp;{{ _d['date'] }}</b></td>
+                                        <td width="200px" style="text-align:left">&nbsp;&nbsp;{{ _d['project'] }}</td>
+                                        <td style="text-align:left"><p>{{ _d['summary'] }}</p></td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                        </div>

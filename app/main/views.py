@@ -34,7 +34,7 @@ key_honor_3m = redis_class.KeyLiveClass('honor_3m')
 # 管理员"正文"缓存
 key_manage = redis_class.KeyLiveClass('manage')
 # 个人档案
-key_personal = redis_class.KeyLiveClass('rdm')
+key_personal = redis_class.KeyLiveClass('personal')
 
 
 def get_context(key, data=None):
@@ -47,6 +47,9 @@ def get_context(key, data=None):
     if data is not None:
         _context['value'] = data
     print(">>> reportDate[%s]" % _context['reportDate'])
+    _context['len'] = len
+    _context['range'] = range
+    _context['int'] = int
 
     return _context
 
@@ -169,3 +172,10 @@ def personal():
 
     return render_template('personal.html', **get_context(key_personal))
 
+
+@main.route('/member_select/<value>')
+def member_select(value):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('personal_desc.html', **get_context(key_personal, data=value))
