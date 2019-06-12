@@ -1477,6 +1477,9 @@ def set_context():
         _trip[_m] = {
             "tripMap": echart_handler.get_geo(u"出差", u"信息来源于出差申请",
                                               _members_trip[_m]['addr_data']),
+            "tripCount": echart_handler.bar(u'出差', month,
+                                            [{'title': u'出差次数',
+                                              'data': _members_trip[_m]['date']}])
         }
 
     _reim_addr_data, _reim_month_data, _members_reim = handler.get_reim_data(st_date, ed_date)

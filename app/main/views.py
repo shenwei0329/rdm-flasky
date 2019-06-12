@@ -36,6 +36,9 @@ key_manage = redis_class.KeyLiveClass('manage')
 # 个人档案
 key_personal = redis_class.KeyLiveClass('personal')
 
+"""个人统计数据"""
+key_member_checkon = redis_class.KeyLiveClass('member_checkon')
+
 
 def get_context(key, data=None):
 
@@ -46,6 +49,33 @@ def get_context(key, data=None):
     _context['reportDate'] = key_index.get()['reportDate']
     if data is not None:
         _context['value'] = data
+    print(">>> reportDate[%s]" % _context['reportDate'])
+    _context['len'] = len
+    _context['range'] = range
+    _context['int'] = int
+    _context['sorted'] = sorted
+
+    return _context
+
+
+def get_contexts(keys, data=None):
+
+    _context = keys[0].get()
+
+    for _key in keys[1:]:
+        __context = _key.get()
+        for _key in __context:
+            print(">>> get_contexts: _key = %s" % _key)
+            _context[_key] = __context[_key]
+
+    _role = Role.query.filter_by(name=current_user.username).first()
+    print(">>> role.level = %d" % _role.level)
+    _context['user'] = {'role': _role.level}
+    _context['reportDate'] = key_index.get()['reportDate']
+    if data is not None:
+        _context['value'] = data
+        if "members" in _context:
+            _context['my'] = _context["members"][int(data)]
     print(">>> reportDate[%s]" % _context['reportDate'])
     _context['len'] = len
     _context['range'] = range
@@ -179,4 +209,18 @@ def member_select(value):
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    return render_template('personal_desc.html', **get_context(key_personal, data=value))
+    return render_template('personal_desc.html', **get_contexts([key_personal, key_member_checkon], data=value))
+
+
+@main.route('/evaluation')
+def evaluation():
+    """
+    评定与评估
+    :return:
+    """
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('evaluation.html', **get_context(key_personal))
+
+

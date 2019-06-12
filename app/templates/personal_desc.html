@@ -33,7 +33,6 @@
                                     {{ trip[my]["tripMap"] | safe }}
                                     {% endif %}
                                     </th>
-                                    <th></th>
                                 </tr>
                                 {% if user["role"] <= 2 %}
                                 <tr>
@@ -43,18 +42,31 @@
                                     {% endif %}
                                     </td>
                                     <td>
-                                    {% if my in loan %}
-                                        {{ loan[my]["tripMonth"] | safe }}
-                                    {% endif %}
-                                    </td>
-                                    <td>
-                                    {% if my in reimbursement %}
-                                    {{ reimbursement[my]["reimMonth"] | safe }}
+                                    {% if my in trip %}
+                                    {{ trip[my]["tripCount"] | safe }}
                                     {% endif %}
                                     </td>
                                 </tr>
                                 {% endif %}
                             </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            {% if user["role"] <= 2 %}
+                            <h5><b>财务情况</b></h5>
+                            <table>
+                                <tr>
+                                    <th>
+                                    {% if my in loan %}
+                                        {{ loan[my]["tripMonth"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                    <th>
+                                    {% if my in reimbursement %}
+                                    {{ reimbursement[my]["reimMonth"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                </tr>
+                            </table>
+                            {% endif %}
                             <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
                             {% endif %}
                             <h5><b>工作情况</b></h5>
