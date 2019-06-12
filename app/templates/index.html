@@ -65,7 +65,7 @@
                         </p>
                         <div><h3>资源明细：</h3></div>
                         <p>
-                        今年，产品研发中心共有<b style="color:#F00">{{ taskStat["pd_persion"] }}</b>名员工，
+                        一年内，产品研发中心共有<b style="color:#F00">{{ taskStat["pd_persion"] }}</b>名员工，
                         耗费<b style="color:#F00">{{ taskStat["pd_cost_time"] }}</b>个工时，
                         完成<b style="color:#F00">{{ taskStat["pd_count"] }}</b>项任务。
                         在支撑项目上，共投入<b style="color:#F00">{{ hrStat["pd_pj_time"] }}</b>个工时
@@ -109,7 +109,7 @@
                         <hr>
                         {% if user["role"] <= 2 %}
                         <p>
-                        今年，已发生差旅<b style="color:#F00">{{ tripStat["total"] }}</b>人次，
+                        一年内，发生差旅<b style="color:#F00">{{ tripStat["total"] }}</b>人次，
                         差旅借款<b style="color:#F00">{{ tripStat["loan"] }}</b>万元，
                         机票费<b style="color:#F00">{{ tripStat["ticket"] }}</b>万元，
                         总费用<b style="color:#F00">{{ tripStat["totalcost"] }}</b>万元。<br/>

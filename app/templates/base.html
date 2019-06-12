@@ -50,7 +50,8 @@
                 <li><a href="{{ url_for('main.finance') }}" style="font-size:12px">财务统计</a></li>
                 {% endif %}
                 {% if user["role"] <= 3 %}
-                <li><a href="{{ url_for('main.personal') }}" style="color:#F00; font-size:16px">个人档案</a></li>
+                <li><a href="{{ url_for('main.personal') }}" style="color:#F00; font-size:16px">工作行为</a></li>
+                <li><a href="{{ url_for('main.evaluation') }}" style="color:#F00; font-size:16px">评定与评估</a></li>
                 {% endif %}
                 {% endif %}
             </ul>

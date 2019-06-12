@@ -177,6 +177,8 @@ def get_trip_data(st_date, ed_date):
     addr_data = {}
     _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
+    _members = {}
+
     # 从出差申请表中获取出差类型为：出差的数据
     mongo_db.connect_db('ext_system')
     _rec = do_search('trip_req', {u'外出类型': u'出差',
@@ -184,9 +186,21 @@ def get_trip_data(st_date, ed_date):
                                            {u"审批完成时间": {"$lt": "%s" % ed_date}}]})
 
     for _r in _rec:
+
+        if _r[u'发起人姓名'] not in _members:
+            _members[_r[u'发起人姓名']] = {
+                "month_stat": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0,
+                               "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0},
+                "addr_data": {},
+                "date": []
+            }
+
         addr_data = addr_filter(addr_data, _r[u'起止地点'])
         _date = datetime.datetime.strptime(_r[u'审批发起时间'], "%Y-%m-%d %H:%M:%S")
         _month_stat[str(_date.month)] += 1
+
+        _members[_r[u'发起人姓名']]['addr_data'] = addr_filter(_members[_r[u'发起人姓名']]['addr_data'], _r[u'起止地点'])
+        _members[_r[u'发起人姓名']]['month_stat'][str(_date.month)] += 1
 
     # 关闭数据库
     mongo_db.close_db()
@@ -198,7 +212,11 @@ def get_trip_data(st_date, ed_date):
 
     print _date
 
-    return addr_data, _date
+    for _m in _members:
+        for _d in range(1, 13):
+            _members[_m]['date'].append(_members[_m]['month_stat'][str(_d)])
+
+    return addr_data, _date, _members
 
 
 def get_reim_data(st_date, ed_date):
@@ -212,12 +230,23 @@ def get_reim_data(st_date, ed_date):
     addr_data = {}
     _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
+    _members = {}
+
     # 从出差申请表中获取出差类型为：出差的数据
     mongo_db.connect_db('ext_system')
     _rec = do_search('reimbursement_req', {"$and": [{u"审批发起时间": {"$gte": "%s" % st_date}},
                                                     {u"审批发起时间": {"$lt": "%s" % ed_date}}]})
 
     for _r in _rec:
+
+        if _r[u'发起人姓名'] not in _members:
+            _members[_r[u'发起人姓名']] = {
+                "month_stat": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0,
+                               "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0},
+                "addr_data": {},
+                "date": []
+            }
+
         addr_data = addr_filter(addr_data, _r[u'出差起止地点'])
         # _date = datetime.datetime.strptime(_r[u'审批发起时间'], "%Y-%m-%d %H:%M:%S")
         try:
@@ -229,6 +258,9 @@ def get_reim_data(st_date, ed_date):
         finally:
             _month_stat[str(_date.month)] += 1
 
+        _members[_r[u'发起人姓名']]['addr_data'] = addr_filter(_members[_r[u'发起人姓名']]['addr_data'], _r[u'出差起止地点'])
+        _members[_r[u'发起人姓名']]['month_stat'][str(_date.month)] += 1
+
     # 关闭数据库
     mongo_db.close_db()
 
@@ -239,7 +271,11 @@ def get_reim_data(st_date, ed_date):
 
     print _date
 
-    return addr_data, _date
+    for _m in _members:
+        for _d in range(1, 13):
+            _members[_m]['date'].append(_members[_m]['month_stat'][str(_d)])
+
+    return addr_data, _date, _members
 
 
 def cal_hour(_str):
@@ -289,7 +325,13 @@ def getChkOn(nWeek):
     获取员工上下班时间序列
     :param nWeek: 近期周数
     :return: 到岗记录时间序列
+    人员：KQ_NAME
     """
+
+    """统计个人考勤数据
+    """
+    _members = {}
+
     _date = cal_date_weekly(nWeek)
     _sql = 'select KQ_AM, KQ_PM, KQ_NAME from checkon_t' \
            ' where str_to_date(KQ_DATE,"%%y-%%m-%%d") between "%s" and "%s"' % \
@@ -304,6 +346,14 @@ def getChkOn(nWeek):
     _user = {}
     for _row in _res:
 
+        if _row[2] not in _members:
+            _members[_row[2]] = {
+                "total_work_hour": 0.,
+                "seq_am": (),
+                "seq_pm": (),
+                "seq_work": ()
+            }
+
         if _row[2] not in _user:
             _user[_row[2]] = 0
 
@@ -313,22 +363,29 @@ def getChkOn(nWeek):
         if (_h is None) or (_h > 12.) or (_h < 6.):
             _h = 9.0
             _seq_am = _seq_am + (9.0,)
+            _members[_row[2]]["seq_am"] = _members[_row[2]]["seq_am"] + (9.0, )
         else:
             _seq_am = _seq_am + (_h,)
+            _members[_row[2]]["seq_am"] = _members[_row[2]]["seq_am"] + (_h, )
 
         _h1 = cal_hour(_row[1])
         if (_h1 is None) or (_h1 < 12.):
             _h1 = 17.5
             _seq_pm = _seq_pm + (17.5,)
+            _members[_row[2]]["seq_pm"] = _members[_row[2]]["seq_pm"] + (17.5, )
         else:
             _seq_pm = _seq_pm + (_h1,)
+            _members[_row[2]]["seq_pm"] = _members[_row[2]]["seq_pm"] + (_h1,)
 
         _seq_work = _seq_work + ((_h1 - _h - 1.0),)
         _total_work_hour += (_h1 - _h - 1.0)
 
+        _members[_row[2]]["seq_work"] = _members[_row[2]]["seq_work"] + ((_h1 - _h - 1.0),)
+        _members[_row[2]]["total_work_hour"] += (_h1 - _h - 1.0)
+
         _user[_row[2]] += 1
 
-    return _seq_am, _seq_pm, _seq_work, _user, _total_work_hour
+    return _seq_am, _seq_pm, _seq_work, _user, _total_work_hour, _members
 
 
 def get_task_stat(st_date, ed_date):
@@ -476,6 +533,7 @@ def get_hr_stat(st_date, ed_date):
     personal = {}
     date = {}
 
+    """以前的
     for pj in pd_list+pj_list+rdm_list:
         mongo_db.connect_db(pj)
         _rec = mongo_db.handler('worklog', 'find', {"$and": [{"created": {"$gte": "%s" % st_date}},
@@ -496,6 +554,27 @@ def get_hr_stat(st_date, ed_date):
 
         mongo_db.close_db()
 
+    """
+    print(">>> +++ get_hr_stat: %s -> %s" % (st_date, ed_date))
+    mongo_db.connect_db("WORK_LOGS")
+    _rec = mongo_db.handler('worklog', 'find', {"$and": [{"created": {"$gte": "%s" % st_date}},
+                                                         {"created": {"$lt": "%s" % ed_date}}]})
+    for _r in _rec:
+        if 'author' not in _r:
+            continue
+        if _r['author'] not in personal:
+            personal[_r['author']] = 0
+        personal[_r['author']] += _r['timeSpentSeconds']
+        _date = _r['created'].split('T')[0]
+        if _date not in date:
+            date[_date] = 0
+        date[_date] += 1
+
+        _date = datetime.datetime.strptime(_date, "%Y-%m-%d")
+        _month_stat[str(_date.month)] += 1
+
+    mongo_db.close_db()
+
     _date = []
     for _d in range(1, 13):
         _date.append(int(_month_stat[str(_d)]))
@@ -509,18 +588,34 @@ def get_loan_stat(st_date, ed_date):
     :param st_date: 起始日期
     :param ed_date: 截止日期
     :return: 统计
+    人员：发起人姓名
     """
     _month_cost_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
+
+    """统计个人的报账数据
+    """
+    _members = {}
 
     mongo_db.connect_db('ext_system')
     _rec = do_search('loan_req', {"$and": [{u"审批完成时间": {"$gte": "%s" % st_date}},
                                            {u"审批完成时间": {"$lt": "%s" % ed_date}}]})
     _cost = 0.
     for _r in _rec:
+
+        if _r[u'发起人姓名'] not in _members:
+            _members[_r[u'发起人姓名']] = {
+                "month_cost_stat": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0,
+                                    "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0},
+                "cost": 0,
+                "date_cost": []
+            }
+
         _cost += float(_r[u'金额小计'])
+        _members[_r[u'发起人姓名']]['cost'] += float(_r[u'金额小计'])
 
         _date = datetime.datetime.strptime(_r[u'审批完成时间'], "%Y-%m-%d %H:%M:%S")
         _month_cost_stat[str(_date.month)] += float(_r[u'金额小计'])
+        _members[_r[u'发起人姓名']]['month_cost_stat'][str(_date.month)] += float(_r[u'金额小计'])
 
     mongo_db.close_db()
 
@@ -528,7 +623,11 @@ def get_loan_stat(st_date, ed_date):
     for _d in range(1, 13):
         _date_cost.append(int(_month_cost_stat[str(_d)]/1000.))
 
-    return _cost, _date_cost
+    for _m in _members:
+        for _d in range(1, 13):
+            _members[_m]['date_cost'].append(int(_members[_m]['month_cost_stat'][str(_d)] / 1000.))
+
+    return _cost, _date_cost, _members
 
 
 def get_reimbursement_stat(st_date, ed_date):
@@ -537,15 +636,31 @@ def get_reimbursement_stat(st_date, ed_date):
     :param st_date: 起始日期
     :param ed_date: 截止日期
     :return: 统计
+    人员：发起人姓名
     """
     _month_cost_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
 
     mongo_db.connect_db('ext_system')
     _rec = do_search('reimbursement_req', {"$and": [{u"审批发起时间": {"$gte": "%s" % st_date}},
                                                     {u"审批发起时间": {"$lt": "%s" % ed_date}}]})
+
+    """统计个人的报账数据
+    """
+    _members = {}
+
     _cost = 0.
     for _r in _rec:
+
+        if _r[u'发起人姓名'] not in _members:
+            _members[_r[u'发起人姓名']] = {
+                "month_cost_stat": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0,
+                                    "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0},
+                "cost": 0,
+                "date_cost": []
+            }
+
         _cost += float(_r[u'金额小计'])
+        _members[_r[u'发起人姓名']]['cost'] += float(_r[u'金额小计'])
 
         # print(">>> 2019 <<< strptime: %s" % _r[u'审批发起时间'])
         try:
@@ -556,6 +671,7 @@ def get_reimbursement_stat(st_date, ed_date):
                                                "%Y-%m-%d")
         finally:
             _month_cost_stat[str(_date.month)] += float(_r[u'金额小计'])
+            _members[_r[u'发起人姓名']]['month_cost_stat'][str(_date.month)] += float(_r[u'金额小计'])
 
     mongo_db.close_db()
 
@@ -563,7 +679,11 @@ def get_reimbursement_stat(st_date, ed_date):
     for _d in range(1, 13):
         _date_cost.append(int(_month_cost_stat[str(_d)]/1000.))
 
-    return _cost, _date_cost
+    for _m in _members:
+        for _d in range(1, 13):
+            _members[_m]['date_cost'].append(int(_members[_m]['month_cost_stat'][str(_d)] / 1000.))
+
+    return _cost, _date_cost, _members
 
 
 def get_ticket_stat(st_date, ed_date):
@@ -582,6 +702,10 @@ def get_ticket_stat(st_date, ed_date):
     _date = ed_date.split('-')
     _ed_date = u"%d年%d月%d日" % (int(_date[0]), int(_date[1]), int(_date[2]))
 
+    """统计个人机票数据
+    """
+    _members = {}
+
     mongo_db.connect_db('ext_system')
     """
     Bug：当月份是[10,11,12]时，$lt逻辑有问题，输出的数据为“空”
@@ -590,13 +714,35 @@ def get_ticket_stat(st_date, ed_date):
                                                {u"起飞时间": {"$lt": "%s" % _ed_date}}]})
     _rec = do_search('plane_ticket', {u"起飞时间": {"$gte": "%s" % _st_date}})
     """
-    print(">>> 2019: %s" % _st_date)
-    _rec = do_search('plane_ticket', {u"起飞时间": {"$regex": "%s" % _st_date[:4]}})
+
+    _rec = do_search('plane_ticket', {"$or": [{u"起飞时间": {"$regex": "%s" % _st_date[:4]}},
+                                              {u"起飞时间": {"$regex": "%s" % _ed_date[:4]}}]})
     _cost = 0.
     addr_data = {}
 
     for _r in _rec:
-        _cost += float(_r[u'实收'])
+
+        if (u'乘机人' in _r) and (_r[u'乘机人'] not in _members):
+            _members[_r[u'乘机人']] = {
+                "month_stat": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0,
+                               "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0},
+                "month_cost_stat": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0,
+                                    "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0},
+                "cost": 0,
+                "addr_data": {},
+                "date": [],
+                "date_cost": []
+            }
+
+        if u"实收" in _r:
+            _cost += float(_r[u'实收'])
+        if u"实收/实付" in _r:
+            _cost += float(_r[u'实收/实付'])
+        if u'乘机人' in _r:
+            if u"实收" in _r:
+                _members[_r[u'乘机人']]['cost'] += float(_r[u'实收'])
+            if u"实收/实付" in _r:
+                _members[_r[u'乘机人']]['cost'] += float(_r[u'实收/实付'])
 
         # 出差地址
         _addr = _r[u'航程'].split('-')
@@ -612,10 +758,29 @@ def get_ticket_stat(st_date, ed_date):
             else:
                 addr_data[__addr] += 1
 
+            if u'乘机人' in _r:
+                if __addr not in _members[_r[u'乘机人']]['addr_data']:
+                    _members[_r[u'乘机人']]['addr_data'][__addr] = 1
+                else:
+                    _members[_r[u'乘机人']]['addr_data'][__addr] += 1
+
+                print(u">>> %s：to %s" % (_r[u'乘机人'], __addr))
+
         _date = datetime.datetime.strptime(_r[u'起飞时间'].replace(u'年', '-').replace(u'月', '-').replace(u'日', ""),
                                            u'%Y-%m-%d')
+
         _month_stat[str(_date.month)] += 1
-        _month_cost_stat[str(_date.month)] += float(_r[u'实收'])
+        if u"实收" in _r:
+            _month_cost_stat[str(_date.month)] += float(_r[u'实收'])
+        else:
+            _month_cost_stat[str(_date.month)] += float(_r[u'实收/实付'])
+
+        if u'乘机人' in _r:
+            _members[_r[u'乘机人']]['month_stat'][str(_date.month)] += 1
+            if u"实收" in _r:
+                _members[_r[u'乘机人']]['month_cost_stat'][str(_date.month)] += float(_r[u'实收'])
+            else:
+                _members[_r[u'乘机人']]['month_cost_stat'][str(_date.month)] += float(_r[u'实收/实付'])
 
     mongo_db.close_db()
 
@@ -623,13 +788,22 @@ def get_ticket_stat(st_date, ed_date):
     for _d in range(1, 13):
         _date.append(int(_month_stat[str(_d)]))
 
+    for _m in _members:
+        for _d in range(1, 13):
+            _members[_m]['date'].append(int(_members[_m]['month_stat'][str(_d)]))
+
     _date_cost = []
     for _d in range(1, 13):
         _date_cost.append(int(_month_cost_stat[str(_d)]/1000.))
 
+    for _m in _members:
+        print(u">>> 乘机人：%s" % _m)
+        for _d in range(1, 13):
+            _members[_m]['date_cost'].append(int(_members[_m]['month_cost_stat'][str(_d)] / 1000.))
+
     print _date, _date_cost
 
-    return _cost, addr_data, _date, _date_cost
+    return _cost, addr_data, _date, _date_cost, _members
 
 
 def is_pj(pj_info, summary):

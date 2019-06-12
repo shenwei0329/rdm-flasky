@@ -48,6 +48,9 @@ key_honor_3m = redis_class.KeyLiveClass('honor_3m')
 # 管理员"正文"缓存
 key_manage = redis_class.KeyLiveClass('manage')
 
+"""个人统计数据"""
+key_member_checkon = redis_class.KeyLiveClass('member_checkon')
+
 # 产品研发中心
 pd_databases = handler.pd_list
 
@@ -1308,7 +1311,15 @@ def set_context():
     ed_date = today.strftime("%Y-%m-%d")
 
     """因考勤数据过多，故仅计算近8周内的"""
-    _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour = handler.getChkOn(8)
+    _checkon_am_data, _checkon_pm_data, _checkon_work, _checkon_user, _total_work_hour, _members_checkon = handler.getChkOn(8)
+
+    _members = {}
+    for _m in _members_checkon:
+        _members[_m] = {
+            'chkonam': echart_handler.scatter(u'上班时间', [0,12], _members_checkon[_m]['seq_am']),
+            'chkonpm': echart_handler.scatter(u'下班时间', [8,24], _members_checkon[_m]['seq_pm']),
+            'chkonwork': echart_handler.scatter(u'工作时长', [0, 12], _members_checkon[_m]['seq_work'])
+        }
 
     _act_user = 0
     for _v in _checkon_user:
@@ -1433,11 +1444,53 @@ def set_context():
 
     }
 
-    _cost_loan, _trip_month_cost = handler.get_loan_stat(st_date, ed_date)
-    _cost_reim, _reim_month_cost = handler.get_reimbursement_stat(st_date, ed_date)
-    _cost_ticket, _addr_data, _month_date, _month_cost = handler.get_ticket_stat(st_date, ed_date)
-    _trip_addr_data, _trip_month_data = handler.get_trip_data(st_date, ed_date)
-    _reim_addr_data, _reim_month_data = handler.get_reim_data(st_date, ed_date)
+    _cost_loan, _trip_month_cost, _members_loan = handler.get_loan_stat(st_date, ed_date)
+    _cost_reim, _reim_month_cost, _members_reimbursement = handler.get_reimbursement_stat(st_date, ed_date)
+
+    _cost_ticket, _addr_data, _month_date, _month_cost, _members_ticket = handler.get_ticket_stat(st_date, ed_date)
+
+    _ticket = {}
+    for _m in _members_ticket:
+        _ticket[_m] = {
+            "planeTicket": echart_handler.get_geo(u"航程",
+                                                  u"数据来源于携程",
+                                                  _members_ticket[_m]['addr_data']),
+            "planeMonth": echart_handler.bar(u'航程', month,
+                                             [{'title': u'航次',
+                                               'data': _members_ticket[_m]['date']},
+                                              {'title': u'金额（1000元）',
+                                               'data': _members_ticket[_m]['date_cost']}]),
+
+        }
+
+    _trip_addr_data, _trip_month_data, _members_trip = handler.get_trip_data(st_date, ed_date)
+
+    _loan = {}
+    for _m in _members_loan:
+        _loan[_m] = {
+            "tripMonth": echart_handler.bar(u'借款', month,
+                                            [{'title': u'借款金额（1000元）',
+                                              'data': _members_loan[_m]['date_cost']}])
+        }
+    _trip = {}
+    for _m in _members_trip:
+        _trip[_m] = {
+            "tripMap": echart_handler.get_geo(u"出差", u"信息来源于出差申请",
+                                              _members_trip[_m]['addr_data']),
+        }
+
+    _reim_addr_data, _reim_month_data, _members_reim = handler.get_reim_data(st_date, ed_date)
+
+    _reimbursement = {}
+    for _m in _members_reimbursement:
+        _reimbursement[_m] = {
+            'reimMonth': echart_handler.bar(u'报账', month,
+                                            [{'title': u'次数',
+                                              'data': _members_reim[_m]['date']},
+                                             {'title': u'报账金额（1000元）',
+                                              'data': _members_reimbursement[_m]['date_cost']}]),
+        }
+
     # 差旅统计信息
     tripStat = {
         "total": handler.get_trip_count(st_date, ed_date),
@@ -1485,6 +1538,17 @@ def set_context():
         chkonpm=echart_handler.scatter(u'下班时间', [8,24], _checkon_pm_data),
         chkonwork=echart_handler.scatter(u'工作时长', [0, 12], _checkon_work),
     )
+
+    key_member_checkon.set(
+        dict(
+            members_checkon=_members,
+            ticket=_ticket,
+            reimbursement=_reimbursement,
+            loan=_loan,
+            trip=_trip,
+        )
+    )
+
     return context
 
 

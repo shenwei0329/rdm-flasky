@@ -10,39 +10,80 @@
                                 {% endfor %}
                             {% endif %}
                             <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
-                            <h5><b>一、工作范围</b></h5>
-                                {% if members[int(value)] in list %}
-                                    <img src="static/member/{{ members[int(value)] }}_工作范围.png" width=260px height=260px  align="middle">
-                                    <br>
-                                    <br>
-                                    <pre>{{ list[members[int(value)]]['row'][0][1][1] }}
-                                    </pre>
-                                {% else %}
-                                    &nbsp;&nbsp;&nbsp;&nbsp;无工作特征。
-                                {% endif %}
+                            {% if my in members_checkon %}
+                            <h5><b>近期考勤情况</b></h5>
+                            <table>
+                                <tr>
+                                    <th>{{ members_checkon[my]["chkonam"] | safe }}</th>
+                                    <th>{{ members_checkon[my]["chkonpm"] | safe }}</th>
+                                    <th>{{ members_checkon[my]["chkonwork"] | safe }}</th>
+                                </tr>
+                            </table>
                             <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
-                            <h5><b>二、行为特征</b></h5>
+                            <h5><b>差旅情况</b></h5>
+                            <table>
+                                <tr>
+                                    <th>
+                                    {% if my in ticket %}
+                                    {{ ticket[my]["planeTicket"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                    <th>
+                                    {% if my in trip %}
+                                    {{ trip[my]["tripMap"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                    <th></th>
+                                </tr>
+                                {% if user["role"] <= 2 %}
+                                <tr>
+                                    <td>
+                                    {% if my in ticket %}
+                                    {{ ticket[my]["planeMonth"] | safe }}
+                                    {% endif %}
+                                    </td>
+                                    <td>
+                                    {% if my in loan %}
+                                        {{ loan[my]["tripMonth"] | safe }}
+                                    {% endif %}
+                                    </td>
+                                    <td>
+                                    {% if my in reimbursement %}
+                                    {{ reimbursement[my]["reimMonth"] | safe }}
+                                    {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            {% endif %}
+                            <h5><b>工作情况</b></h5>
                                 {% if members[int(value)] in list %}
-                                <table border="0" width="560px">
+                                <table border="0" width="900px">
                                     <tr>
-                                        <td width="280px" style="text-align:center">
-                                            <img src="static/member/{{ members[int(value)] }}_工作主题分布.png" width=260px height=260px  align="middle">
-                                        </td>
-                                        <td width="280px" style="text-align:center">
-                                            <img src="static/member/{{ members[int(value)] }}_工作行为分布.png" width=260px height=260px  align="middle">
-                                        </td>
+                                        <th width="300px" style="text-align:center">
+                                            <img src="static/member/{{ members[int(value)] }}_工作范围.png" width="260px" height="260px" align="middle">
+                                        </th>
+                                        <th width="300px" style="text-align:center">
+                                            <img src="static/member/{{ members[int(value)] }}_工作主题分布.png" width="260px" height="260px" align="middle">
+                                        </th>
+                                        <th width="300px" style="text-align:center">
+                                            <img src="static/member/{{ members[int(value)] }}_工作行为分布.png" width="260px" height="260px" align="middle">
+                                        </th>
                                     </tr>
                                 </table>
                                 <br>
                                 {% endif %}
                                 {% if members[int(value)] in list %}
+                                    <pre>{{ list[members[int(value)]]['row'][0][1][1] }}
+                                    </pre>
                                     <pre>{{ list[members[int(value)]]['row'][1][2][1] }}
                                     </pre>
                                 {% else %}
                                     &nbsp;&nbsp;&nbsp;&nbsp;无工作特征。
                                 {% endif %}
                             <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
-                            <h5><b>三、工作明细</b></h5>
+                            <h5><b>近期工作内容</b></h5>
                                 <table border="1" width="800px" rules=none>
                                     {% for _d in sorted(log[members[int(value)]]) %}
                                     <tr>
