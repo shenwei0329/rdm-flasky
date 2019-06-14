@@ -1639,3 +1639,18 @@ def cal_personal_checkon(personal, st_date, ed_date):
 
     return _total
 
+
+def get_email():
+    """
+    建立email与员工的映射表
+    :return:
+    """
+    mongo_db.connect_db("ext_system")
+
+    _email = {}
+    _rec = mongo_db.handler('member_email_t', 'find', {})
+    for _r in _rec:
+        if _r[u'邮箱地址'] not in _email:
+            _email[_r[u'邮箱地址']] = _r['用户姓名']
+
+    return _email

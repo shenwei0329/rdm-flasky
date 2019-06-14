@@ -51,6 +51,9 @@ key_manage = redis_class.KeyLiveClass('manage')
 """个人统计数据"""
 key_member_checkon = redis_class.KeyLiveClass('member_checkon')
 
+"""邮箱"""
+key_email = redis_class.KeyLiveClass('email')
+
 # 产品研发中心
 pd_databases = handler.pd_list
 
@@ -212,6 +215,17 @@ def build_manager():
     :return: 内容
     """
     key_manage.set(set_manager_context())
+
+
+def build_email():
+    """
+    构建“邮箱”内容
+    :return: 内容
+    """
+    _context = dict(
+        email=handler.get_email(),
+    )
+    key_email.set(_context)
 
 
 def cal_task_ind(_type):
@@ -1589,6 +1603,8 @@ def main():
     build_rdm(_cont)
     print(">>> build_manager <<<")
     build_manager()
+    print(">>> build_email <<<")
+    build_email()
 
 
 if __name__ == '__main__':

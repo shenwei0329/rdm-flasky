@@ -39,13 +39,27 @@ key_personal = redis_class.KeyLiveClass('personal')
 """个人统计数据"""
 key_member_checkon = redis_class.KeyLiveClass('member_checkon')
 
+"""邮箱"""
+key_email = redis_class.KeyLiveClass('email')
+
 
 def get_context(key, data=None):
 
     _context = key.get()
-    _role = Role.query.filter_by(name=current_user.username).first()
+    _email = key_email.get()
+    _context['email'] = _email['email']
+    _role = Role.query.filter_by(name=current_user.email).first()
     print(">>> role.level = %d" % _role.level)
     _context['user'] = {'role': _role.level}
+
+    if current_user.email in _email['email']:
+        _context['username'] = _email['email'][current_user.email]
+    else:
+        _context['username'] = current_user.username
+        if 'userindex' in _context:
+            """清除原有的内容"""
+            _context.pop('userindex')
+
     _context['reportDate'] = key_index.get()['reportDate']
     if data is not None:
         _context['value'] = data
@@ -61,16 +75,26 @@ def get_context(key, data=None):
 def get_contexts(keys, data=None):
 
     _context = keys[0].get()
-
+    _email = key_email.get()
+    _context['email'] = _email['email']
     for _key in keys[1:]:
         __context = _key.get()
         for _key in __context:
             print(">>> get_contexts: _key = %s" % _key)
             _context[_key] = __context[_key]
 
-    _role = Role.query.filter_by(name=current_user.username).first()
+    _role = Role.query.filter_by(name=current_user.email).first()
     print(">>> role.level = %d" % _role.level)
     _context['user'] = {'role': _role.level}
+
+    if current_user.email in _email['email']:
+        _context['username'] = _email['email'][current_user.email]
+    else:
+        _context['username'] = current_user.username
+        if 'userindex' in _context:
+            """清除原有的内容"""
+            _context.pop('userindex')
+
     _context['reportDate'] = key_index.get()['reportDate']
     if data is not None:
         _context['value'] = data
@@ -201,7 +225,7 @@ def personal():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    return render_template('personal.html', **get_context(key_personal))
+    return render_template('personal.html', **get_contexts([key_personal, key_member_checkon]))
 
 
 @main.route('/member_select/<value>')

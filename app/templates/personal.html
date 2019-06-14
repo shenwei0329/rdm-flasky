@@ -31,52 +31,162 @@
         其中，提交个人工作日志的有 <b>{{ used_count }}</b> 人，未提交的有 <b>{{ no_count }}</b> 人。</p>
         <br>
         <div class="container" id="div_wrap">
-            <div id="div_menu">【员工选择】
-                <table border="1">
-                    <tr style="text-align:center">
-                        <th width="80px" style="text-align:center"></th>
-                        <th width="80px" style="text-align:center"></th>
-                        <th width="80px" style="text-align:center"></th>
-                    </tr>
-                    {% for _i in range( int((len(members)+2)/3) ) %}
-                    <tr>
-                        <td style="text-align:center">
-                            <button style="width:60px;" value="{{members[_i*3]}}" v-on:click="say({{_i*3}})">
-                                {{ members[_i*3] }}</button>
-                        </td>
-                        <td style="text-align:center">
-                            {% if (_i*3+1)<len(members) %}
-                                <button style="width:60px;" value="{{members[_i*3+1]}}" v-on:click="say({{_i*3+1}})">
-                                    {{ members[_i*3+1] }}</button>
-                            {% endif %}
-                        </td>
-                        <td style="text-align:center">
-                            {% if (_i*3+2)<len(members) %}
-                                <button style="width:60px;" value="{{members[_i*3+2]}}" v-on:click="say({{_i*3+2}})">
-                                    {{ members[_i*3+2] }}</button>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-            <div>
-                <div id="member_summary" >
+            {% if user["role"] <= 2 %}
+                <div id="div_menu">【员工选择】
+                    <table border="1">
+                        <tr style="text-align:center">
+                            <th width="80px" style="text-align:center"></th>
+                            <th width="80px" style="text-align:center"></th>
+                            <th width="80px" style="text-align:center"></th>
+                        </tr>
+                        {% for _i in range( int((len(members)+2)/3) ) %}
+                        <tr>
+                            <td style="text-align:center">
+                                <button style="width:60px;" value="{{members[_i*3]}}" v-on:click="say({{_i*3}})">
+                                    {{ members[_i*3] }}</button>
+                            </td>
+                            <td style="text-align:center">
+                                {% if (_i*3+1)<len(members) %}
+                                    <button style="width:60px;" value="{{members[_i*3+1]}}" v-on:click="say({{_i*3+1}})">
+                                        {{ members[_i*3+1] }}</button>
+                                {% endif %}
+                            </td>
+                            <td style="text-align:center">
+                                {% if (_i*3+2)<len(members) %}
+                                    <button style="width:60px;" value="{{members[_i*3+2]}}" v-on:click="say({{_i*3+2}})">
+                                        {{ members[_i*3+2] }}</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
                 </div>
-            </div>
-            <script>
-                new Vue({
-                    el: '#div_wrap',
-                    methods: {
-                        say: function (value){
-                            var str = value;
-                            htmlobj=$.ajax({url:"/member_select/"+str,async:false})
-                            $("#member_summary").html(htmlobj.responseText);
-                            $("#member_summary").show();
+                <div>
+                    <div id="member_summary" >
+                    </div>
+                </div>
+                <script>
+                    new Vue({
+                        el: '#div_wrap',
+                        methods: {
+                            say: function (value){
+                                var str = value;
+                                htmlobj=$.ajax({url:"/member_select/"+str,async:false})
+                                $("#member_summary").html(htmlobj.responseText);
+                                $("#member_summary").show();
+                            }
                         }
-                    }
-                })
-            </script>
+                    })
+                </script>
+            {% else %}
+                <div>
+                        <div>
+                            <h4  style="text-align:left">
+                                <img src="static/personal/{{ username }}.jpg" width=100px height=140px align="middle">
+                                &nbsp;&nbsp;&nbsp;&nbsp;员工：<b>{{ username }}</b>，个人信息。
+                                <hr style="height:4px;border:none;border-top:4px groove skyblue;"/>
+                            </h4>
+                            {% if username in list %}
+                                {% for _text in list[username]['text'] %}
+                                <p>{{ _text }}</p>
+                                {% endfor %}
+                            {% endif %}
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            {% if username in members_checkon %}
+                            <h5><b>近期考勤情况</b></h5>
+                            <table>
+                                <tr>
+                                    <th>{{ members_checkon[username]["chkonam"] | safe }}</th>
+                                    <th>{{ members_checkon[username]["chkonpm"] | safe }}</th>
+                                    <th>{{ members_checkon[username]["chkonwork"] | safe }}</th>
+                                </tr>
+                            </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            {% endif %}
+                            <h5><b>差旅情况</b></h5>
+                            <table>
+                                <tr>
+                                    <th>
+                                    {% if username in ticket %}
+                                    {{ ticket[username]["planeTicket"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                    <th>
+                                    {% if username in trip %}
+                                    {{ trip[username]["tripMap"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                    {% if username in ticket %}
+                                    {{ ticket[username]["planeMonth"] | safe }}
+                                    {% endif %}
+                                    </td>
+                                    <td>
+                                    {% if username in trip %}
+                                    {{ trip[username]["tripCount"] | safe }}
+                                    {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>财务情况</b></h5>
+                            <table>
+                                <tr>
+                                    <th>
+                                    {% if username in loan %}
+                                        {{ loan[username]["tripMonth"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                    <th>
+                                    {% if username in reimbursement %}
+                                        {{ reimbursement[username]["reimMonth"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                </tr>
+                            </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>工作情况</b></h5>
+                                {% if username in list %}
+                                <table border="0" width="900px">
+                                    <tr>
+                                        <th width="300px" style="text-align:center">
+                                            <img src="static/member/{{ username }}_工作范围.png" width="260px" height="260px" align="middle">
+                                        </th>
+                                        <th width="300px" style="text-align:center">
+                                            <img src="static/member/{{ username }}_工作主题分布.png" width="260px" height="260px" align="middle">
+                                        </th>
+                                        <th width="300px" style="text-align:center">
+                                            <img src="static/member/{{ username }}_工作行为分布.png" width="260px" height="260px" align="middle">
+                                        </th>
+                                    </tr>
+                                </table>
+                                <br>
+                                {% endif %}
+                                {% if username in list %}
+                                    <pre>{{ list[username]['row'][0][1][1] }}
+                                    </pre>
+                                    <pre>{{ list[username]['row'][1][2][1] }}
+                                    </pre>
+                                {% else %}
+                                    &nbsp;&nbsp;&nbsp;&nbsp;无工作特征。
+                                {% endif %}
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>近期工作内容</b></h5>
+                                <table border="1" width="800px" rules=none>
+                                    {% for _d in sorted(log[username]) %}
+                                    <tr>
+                                            <td width="120px" style="text-align:left"><b>&nbsp;&nbsp;{{ _d['date'] }}</b></td>
+                                        <td width="200px" style="text-align:left">&nbsp;&nbsp;{{ _d['project'] }}</td>
+                                        <td style="text-align:left"><p>{{ _d['summary'] }}</p></td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                        </div>
+                </div>
+       {% endif %}
         </div>
         <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
 </div>
