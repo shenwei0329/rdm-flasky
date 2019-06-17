@@ -454,7 +454,7 @@ def lines(data):
 
         _line.add(_d, _title, _v,
                   is_fill=True,
-                  # is_stack=True,
+                  is_stack=True,
                   line_opacity=0.2,
                   area_opacity=0.4,
                   # is_smooth=True,
@@ -464,6 +464,53 @@ def lines(data):
                   mark_line=['average'],
                   mark_point=['max', 'min'],
                   symbol=None)
+    _line.options['toolbox']['show'] = False
+    return _line.render_embed()
+
+
+def lines_by_pj(pj, data):
+    """
+    展示指定项目的分布
+    :param pj: 指定的项目
+    :param data: 数据集
+    :return: 展示图
+    """
+
+    _t = []
+    for _d in data:
+        for _dd in data[_d]:
+            if _dd not in _t:
+                _t.append(_dd)
+
+    _line = Line(u"",
+                 width=100, height=60,
+                 background_color='#b0bab9',
+                 title_pos="center")
+
+    _title = []
+    for __t in sorted(_t):
+        _title.append(__t)
+    _title = _title[-12:]
+    print _title
+
+    _v = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    for _dd in sorted(data[pj]):
+        if _dd not in _title:
+            continue
+        _idx = _title.index(_dd)
+        _v[_idx] = data[pj][_dd]
+    print _v
+
+    _line.add(pj, _title, _v,
+              is_fill=True,
+              # is_stack=True,
+              line_opacity=0.2,
+              area_opacity=0.4,
+              # is_smooth=True,
+              is_legend_show=False,
+              # is_label_show=False,
+              is_focusnode=True,
+              symbol=None)
     _line.options['toolbox']['show'] = False
     return _line.render_embed()
 

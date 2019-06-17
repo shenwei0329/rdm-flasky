@@ -187,6 +187,10 @@ def build_project():
     _context['pj_manager_count'] = len(_pj_managers)
 
     _context['project_echarts'] = echart_handler.lines(_members['project_stat'])
+    _pjs = {}
+    for _pj in _members['project_stat']:
+        _pjs[_pj] = echart_handler.lines_by_pj(_pj, _members['project_stat'])
+    _context['project_echarts_list'] = _pjs
 
     key_project.set(_context)
     return _context
