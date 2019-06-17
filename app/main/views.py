@@ -159,7 +159,7 @@ def project():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    return render_template('project.html', **get_context(key_project))
+    return render_template('project.html', **get_contexts([key_project, key_personal]))
 
 
 @main.route('/honor')

@@ -418,3 +418,52 @@ def gauge(title, ratio):
     chart.add("", "", ratio)
     chart.options['toolbox']['show'] = False
     return chart.render_embed()
+
+
+def lines(data):
+
+    _max = 0
+    _t = []
+    for _d in data:
+        for _dd in data[_d]:
+            if _dd not in _t:
+                _t.append(_dd)
+            if data[_d][_dd] > _max:
+                _max = data[_d][_dd]
+
+    _line = Line(u"",
+                 width=1200, height=600,
+                 background_color='#b0bab9',
+                 title_pos="center")
+
+    _title = []
+    for __t in sorted(_t):
+        _title.append(__t)
+    _title = _title[-12:]
+    print _title
+
+    for _d in data:
+        _v = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for _dd in sorted(data[_d]):
+            if _dd not in _title:
+                continue
+            _idx = _title.index(_dd)
+            _v[_idx] = float(data[_d][_dd])/float(_max)
+
+        print _v
+
+        _line.add(_d, _title, _v,
+                  is_fill=True,
+                  # is_stack=True,
+                  line_opacity=0.2,
+                  area_opacity=0.4,
+                  # is_smooth=True,
+                  legend_top='top',
+                  is_label_show=True,
+                  is_focusnode=True,
+                  mark_line=['average'],
+                  mark_point=['max', 'min'],
+                  symbol=None)
+    _line.options['toolbox']['show'] = False
+    return _line.render_embed()
+

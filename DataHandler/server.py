@@ -50,6 +50,8 @@ key_manage = redis_class.KeyLiveClass('manage')
 
 """个人统计数据"""
 key_member_checkon = redis_class.KeyLiveClass('member_checkon')
+key_member = redis_class.KeyLiveClass('personal')
+
 
 """邮箱"""
 key_email = redis_class.KeyLiveClass('email')
@@ -167,6 +169,9 @@ def build_project():
     构建“项目管理”内容
     :return: 内容
     """
+
+    _members = key_member.get()
+
     _context = set_rdm_context()
     _pj = handler.get_project_info('pj_deliver_t')
     _val = handler.get_project_info('pj_ing_t')
@@ -180,6 +185,8 @@ def build_project():
     _context['imp_projects'] = _imp_pj
     _context['pj_managers'] = _pj_managers
     _context['pj_manager_count'] = len(_pj_managers)
+
+    _context['project_echarts'] = echart_handler.lines(_members['project_stat'])
 
     key_project.set(_context)
     return _context

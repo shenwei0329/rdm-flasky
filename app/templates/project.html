@@ -99,9 +99,30 @@
                     {% endfor %}
                 </table>
                 <b style="color:#F00">注：以上日期为阶段完成的时间点；【合同交付】是合同要求的交付日期。</b>
+            </div-->
+
+            <br>
+
+            <div class="container">
+                <h2><b>项目资源投入情况</b></h2>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;说明：下表内容是对一年内，所有参与项目过程的相关资源的数据统计。</p>
+                <table border="1" width="900px">
+                    {% for _p in project_list %}
+                    <tr>
+                        <td width="200px" >&nbsp;&nbsp;<b>{{ _p['project'] }}</b></td>
+                        <td width="100px" style="text-align:center">{{ _p['count'] }}</td>
+                        <td>{{ _p['member'] }}</td>
+                    </tr>
+                    <tr></tr>
+                    {% endfor %}
+                </table>
+                <h2><b>一年内各项目资源投入分布</b><sub>&nbsp;&nbsp;&nbsp;&nbsp;注：指标为资源对各项目的关注度</sub></h2>
+                <p>
+                    {{ project_echarts | safe }}
+                </p>
             </div>
 
-            <br/-->
+            <br>
 
             <div class="container"><h2><b>近三个月的资源投入组成：</b></h2>
                 <p>
@@ -110,7 +131,6 @@
             </div>
 
             <br/>
-
             <!--div class="container"><h2><b>近两周的资源池任务及效率情况</b></h2>
                 <p>
                     <b>注1</b>：“任务分配”图中每个点表示一个资源（员工），情况分三类：<br/>
