@@ -192,6 +192,26 @@ def build_project():
         _pjs[_pj] = echart_handler.lines_by_pj(_pj, _members['project_stat'])
     _context['project_echarts_list'] = _pjs
 
+    _project_member_echarts = {}
+    _project_member_echarts_list = {}
+    for _m in _members['project_member_stat']:
+        # print(u"%s" % _m)
+        if _m not in _project_member_echarts:
+            # print _members['project_member_stat'][_m]
+            _project_member_echarts[_m] = \
+                echart_handler.lines(_members['project_member_stat'][_m],
+                                     width=600,
+                                     height=400,
+                                     )
+        if _m not in _project_member_echarts_list:
+            _project_member_echarts_list[_m] = {}
+        for _pj in _members['project_member_stat'][_m]:
+            _project_member_echarts_list[_m][_pj] = \
+                echart_handler.lines_member_by_pj(_pj,
+                                           _members['project_member_stat'][_m])
+    _context['project_member_echarts'] = _project_member_echarts
+    _context['project_member_echarts_list'] = _project_member_echarts_list
+
     key_project.set(_context)
     return _context
 
@@ -504,6 +524,8 @@ def set_honor_context(_st_date, _ed_date):
 
     _rdm_count = handler.conf.getint('HONOR', 'rdm_number_member')
     _rdm_numb_list = _rdm_count/handler.conf.getint('HONOR', 'number_column')
+    if _rdm_numb_list == 0:
+        _rdm_count = 1
 
     _pd_list = []
     _pj_list = []
@@ -1005,17 +1027,17 @@ def cal_pd_task_work_hour(pd_list, _st_date, _ed_date):
         if (_p in _pd2pj) and (_pd2pj[_p] not in _pj):
             _pj[_pd2pj[_p]] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0}
         else:
-            print(u"-->[cal_pd_task_work_hour] %s" % _p)
+            # print(u"-->[cal_pd_task_work_hour] %s" % _p)
             _pd2pj[_p] = 'FAST'
 
         for _v in _pd[_p]:
             _pj[_pd2pj[_p]][_v] += _pd[_p][_v]
 
-        print(">>> product_sum[%s]: " % _p)
-        print _pd[_p]
+        # print(">>> product_sum[%s]: " % _p)
+        # print _pd[_p]
         product_sum(_pd[_p])
-        print(">>> product_pj_sum[%s]: " % _pd2pj[_p])
-        print _pj[_pd2pj[_p]]
+        # print(">>> product_pj_sum[%s]: " % _pd2pj[_p])
+        # print _pj[_pd2pj[_p]]
         _sum += __sum
 
     for __pj in ['FAST', 'HUBBLE']:
@@ -1029,7 +1051,7 @@ def cal_work_hour_sum(cost, rat=1):
     _sum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     for _item in cost:
         for _m in range(1, 14):
-            print cost[_item][_m]
+            # print cost[_item][_m]
             _sum[_m] += float(cost[_item][_m])
     for _m in range(1, 14):
         _sum[_m] = "%0.2f" % (_sum[_m]/rat)
@@ -1222,7 +1244,19 @@ def set_rdm_context():
 
     __v = handler.cal_date_monthly(3)
     context['pic_sankey'] = pdPersonals.buildSanKey(__v['month'])
-    context['pic_pj_sankey'] = pjPersonals.buildSanKeyFrPj(__v['month'], ['FT', 'GZ', 'JTJD', 'JX', 'SCGA'])
+    context['pic_pj_sankey'] = pjPersonals.buildSanKeyFrPj(__v['month'],
+                                                           ['FT',
+                                                            'GZ',
+                                                            'YNSZ',
+                                                            'JDWL',
+                                                            'GCXM',
+                                                            'GZERQI',
+                                                            'HBJCY',
+                                                            'JX',
+                                                            'SCGA',
+                                                            'JTJD',
+                                                            'NLZXZH',
+                                                            ])
 
     return context
 
@@ -1341,9 +1375,9 @@ def set_context():
     _members = {}
     for _m in _members_checkon:
         _members[_m] = {
-            'chkonam': echart_handler.scatter(u'上班时间', [0,12], _members_checkon[_m]['seq_am']),
-            'chkonpm': echart_handler.scatter(u'下班时间', [8,24], _members_checkon[_m]['seq_pm']),
-            'chkonwork': echart_handler.scatter(u'工作时长', [0, 12], _members_checkon[_m]['seq_work'])
+            'chkonam': echart_handler.scatter(u'上班时间', [6,10], _members_checkon[_m]['seq_am']),
+            'chkonpm': echart_handler.scatter(u'下班时间', [15,20], _members_checkon[_m]['seq_pm']),
+            'chkonwork': echart_handler.scatter(u'工作时长', [4, 10], _members_checkon[_m]['seq_work'])
         }
 
     _act_user = 0
@@ -1562,9 +1596,9 @@ def set_context():
         reim=echart_handler.get_geo(u"报账", u"信息来源于差旅报账申请", _reim_addr_data),
         persionTask=echart_handler.scatter(u'任务/人', [0, _persion_max/2], _persion),
         dateTask=echart_handler.scatter(u'任务/天', [0, _persion_max/2], _date),
-        chkonam=echart_handler.scatter(u'上班时间', [0,12], _checkon_am_data),
-        chkonpm=echart_handler.scatter(u'下班时间', [8,24], _checkon_pm_data),
-        chkonwork=echart_handler.scatter(u'工作时长', [0, 12], _checkon_work),
+        chkonam=echart_handler.scatter(u'上班时间', [6,10], _checkon_am_data),
+        chkonpm=echart_handler.scatter(u'下班时间', [15,20], _checkon_pm_data),
+        chkonwork=echart_handler.scatter(u'工作时长', [4, 10], _checkon_work),
     )
 
     key_member_checkon.set(

@@ -284,7 +284,7 @@ def scatter(title, range_def, data, size=None):
                           )
 
     scatter.add("", range(len(data)), data,
-                visual_range=range_def,
+                visual_range_size=range_def,
                 is_visualmap=False,
                 visual_range_color=range_color,
                 mark_line=['average'],
@@ -420,7 +420,7 @@ def gauge(title, ratio):
     return chart.render_embed()
 
 
-def lines(data):
+def lines(data, width=None, height=None):
 
     _max = 0
     _t = []
@@ -431,10 +431,17 @@ def lines(data):
             if data[_d][_dd] > _max:
                 _max = data[_d][_dd]
 
+    if (width is None) or (height is None):
+        _width = 1200
+        _height = 600
+    else:
+        _width = width
+        _height = height
     _line = Line(u"",
-                 width=1200, height=600,
-                 background_color='#b0bab9',
-                 title_pos="center")
+                 width=_width, height=_height,
+                 # background_color='#b0bab9',
+                 title_pos="center"
+                 )
 
     _title = []
     for __t in sorted(_t):
@@ -443,7 +450,9 @@ def lines(data):
     print _title
 
     for _d in data:
-        _v = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        _v = []
+        for _i in range(len(_title)):
+            _v.append(0)
         for _dd in sorted(data[_d]):
             if _dd not in _title:
                 continue
@@ -461,8 +470,8 @@ def lines(data):
                   legend_top='top',
                   is_label_show=True,
                   is_focusnode=True,
-                  mark_line=['average'],
-                  mark_point=['max', 'min'],
+                  # mark_line=['average'],
+                  # mark_point=['max', 'min'],
                   symbol=None)
     _line.options['toolbox']['show'] = False
     return _line.render_embed()
@@ -485,7 +494,8 @@ def lines_by_pj(pj, data):
     _line = Line(u"",
                  width=100, height=60,
                  background_color='#b0bab9',
-                 title_pos="center")
+                 title_pos="center",
+                 )
 
     _title = []
     for __t in sorted(_t):
@@ -493,12 +503,64 @@ def lines_by_pj(pj, data):
     _title = _title[-12:]
     print _title
 
-    _v = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    _v = []
+    for _i in range(len(_title)):
+        _v.append(0)
     for _dd in sorted(data[pj]):
         if _dd not in _title:
             continue
         _idx = _title.index(_dd)
         _v[_idx] = data[pj][_dd]
+    print _v
+
+    _line.add(pj, _title, _v,
+              is_fill=True,
+              # is_stack=True,
+              line_opacity=0.2,
+              area_opacity=0.4,
+              # is_smooth=True,
+              is_legend_show=False,
+              # is_label_show=False,
+              is_focusnode=True,
+              symbol=None)
+    _line.options['toolbox']['show'] = False
+    return _line.render_embed()
+
+
+def lines_member_by_pj(pj, data):
+    """
+    展示指定项目的分布
+    :param pj: 指定的项目
+    :param data: 数据集
+    :return: 展示图
+    """
+
+    _t = []
+    for _d in data:
+        for _dd in data[_d]:
+            if _dd not in _t:
+                _t.append(_dd)
+
+    _line = Line(u"",
+                 width=100, height=60,
+                 background_color='#b0bab9',
+                 title_pos="center",
+                 )
+
+    _title = []
+    for __t in sorted(_t):
+        _title.append(__t)
+    _title = _title[-12:]
+    print _title
+
+    _v = []
+    for _i in range(len(_title)):
+        _v.append(0)
+    for _dd in sorted(data[pj]):
+        if _dd not in _title:
+            continue
+        _idx = _title.index(_dd)
+        _v[_idx] = data[pj][_dd]*10
     print _v
 
     _line.add(pj, _title, _v,

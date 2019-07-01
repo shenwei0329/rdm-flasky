@@ -225,7 +225,7 @@ def personal():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    return render_template('personal.html', **get_contexts([key_personal, key_member_checkon]))
+    return render_template('personal.html', **get_contexts([key_personal, key_member_checkon, key_project]))
 
 
 @main.route('/member_select/<value>')
@@ -233,7 +233,7 @@ def member_select(value):
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    return render_template('personal_desc.html', **get_contexts([key_personal, key_member_checkon], data=value))
+    return render_template('personal_desc.html', **get_contexts([key_personal, key_member_checkon, key_project], data=value))
 
 
 @main.route('/evaluation')

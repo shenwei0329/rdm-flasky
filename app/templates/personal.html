@@ -173,12 +173,32 @@
                                     &nbsp;&nbsp;&nbsp;&nbsp;无工作特征。
                                 {% endif %}
                             <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>项目投入情况</b></h5>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;说明：下表内容是对一年内所有参与项目过程的相关数据统计。</p>
+                            <table border="1" width="600px">
+                                <tr>
+                                    <th style="text-align:center"><b>项目</b></th>
+                                    <th width="100px" style="text-align:center"><b>趋势</b></th>
+                                </tr>
+                                {% for _p in project_member_stat[username] %}
+                                <tr>
+                                    <td>&nbsp;&nbsp;<b>{{ _p }}</b></td>
+                                    <td>{{ project_member_echarts_list[username][_p] | safe}}</td>
+                                </tr>
+                                <tr></tr>
+                                {% endfor %}
+                            </table>
+                            <h5><b>一年内各项目资源投入分布</b><sub>&nbsp;&nbsp;&nbsp;&nbsp;注：指标为对各项目的关注度</sub></h5>
+                            <p>
+                                {{ project_member_echarts[username] | safe }}
+                            </p>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
                             <h5><b>后期工作内容</b></h5>
-                                <table border="1" width="800px" rules=none>
+                                <table border="1" width="880px" rules=none>
                                     {% for _d in sorted(log[username])[-12:] %}
                                     <tr>
                                             <td width="120px" style="text-align:left"><b>&nbsp;&nbsp;{{ _d['date'] }}</b></td>
-                                        <td width="200px" style="text-align:left">&nbsp;&nbsp;{{ _d['project'] }}</td>
+                                        <td width="300px" style="text-align:left">&nbsp;&nbsp;{{ _d['project'] }}</td>
                                         <td style="text-align:left"><p>{{ _d['summary'] }}</p></td>
                                     </tr>
                                     {% endfor %}

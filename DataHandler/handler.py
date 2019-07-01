@@ -210,7 +210,7 @@ def get_trip_data(st_date, ed_date):
     for _d in range(1, 13):
         _date.append(_month_stat[str(_d)])
 
-    print _date
+    # print _date
 
     for _m in _members:
         for _d in range(1, 13):
@@ -269,7 +269,7 @@ def get_reim_data(st_date, ed_date):
     for _d in range(1, 13):
         _date.append(_month_stat[str(_d)])
 
-    print _date
+    # print _date
 
     for _m in _members:
         for _d in range(1, 13):
@@ -492,9 +492,22 @@ def get_hr_stat_by_name(p_name, st_date, ed_date):
     :return:
     """
 
+    """
     mongo_db.connect_db(p_name)
-    _rec = mongo_db.handler('worklog', 'find', {"$and": [{"created": {"$gte": "%s" % st_date}},
-                                                         {"created": {"$lt": "%s" % ed_date}}]})
+    _rec = mongo_db.handler('worklog', 'find',
+                            {"$and": [
+                                {"created": {"$gte": "%s" % st_date}},
+                                {"created": {"$lt": "%s" % ed_date}}]
+                            })
+    """
+    mongo_db.connect_db("WORK_LOGS")
+    _rec = mongo_db.handler('worklog', 'find',
+                            {"$and": [
+                                {"summary": {'$regex': ".*%s-.*" % p_name}},
+                                {"created": {"$gte": "%s" % st_date}},
+                                {"created": {"$lt": "%s" % ed_date}}]
+                            }
+                            )
     _month_stat = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0}
     personal = {}
     date = {}
@@ -698,9 +711,11 @@ def get_ticket_stat(st_date, ed_date):
 
     _date = st_date.split('-')
     _st_date = u"%d年%d月%d日" % (int(_date[0]), int(_date[1]), int(_date[2]))
+    _st_int = (int(_date[0])*100 + int(_date[1]))*100 + int(_date[2])
 
     _date = ed_date.split('-')
     _ed_date = u"%d年%d月%d日" % (int(_date[0]), int(_date[1]), int(_date[2]))
+    _ed_int = (int(_date[0])*100 + int(_date[1]))*100 + int(_date[2])
 
     """统计个人机票数据
     """
@@ -721,6 +736,19 @@ def get_ticket_stat(st_date, ed_date):
     addr_data = {}
 
     for _r in _rec:
+
+        _str = _r[u"起飞时间"].split(u"年")
+        _v1 = int(_str[0])
+        _str = _str[1].split(u"月")
+        _v2 = int(_str[0])
+        _str = _str[1].split(u"日")
+        _v3 = int(_str[0])
+        _date_v = (_v1*100 + _v2)*100 + _v3
+
+        print(">>> %d : [%d, %d]" % (_date_v, _st_int, _ed_int))
+
+        if (_date_v <= _st_int) or (_date_v > _ed_int):
+            continue
 
         if (u'乘机人' in _r) and (_r[u'乘机人'] not in _members):
             _members[_r[u'乘机人']] = {
@@ -764,7 +792,7 @@ def get_ticket_stat(st_date, ed_date):
                 else:
                     _members[_r[u'乘机人']]['addr_data'][__addr] += 1
 
-                print(u">>> %s：to %s" % (_r[u'乘机人'], __addr))
+                # print(u">>> %s：to %s" % (_r[u'乘机人'], __addr))
 
         _date = datetime.datetime.strptime(_r[u'起飞时间'].replace(u'年', '-').replace(u'月', '-').replace(u'日', ""),
                                            u'%Y-%m-%d')
@@ -797,11 +825,11 @@ def get_ticket_stat(st_date, ed_date):
         _date_cost.append(int(_month_cost_stat[str(_d)]/1000.))
 
     for _m in _members:
-        print(u">>> 乘机人：%s" % _m)
+        # print(u">>> 乘机人：%s" % _m)
         for _d in range(1, 13):
             _members[_m]['date_cost'].append(int(_members[_m]['month_cost_stat'][str(_d)] / 1000.))
 
-    print _date, _date_cost
+    # print _date, _date_cost
 
     return _cost, addr_data, _date, _date_cost, _members
 
@@ -1625,7 +1653,7 @@ def cal_personal_checkon(personal, st_date, ed_date):
         _date = '20' + _rec[0].split('^')[0][:8]
         if is_date_aft(_date, st_date) and is_date_bef(_date, ed_date):
             _total += 4
-            print personal, "AM: ", _date, st_date, ed_date, _total
+            # print personal, "AM: ", _date, st_date, ed_date, _total
 
     """统计下午出勤工时"""
     _sql = u'select KQ_DATE from checkon_t where KQ_NAME="%s" and ' % personal
@@ -1635,7 +1663,7 @@ def cal_personal_checkon(personal, st_date, ed_date):
         _date = '20' + _rec[0].split('^')[0][:8]
         if is_date_aft(_date, st_date) and is_date_bef(_date, ed_date):
             _total += 4
-            print personal, "PM: ", _date, st_date, ed_date, _total
+            # print personal, "PM: ", _date, st_date, ed_date, _total
 
     return _total
 
