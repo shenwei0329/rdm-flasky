@@ -10,9 +10,7 @@ import mongodb_class
 import sys
 import member
 import handler
-import server
 import echart_handler
-import redis_class
 
 import logging
 
@@ -27,12 +25,14 @@ spi_for_honor = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟']
 spi_for_group = [u'谭颖卿', u'向晓燕', u'吴丹阳', u'沈伟', u'吴昱珉',
                  u'杨飞', u'柏银', u'王学凯', u'饶定远', u'王宇',
                  u'杨勇', u'李诗', u'金日海', u'雷东东', u'蒲治国'
-                 u'何坤峰', u'刘伟'
+                 u'何坤峰', u'刘伟', u'许文宝',
                  ]
 """参与项目开发的部门"""
 pj_devel_dpt = [u'行业营销部',
+                u'行业营销事业部',
                 u'解决方案与交付中心',
-                u'新型智慧城市及运营商事业部']
+                u'新型智慧城市及运营商事业部',
+                u'外包']
 
 
 class Personal:
@@ -48,6 +48,10 @@ class Personal:
         :return:
         """
 
+        """【注意】personal与members的区别
+            在personal中保存的是与部门相关的人员及其工作数据（任务和工作日志）
+            在members中仅保存公司所有（在职，包含外包）人员信息及其归属部门，注：外包人员归属项目/交付中心
+        """
         """人员集"""
         self.personal = {}
 
@@ -78,7 +82,7 @@ class Personal:
         清除信息【注：已废除】
         :return:
         """
-        # self.personal = {}
+        self.personal = {}
         pass
 
     def setDate(self, date, whichdate=None):
@@ -93,11 +97,12 @@ class Personal:
         if whichdate is not None:
             self.whichdate = whichdate
 
-    def _getTaskListByPersonal(self, project, dpt):
+    def _getTaskListByPersonal(self, project, dpt, extTask):
         """
         按组列出 人员-任务
         :param project: 项目
         :param dpt: 部门
+        :param extTask:
         :return:
         """
 
@@ -129,7 +134,8 @@ class Personal:
             if _issue['users'] in spi_list:
                 continue
             if _issue['users'] not in self.members:
-                # logging.log(logging.WARN, u">>> user(%s) not in members" % _issue['users'])
+                """有可能是：1）新员工；2）外包人员"""
+                logging.log(logging.WARN, u">>> user(%s) not in members" % _issue['users'])
                 continue
 
             if u"项目开发" in dpt:
@@ -146,9 +152,9 @@ class Personal:
                 _task[_i] = _issue[_i]
 
             _issue_class = _issue['issue'].split('-')[0]
-            if _issue_class in ['CPSJ', 'FAST', 'HUBBLE', 'ROOOT']:
+            if _issue_class in handler.pd_list:
                 _task['ext'] = False
-                if _issue in server.extTask:
+                if _issue in extTask:
                     _task['ext'] = True
             else:
                 _task['ext'] = True
@@ -297,14 +303,18 @@ class Personal:
             # logging.log(logging.WARN, u'%s' % _m)
             self.members[_m[u'人员姓名']] = _m[u'部门']
 
-    def scanProject(self, project, dpt):
+    def scanProject(self, project, dpt, extTask):
 
         logging.log(logging.WARN, u">>> PersonalStat.scanProject(%s,%s)@(%s,%s)" %
                     (project, dpt, self.st_date, self.ed_date))
 
+        """获取注册人员"""
         self.scanMember()
-        self._getTaskListByPersonal(project, dpt)
+        """按人员统计项目任务"""
+        self._getTaskListByPersonal(project, dpt, extTask)
+        """按人员统计工作日志"""
         self._getWorklogListByPersonal(project)
+        """计算工作指标"""
         self.calWorkInd()
 
     def getPersonal(self, name=None):
@@ -353,20 +363,27 @@ class Personal:
             _count += self.personal[_p].get_work_log_count()
         return _count
 
-    def getNumbOfMember(self):
+    def getNumbOfMember(self, ext=False):
         """
         获取员工个数
         :return: 个数
         """
-        return len(self.personal)
+        if not ext:
+            return len(self.personal)
+        else:
+            _cnt = 0
+            for _p in self.personal:
+                if u'外包' in self.personal[_p].get_dpt():
+                    _cnt += 1
+            return _cnt
 
-    def calWorkInd(self):
+    def calWorkInd(self, be_log=False):
         """
         计算个人工作量指标
         :return: 个人工作量指标集合
         """
         for _p in self.personal:
-            self.personal[_p].cal_quota(self.st_date, self.ed_date)
+            self.personal[_p].cal_quota(self.st_date, self.ed_date, log_enabled=be_log)
 
     def calTaskInd(self):
         """
@@ -402,6 +419,10 @@ class Personal:
                 _ind.append(__ind["spent_doing"])
             elif ind_type == "spent_done":
                 _ind.append(__ind["spent_done"])
+            elif ind_type == "agg_doing":
+                _ind.append(__ind["agg_doing"])
+            elif ind_type == "agg_done":
+                _ind.append(__ind["agg_done"])
             else:
                 continue
             _personal.append(_p)
@@ -415,6 +436,10 @@ class Personal:
         """
         _personal = ()
         for _p in self.personal:
+
+            if u'外包' in self.personal[_p].get_dpt():
+                continue
+
             if _p not in spi_for_honor:
                 _q, _ext_q = self.personal[_p].get_quota()
                 _personal += (_p, int(_q + _ext_q),),
@@ -492,6 +517,10 @@ class Personal:
             for _p in self.personal:
                 """创建个人节点及其工作量链接
                 """
+
+                if _p in spi_for_group:
+                    continue
+
                 _node = {'name': _p}
                 if _node not in self.nodes:
                     self.nodes.append(_node)
@@ -526,3 +555,83 @@ class Personal:
 
         return echart_handler.sankey_charts('', self.nodes, self.links)
 
+    def buildSanKeyFrPj(self, date, PjList):
+        """
+        按指定日期（通常为一个月）构建"个人-任务量-项目"的sankey图
+        :param date: 一组日期（通常按一个月为一个单元），如[{'year': 2018, 'month': 3},...]
+        :param PjList: 项目节点
+        :return: echarts图
+        """
+
+        self.nodes = []
+        self.links = []
+
+        for _date in date:
+
+            """获取指定日期
+            """
+            year = _date['year']
+            month = _date['month']
+
+            """计算指定日期的起始、截止日期
+            """
+            _v = handler.cal_one_month(year, month)
+            _st_date = _v['st_date']
+            _ed_date = _v['ed_date']
+
+            for _pj in PjList:
+                """节点："项目"
+                """
+                _str = "%s @%d-%02d" % (_pj, year, month)
+
+                if {'name': _str} not in self.nodes:
+                    self.nodes.append({'name': _str})
+
+            for _p in self.personal:
+                """创建个人节点及其工作量链接
+                """
+                if _p in spi_for_group:
+                    continue
+
+                _node = {'name': _p}
+                if _node not in self.nodes:
+                    self.nodes.append(_node)
+
+                self.personal[_p].cal_plan_quota_for_pj(_st_date, _ed_date)
+                self.personal[_p].cal_quota_for_pj(_st_date, _ed_date)
+
+                _q, _ext_q = self.personal[_p].get_quota()
+                """建立"个人"与"日期"之间基于工作量的链接
+                """
+                for _pj in _q:
+                    _str = "%s @%d-%02d" % (_pj, year, month)
+                    self._add_link(_p, _str, _q[_pj])
+                    """
+                    logging.log(logging.WARN, ">>> PersonalStat.buildFrPjSanKey.addLink: %s,%s,%s" %
+                                (_p, _str, _q))
+                    """
+
+        return echart_handler.sankey_charts('', self.nodes, self.links)
+
+    def build_efficiency(self):
+        """
+        构建员工工作效率数据
+        :return:
+        """
+        _x = []
+        _y = []
+        _i = 0
+        for _p in self.personal:
+            if _p in spi_for_group:
+                continue
+            _m = self.personal[_p].get_m()
+            if len(_m) == 0:
+                _m = [0]
+            _x.append(_i)
+            """标注员工名称！！！"""
+            # _x.append(_p)
+            _y.append(_m)
+            logging.log(logging.WARN, u"Efficiency: %d: %s-<%s>" % (_i, _p, _m))
+            _i += 1
+
+        return _x, _y

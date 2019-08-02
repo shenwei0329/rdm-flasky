@@ -1,3 +1,5 @@
+#coding=utf-8
+
 from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_user, logout_user, login_required, \
     current_user
@@ -14,6 +16,7 @@ import sys
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
 
 @auth.before_app_request
 def before_request():
@@ -68,9 +71,7 @@ def logout():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(email=form.email.data,
-                    username=form.username.data,
-                    password=form.password.data)
+        user = User(email=form.email.data, username=form.username.data, password=form.password.data)
         db.session.add(user)
         db.session.commit()
         token = user.generate_confirmation_token()

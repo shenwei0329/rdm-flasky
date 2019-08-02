@@ -1,0 +1,129 @@
+                        <div>
+                            <h4  style="text-align:left">
+                                <img src="static/personal/{{ members[int(value)] }}.jpg" width=100px height=140px align="middle">
+                                &nbsp;&nbsp;&nbsp;&nbsp;员工：<b>{{ members[int(value)] }}</b>，个人信息。
+                                <hr style="height:4px;border:none;border-top:4px groove skyblue;"/>
+                            </h4>
+                            {% if members[int(value)] in list %}
+                                {% for _text in list[members[int(value)]]['text'] %}
+                                <p>{{ _text }}</p>
+                                {% endfor %}
+                            {% endif %}
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            {% if my in members_checkon %}
+                            <h5><b>近期考勤情况</b></h5>
+                            <table>
+                                <tr>
+                                    <th>{{ members_checkon[my]["chkonam"] | safe }}</th>
+                                    <th>{{ members_checkon[my]["chkonpm"] | safe }}</th>
+                                    <th>{{ members_checkon[my]["chkonwork"] | safe }}</th>
+                                </tr>
+                            </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>差旅情况</b>&nbsp;&nbsp;&nbsp;&nbsp;<sub>注：一年内的数据统计</sub></h5>
+                            <table>
+                                <tr>
+                                    <th>
+                                    {% if my in ticket %}
+                                    {{ ticket[my]["planeTicket"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                    <th>
+                                    {% if my in trip %}
+                                    {{ trip[my]["tripMap"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                </tr>
+                                {% if user["role"] <= 2 %}
+                                <tr>
+                                    <td>
+                                    {% if my in ticket %}
+                                    {{ ticket[my]["planeMonth"] | safe }}
+                                    {% endif %}
+                                    </td>
+                                    <td>
+                                    {% if my in trip %}
+                                    {{ trip[my]["tripCount"] | safe }}
+                                    {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            {% if user["role"] <= 2 %}
+                            <h5><b>财务情况</b>&nbsp;&nbsp;&nbsp;&nbsp;<sub>注：一年内的数据统计</sub></h5>
+                            <table>
+                                <tr>
+                                    <th>
+                                    {% if my in loan %}
+                                        {{ loan[my]["tripMonth"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                    <th>
+                                    {% if my in reimbursement %}
+                                    {{ reimbursement[my]["reimMonth"] | safe }}
+                                    {% endif %}
+                                    </th>
+                                </tr>
+                            </table>
+                            {% endif %}
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            {% endif %}
+                            <h5><b>工作情况</b></h5>
+                                {% if members[int(value)] in list %}
+                                <table border="0" width="900px">
+                                    <tr>
+                                        <th width="300px" style="text-align:center">
+                                            <img src="static/member/{{ members[int(value)] }}_工作范围.png" width="260px" height="260px" align="middle">
+                                        </th>
+                                        <th width="300px" style="text-align:center">
+                                            <img src="static/member/{{ members[int(value)] }}_工作主题分布.png" width="260px" height="260px" align="middle">
+                                        </th>
+                                        <th width="300px" style="text-align:center">
+                                            <img src="static/member/{{ members[int(value)] }}_工作行为分布.png" width="260px" height="260px" align="middle">
+                                        </th>
+                                    </tr>
+                                </table>
+                                <br>
+                                {% endif %}
+                                {% if members[int(value)] in list %}
+                                    <pre>{{ list[members[int(value)]]['row'][0][1][1] }}
+                                    </pre>
+                                    <pre>{{ list[members[int(value)]]['row'][1][2][1] }}
+                                    </pre>
+                                {% else %}
+                                    &nbsp;&nbsp;&nbsp;&nbsp;无工作特征。
+                                {% endif %}
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>项目投入情况</b></h5>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;说明：下表内容是对一年内所有参与项目过程的相关数据统计。</p>
+                            <table border="1" width="600px">
+                                <tr>
+                                    <th style="text-align:center"><b>项目</b></th>
+                                    <th width="100px" style="text-align:center"><b>趋势</b></th>
+                                </tr>
+                                {% for _p in project_member_stat[members[int(value)]] %}
+                                <tr>
+                                    <td>&nbsp;&nbsp;<b>{{ _p }}</b></td>
+                                    <td>{{ project_member_echarts_list[members[int(value)]][_p] | safe}}</td>
+                                </tr>
+                                <tr></tr>
+                                {% endfor %}
+                            </table>
+                            <h5><b>一年内各项目资源投入分布</b><sub>&nbsp;&nbsp;&nbsp;&nbsp;注：指标为对各项目的关注度</sub></h5>
+                            <p>
+                                {{ project_member_echarts[members[int(value)]] | safe }}
+                            </p>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                            <h5><b>后期工作内容</b></h5>
+                                <table border="1" width="880px" rules=none>
+                                    {% for _d in sorted(log[members[int(value)]])[-12:] %}
+                                    <tr>
+                                        <td width="120px" style="text-align:left"><b>&nbsp;&nbsp;{{ _d['date'] }}</b></td>
+                                        <td width="300px" style="text-align:left">&nbsp;&nbsp;{{ _d['project'] }}</td>
+                                        <td style="text-align:left"><p>{{ _d['summary'] }}</p></td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            <hr style=" height:2px;border:none;border-top:2px dotted #185598;" />
+                        </div>

@@ -1,0 +1,502 @@
+{% extends "base.html" %}
+
+{% block title %}研发管理信息系统{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+        <div class="head" id="A1">
+            <div class="jumbotron">
+                <div class="container">
+                    <div style="text-align:center" id="vueex">
+                        <h1><b>财务统计</b></h1>
+                        <p v-text="msg"></p>
+                        <p>数据统计日期：{{ reportDate }}</p>
+                    </div>
+                    <script>
+                        let vm = new Vue({
+                            el: '#vueex',
+                            data: {
+                                msg: 'Vue.js版本'
+                            }
+                        })
+                    </script>
+                    <p>
+                        本网页的内容是按照公司财务部门提出需求制作。<br/>
+                        以下所指“项目”皆包含产品项目和市场项目，研发人员包括：产品研发中心、测试部人员。<br/>
+                        研发人员在各项目实际投入的工时，将研发人工成本分摊至各项目。<br/>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="container">
+
+                <div class="container"><h3>产品研发资源在产品开发项目-月计</h3>
+                    <div id="product_project_year_list">（单位：工时）
+                        <table border="2">
+                            <tr>
+                                <th width="300px" style="text-align:center">项目</th>
+                                <th width="120px" style="text-align:center">一月</th>
+                                <th width="120px" style="text-align:center">二月</th>
+                                <th width="120px" style="text-align:center">三月</th>
+                                <th width="120px" style="text-align:center">四月</th>
+                                <th width="120px" style="text-align:center">五月</th>
+                                <th width="120px" style="text-align:center">六月</th>
+                                <th width="120px" style="text-align:center">七月</th>
+                                <th width="120px" style="text-align:center">八月</th>
+                                <th width="120px" style="text-align:center">九月</th>
+                                <th width="120px" style="text-align:center">十月</th>
+                                <th width="120px" style="text-align:center">十一月</th>
+                                <th width="120px" style="text-align:center">十二月</th>
+                                <th width="120px" style="text-align:center">合计</th>
+                            </tr>
+                            {% for _pd_name in sorted(product_pj_task) %}
+                            <tr>
+                                <td>{{ _pd_name }}</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if product_pj_task[_pd_name][_g]>0 %}
+                                            <b style="color:#F00">{{ product_pj_task[_pd_name][_g] }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td>合计</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        <b style="color:#F00">{{ product_pj_task_sum[_g] }}&nbsp;&nbsp;</b>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <br/>
+
+                <div class="container"><h3>产品研发资源在产品类任务的投入明细-月计</h3>
+                    <div id="product_year_list">（单位：工时）
+                        <table border="2">
+                            <tr>
+                                <th width="300px" style="text-align:center">产品单元</th>
+                                <th width="120px" style="text-align:center">一月</th>
+                                <th width="120px" style="text-align:center">二月</th>
+                                <th width="120px" style="text-align:center">三月</th>
+                                <th width="120px" style="text-align:center">四月</th>
+                                <th width="120px" style="text-align:center">五月</th>
+                                <th width="120px" style="text-align:center">六月</th>
+                                <th width="120px" style="text-align:center">七月</th>
+                                <th width="120px" style="text-align:center">八月</th>
+                                <th width="120px" style="text-align:center">九月</th>
+                                <th width="120px" style="text-align:center">十月</th>
+                                <th width="120px" style="text-align:center">十一月</th>
+                                <th width="120px" style="text-align:center">十二月</th>
+                                <th width="120px" style="text-align:center">合计</th>
+                            </tr>
+                            {% for _pd_name in sorted(product_task) %}
+                            <tr>
+                                <td>{{ _pd_name }}</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if product_task[_pd_name][_g]>0 %}
+                                            <b style="color:#F00">{{ product_task[_pd_name][_g] }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td>合计</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        <b style="color:#F00">{{ product_task_sum[_g] }}&nbsp;&nbsp;</b>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <br/>
+
+                {% if user["role"] <= 2 %}
+
+                <!--div id='monthly_work_hour' class="container"><h3>研发中心月工时明细表</h3>
+                    <p>
+                        统计范围：研发人员每人每月的工时，如有不在项目上的工时则单列一列（例如“其他”）。
+                    </p>
+                    <div id="month_selectd"><h4><b style="color:#F00">选择月份：</b></h4></div>
+                    <table>
+                        <tr style="text-align:center">
+                            {% for month in range(1,13) %}
+                            <th width="50px" style="text-align:center">
+                                <input name="monthchkbtn" type="checkbox" value="{{ month }}" v-on:click="say({{ month}})">{{ month }}月</input>
+                            </th>
+                            {% endfor %}
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="100"  v-on:click="say(100)">全选</button>
+                            </th>
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="0"  v-on:click="say(0)">全清</button>
+                            </th>
+                            <th width="120px" style="text-align:center">
+                                <button ref="report_btn" type="button" style="display:none;color:#F00" value="200" v-on:click="say(200)">
+                                    <img src="static/images/excel.png"/>&nbsp;获取报告
+                                </button>
+                            </th>
+                        </tr>
+                    </table>
+                    <script>
+                        new Vue({
+                            el: '#monthly_work_hour',
+                            methods: {
+                                say: function (value){
+                                    var str = "";
+                                    var items = document.getElementsByName("monthchkbtn");
+                                    for (var m = 0; m < 12; m++) {
+                                        if (value==100) {
+                                            items[m].checked = true
+                                        }
+                                        if (value==0) {
+                                            items[m].checked = false
+                                        }
+                                        if (items[m].checked) {
+                                            str += (m+1)+',';
+                                        }
+                                    }
+                                    if (value<200) {
+                                        if (str=="") {
+                                            this.$refs.report_btn.style.display='none';
+                                        }
+                                        else {
+                                            this.$refs.report_btn.style.display='block';
+                                        }
+                                        $("#month_selectd").html('<h4><b style="color:#F00">选择月份：'+
+                                        str+'</b></h4>');
+                                    }
+                                    else {
+                                        alert(">>> 正在建设中 <<<");
+                                    }
+                                }
+                            }
+                        })
+                    </script>
+                </div-->
+
+                <br/>
+
+                {% endif %}
+
+                <div id="test_info" class="container"><h3>测试中心投入明细-月计</h3>
+                    <button id="btn_test_center" type="button" v-on:click="say">显示</button>
+                    <div id="test_center_list" ref="test_list" style="display: none;">（单位：工时）
+                        <table border="2">
+                            <tr>
+                                <th width="300px" style="text-align:center">项目</th>
+                                <th width="120px" style="text-align:center">一月</th>
+                                <th width="120px" style="text-align:center">二月</th>
+                                <th width="120px" style="text-align:center">三月</th>
+                                <th width="120px" style="text-align:center">四月</th>
+                                <th width="120px" style="text-align:center">五月</th>
+                                <th width="120px" style="text-align:center">六月</th>
+                                <th width="120px" style="text-align:center">七月</th>
+                                <th width="120px" style="text-align:center">八月</th>
+                                <th width="120px" style="text-align:center">九月</th>
+                                <th width="120px" style="text-align:center">十月</th>
+                                <th width="120px" style="text-align:center">十一月</th>
+                                <th width="120px" style="text-align:center">十二月</th>
+                                <th width="120px" style="text-align:center">合计</th>
+                            </tr>
+                            {% for _pd_name in sorted(test_task) %}
+                            <tr>
+                                <td>{{ _pd_name }}</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if test_task[_pd_name][_g]>0 %}
+                                            <b style="color:#F00">{{ test_task[_pd_name][_g] }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td>合计</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        <b style="color:#F00">{{ test_task_sum[_g] }}&nbsp;&nbsp;</b>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                    <script>
+                        new Vue({
+                            el: '#test_info',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.test_list.style.display=='none'){
+                                        this.$refs.test_list.style.display='block';
+                                        $("#btn_test_center").html('隐藏');
+                                    }else{
+                                        this.$refs.test_list.style.display='none';
+                                        $("#btn_test_center").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script>
+                </div>
+
+                <div id='test_mx' class="container"><h3>测试资源投入明细</h3>
+
+                    <div id="test_mx_selectd"><h4><b style="color:#F00">选择月份：</b></h4></div>
+                    <table>
+                        <tr style="text-align:center">
+                            {% for month in range(1,13) %}
+                            <th width="50px" style="text-align:center">
+                                <input name="test_monthchkbtn" type="checkbox" value="{{ month }}" v-on:click="say({{ month}})">{{ month }}月</input>
+                            </th>
+                            {% endfor %}
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="100"  v-on:click="say(100)">全选</button>
+                            </th>
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="0"  v-on:click="say(0)">全清</button>
+                            </th>
+                            <th width="120px" style="text-align:center">
+                                <button ref="report_btn" type="button" style="display:none;color:#F00" value="200" v-on:click="say(200)">
+                                    <img src="static/images/excel.png"/>&nbsp;获取明细
+                                </button>
+                            </th>
+                        </tr>
+                    </table>
+                    <div id="test_mx_list" ref="test_mx_list" style="display: none;">
+                    </div>
+                    <script>
+                        new Vue({
+                            el: '#test_mx',
+                            methods: {
+                                say: function (value){
+                                    var str = "";
+                                    var items = document.getElementsByName("test_monthchkbtn");
+                                    for (var m = 0; m < 12; m++) {
+                                        if (value==100) {
+                                            items[m].checked = true
+                                        }
+                                        if (value==0) {
+                                            items[m].checked = false
+                                        }
+                                        if (items[m].checked) {
+                                            if (m<10){
+                                                str += '-0'+(m+1)+'-';
+                                            }else{
+                                                str += '-'+(m+1)+'-';
+                                            }
+                                        }
+                                    }
+                                    if (value<200) {
+                                        if (str=="") {
+                                            this.$refs.report_btn.style.display='none';
+                                        }
+                                        else {
+                                            this.$refs.report_btn.style.display='block';
+                                        }
+                                        $("#test_mx_selectd").html('<h4><b style="color:#F00">选择月份：'+
+                                        str+'</b></h4>');
+                                        this.$refs.test_mx_list.style.display='none';
+                                    }
+                                    else {
+                                        htmlobj=$.ajax({url:"/finance_tc_select/"+str,async:false})
+                                        $("#test_mx_list").html(htmlobj.responseText);
+                                        $("#test_mx_list").show()
+                                        this.$refs.test_mx_list.style.display='block';
+                                    }
+                                }
+                            }
+                        })
+                    </script>
+                    <!--script>
+                        new Vue({
+                            el: '#test_mx',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.test_mx_list.style.display=='none'){
+                                        this.$refs.test_mx_list.style.display='block';
+                                        $("#btn_test_mx").html('隐藏');
+                                    }else{
+                                        this.$refs.test_mx_list.style.display='none';
+                                        $("#btn_test_mx").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script-->
+                </div>
+
+                <br/>
+
+                <div id='pd_pj_month' class="container"><h3>产品研发资源在非产品类任务的投入明细-月计</h3>
+                    <button id="btn_year_desc" type="button" v-on:click="say">显示
+                    </button>
+                    <div id="producting_year_list" ref="pd_year_list" style="display: none;">（单位：工时）
+                        <table border="2">
+                            <tr>
+                                <th width="300px" style="text-align:center">项目</th>
+                                <th width="120px" style="text-align:center">一月</th>
+                                <th width="120px" style="text-align:center">二月</th>
+                                <th width="120px" style="text-align:center">三月</th>
+                                <th width="120px" style="text-align:center">四月</th>
+                                <th width="120px" style="text-align:center">五月</th>
+                                <th width="120px" style="text-align:center">六月</th>
+                                <th width="120px" style="text-align:center">七月</th>
+                                <th width="120px" style="text-align:center">八月</th>
+                                <th width="120px" style="text-align:center">九月</th>
+                                <th width="120px" style="text-align:center">十月</th>
+                                <th width="120px" style="text-align:center">十一月</th>
+                                <th width="120px" style="text-align:center">十二月</th>
+                                <th width="120px" style="text-align:center">合计</th>
+                            </tr>
+                            {% for _pj_name in sorted(pd_project) %}
+                            <tr>
+                                <td>{{ _pj_name }}</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        {% if pd_project[_pj_name][_g]>0 %}
+                                            <b style="color:#F00">{{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;</b>
+                                        {% else %}
+                                            0&nbsp;&nbsp;
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td>合计</td>
+                                {% for _g in range(1,14) %}
+                                    <td style="text-align:right">
+                                        <b style="color:#F00">{{ pd_project_sum[_g] }}&nbsp;&nbsp;</b>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                    <script>
+                        new Vue({
+                            el: '#pd_pj_month',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.pd_year_list.style.display=='none'){
+                                        this.$refs.pd_year_list.style.display='block';
+                                        $("#btn_year_desc").html('隐藏');
+                                    }else{
+                                        this.$refs.pd_year_list.style.display='none';
+                                        $("#btn_year_desc").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script>
+                </div>
+
+                <div id='pd_pj_mx' class="container"><h3>产品研发资源在非产品类任务的资源投入明细</h3>
+
+                    <div id="pd_pj_mx_selectd"><h4><b style="color:#F00">选择月份：</b></h4></div>
+                    <table>
+                        <tr style="text-align:center">
+                            {% for month in range(1,13) %}
+                            <th width="50px" style="text-align:center">
+                                <input name="pd_pj_monthchkbtn" type="checkbox" value="{{ month }}" v-on:click="say({{ month}})">{{ month }}月</input>
+                            </th>
+                            {% endfor %}
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="100"  v-on:click="say(100)">全选</button>
+                            </th>
+                            <th width="50px" style="text-align:center">
+                                <button type="button" value="0"  v-on:click="say(0)">全清</button>
+                            </th>
+                            <th width="120px" style="text-align:center">
+                                <button ref="pd_pj_report_btn" type="button" style="display:none;color:#F00" value="200" v-on:click="say(200)">
+                                    <img src="static/images/excel.png"/>&nbsp;获取明细
+                                </button>
+                            </th>
+                        </tr>
+                    </table>
+
+                    <div id="pd_pj_mx_list" ref="pd_pj_mx_list" style="display: none;">
+                    </div>
+                    <script>
+                        new Vue({
+                            el: '#pd_pj_mx',
+                            methods: {
+                                say: function (value){
+                                    var str = "";
+                                    var items = document.getElementsByName("pd_pj_monthchkbtn");
+                                    for (var m = 0; m < 12; m++) {
+                                        if (value==100) {
+                                            items[m].checked = true
+                                        }
+                                        if (value==0) {
+                                            items[m].checked = false
+                                        }
+                                        if (items[m].checked) {
+                                            if (m<10){
+                                                str += '-0'+(m+1)+'-';
+                                            }else{
+                                                str += '-'+(m+1)+'-';
+                                            }
+                                        }
+                                    }
+                                    if (value<200) {
+                                        if (str=="") {
+                                            this.$refs.pd_pj_report_btn.style.display='none';
+                                        }
+                                        else {
+                                            this.$refs.pd_pj_report_btn.style.display='block';
+                                        }
+                                        $("#pd_pj_mx_selectd").html('<h4><b style="color:#F00">选择月份：'+
+                                        str+'</b></h4>');
+                                        this.$refs.pd_pj_mx_list.style.display='none';
+                                    }
+                                    else {
+                                        htmlobj=$.ajax({url:"/finance_pd_pj_select/"+str,async:false})
+                                        $("#pd_pj_mx_list").html(htmlobj.responseText);
+                                        $("#pd_pj_mx_list").show()
+                                        this.$refs.pd_pj_mx_list.style.display='block';
+                                    }
+                                }
+                            }
+                        })
+                    </script>
+                    <!--script>
+                        new Vue({
+                            el: '#pd_pj_mx',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.pd_pj_mx_list.style.display=='none'){
+                                        this.$refs.pd_pj_mx_list.style.display='block';
+                                        $("#btn_mx").html('隐藏');
+                                    }else{
+                                        this.$refs.pd_pj_mx_list.style.display='none';
+                                        $("#btn_mx").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script-->
+                </div>
+
+                <br/>
+
+        </div>
+
+        <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
+</div>
+{% endblock %}

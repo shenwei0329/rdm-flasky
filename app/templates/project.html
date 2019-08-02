@@ -7,90 +7,166 @@
         <div class="head" id="A1">
             <div class="jumbotron">
                 <div class="container">
-                    <div style="text-align:center">
+                    <div style="text-align:center" id="vueex">
                         <h1><b>项目开发信息</b></h1>
+                        <p v-text="msg"></p>
+                        <p>数据统计日期：{{ reportDate }}</p>
                     </div>
+                    <script>
+                        let vm = new Vue({
+                            el: '#vueex',
+                            data: {
+                                msg: 'Vue.js版本'
+                            }
+                        })
+                    </script>
                     <p>
                         目前，有{{ pj_count }}个项目正在建设中，其中包含已投入开发资源的跟进项目；
                         有{{ pre_pj_count }}个项目正处于商务跟进中。<br/>
-                        共有{{ pj_manager_count }}位项目经理。
+                        共有{{ pj_manager_count }}位项目经理，
+                        项目开发有{{ pj_count }}人，
+                        外包人员有{{ ext_personals_count }}人。
                     </p>
                 </div>
             </div>
+            <!--div class="container">
+                <h3><b>项目经理：</b></h3>
+                <hr>
+                <p>
+                    {% for _p in pj_managers %}
+                        <b>{{ _p }}</b>，负责
+                        {% for _pj in pj_managers[_p] %}
+                            {{ _pj.replace("简称","").replace('：',"").replace(':',"") }}
+                        {% endfor %}
+                        等项目。<br/>
+                    {% endfor %}
+                </p>
+            </div>
+
+            <div class="container">
+                <h3><b>在建项目：</b></h3>
+                <hr>
+                <table border="2">
+                    <tr style="text-align:center">
+                        <th width="300px" style="text-align:center">名称</th>
+                        <th width="140px" style="text-align:center">合同</th>
+                        <th width="140px" style="text-align:center">启动</th>
+                        <th width="140px" style="text-align:center">立项</th>
+                        <th width="140px" style="text-align:center">需求</th>
+                        <th width="140px" style="text-align:center">开发</th>
+                        <th width="140px" style="text-align:center">部署</th>
+                        <th width="140px" style="text-align:center; color:#F00">合同交付</th>
+                    </tr>
+                    {% for pj in projects %}
+                    <tr>
+                        <td>{{ pj['项目名称'][pj['项目名称'].find('(简称'):].replace('简称',"").replace('：',"").replace(':',"") }}</td>
+                        {% if '年' in pj['合同'] %}
+                        <td style="text-align:center; background-color:#0F0;">{{ pj['合同'] }}</td>
+                        {% else %}
+                        <td style="text-align:center">{{ pj['合同'] }}</td>
+                        {% endif %}
+                        {% if '年' in pj['启动'] %}
+                        <td style="text-align:center; background-color:#0F0;">{{ pj['启动'] }}</td>
+                        {% else %}
+                        <td style="text-align:center">{{ pj['启动'] }}</td>
+                        {% endif %}
+                        {% if '年' in pj['实际立项'] %}
+                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际立项'] }}</td>
+                        {% else %}
+                        <td style="text-align:center">{{ pj['实际立项'] }}</td>
+                        {% endif %}
+                        {% if '年' in pj['实际需求设计'] %}
+                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际需求设计'] }}</td>
+                        {% else %}
+                        <td style="text-align:center">{{ pj['实际需求设计'] }}</td>
+                        {% endif %}
+                        {% if '年' in pj['实际研发测试'] %}
+                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际研发测试'] }}</td>
+                        {% else %}
+                        <td style="text-align:center">{{ pj['实际研发测试'] }}</td>
+                        {% endif %}
+                        {% if '年' in pj['实际部署实施'] %}
+                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际部署实施'] }}</td>
+                        {% else %}
+                        <td style="text-align:center">{{ pj['实际部署实施'] }}</td>
+                        {% endif %}
+                        {% if '年' in pj['合同交付日期'] %}
+                        <td style="text-align:center; background-color:#FF0;">{{ pj['合同交付日期'] }}</td>
+                        {% else %}
+                        <td style="text-align:center">{{ pj['合同交付日期'] }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </table>
+                <b style="color:#F00">注：以上日期为阶段完成的时间点；【合同交付】是合同要求的交付日期。</b>
+            </div-->
+
+            <br>
+
+            <div class="container">
+                <h2><b>项目资源投入情况</b></h2>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;说明：下表内容是对一年内，所有参与项目过程的相关资源的数据统计。</p>
+                <table border="1" width="900px">
+                    <tr>
+                        <th width="100px" style="text-align:center"><b>项目</b></th>
+                        <th width="60px" style="text-align:center"><b>人数</b></th>
+                        <th style="text-align:center"><b>人员</b></th>
+                        <th width="100px" style="text-align:center"><b>趋势</b></th>
+                    </tr>
+                    {% for _p in project_list %}
+                    <tr>
+                        <td>&nbsp;&nbsp;<b>{{ _p['project'] }}</b></td>
+                        <td style="text-align:center">{{ _p['count'] }}</td>
+                        <td>{{ _p['member'] }}</td>
+                        <td style="background-color:#b0bab9">{{ project_echarts_list[_p['project']] | safe}}</td>
+                    </tr>
+                    <tr></tr>
+                    {% endfor %}
+                </table>
+                <h2><b>一年内各项目资源投入分布</b><sub>&nbsp;&nbsp;&nbsp;&nbsp;注：指标为资源对各项目的关注度</sub></h2>
+                <p>
+                    {{ project_echarts | safe }}
+                </p>
+            </div>
+
+            <br>
+
+            <div class="container"><h2><b>近三个月的资源投入组成：</b></h2>
+                <p>
+                    {{  pic_pj_sankey | safe }}
+                </p>
+            </div>
+
+            <br/>
+            <!--div class="container"><h2><b>近两周的资源池任务及效率情况</b></h2>
+                <p>
+                    <b>注1</b>：“任务分配”图中每个点表示一个资源（员工），情况分三类：<br/>
+                    &nbsp;&nbsp;•&nbsp;&nbsp;“大圈”表示负载饱和（承担的任务量超过40个工时）；<br/>
+                    &nbsp;&nbsp;•&nbsp;&nbsp;“中圈”表示负载适中（承担的任务量在24至40个工时之间）；<br/>
+                    &nbsp;&nbsp;•&nbsp;&nbsp;“小圈”表示负载欠缺（承担的任务量小于24个工时）。<br/>
+                    <b>注2</b>：“工作效率”图示了每个资源（员工）的任务执行效率统计特征，效率=估计工时/实际工时。
+                </p>
+                <table border="2">
+                    <tr style="text-align:center">
+                        <th width="400px" style="text-align:center">任务分配情况</th>
+                        <th width="800px" style="text-align:center">执行效率情况</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            {{ task_ind_pj_org | safe }}
+                        </td>
+                        <td>
+                            {{ pj_task_efficiency | safe }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <br/>
+
             <div class="list">
                 <ul>
                     <dh>
-                        <div class="container">
-                            <h3><b>项目经理：</b></h3>
-                            <hr>
-                            <p>
-                                {% for _p in pj_managers %}
-                                <b>{{ _p }}</b>，负责
-                                    {% for _pj in pj_managers[_p] %}
-                                    {{ _pj.replace("简称","").replace('：',"").replace(':',"") }}
-                                    {% endfor %}
-                                等项目。<br/>
-                                {% endfor %}
-                            </p>
-                        </div>
-                        <div class="container">
-                            <h3><b>在建项目：</b></h3>
-                            <hr>
-                            <table border="2">
-                                <tr style="text-align:center">
-                                    <th width="300px" style="text-align:center">名称</th>
-                                    <th width="140px" style="text-align:center">合同</th>
-                                    <th width="140px" style="text-align:center">启动</th>
-                                    <th width="140px" style="text-align:center">立项</th>
-                                    <th width="140px" style="text-align:center">需求</th>
-                                    <th width="140px" style="text-align:center">开发</th>
-                                    <th width="140px" style="text-align:center">部署</th>
-                                    <th width="140px" style="text-align:center; color:#F00">合同交付</th>
-                                </tr>
-                                {% for pj in projects %}
-                                <tr>
-                                    <td>{{ pj['项目名称'][pj['项目名称'].find('(简称'):].replace('简称',"").replace('：',"").replace(':',"") }}</td>
-                                    {% if '年' in pj['合同'] %}
-                                        <td style="text-align:center; background-color:#0F0;">{{ pj['合同'] }}</td>
-                                    {% else %}
-                                        <td style="text-align:center">{{ pj['合同'] }}</td>
-                                    {% endif %}
-                                    {% if '年' in pj['启动'] %}
-                                        <td style="text-align:center; background-color:#0F0;">{{ pj['启动'] }}</td>
-                                    {% else %}
-                                        <td style="text-align:center">{{ pj['启动'] }}</td>
-                                    {% endif %}
-                                    {% if '年' in pj['实际立项'] %}
-                                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际立项'] }}</td>
-                                    {% else %}
-                                        <td style="text-align:center">{{ pj['实际立项'] }}</td>
-                                    {% endif %}
-                                    {% if '年' in pj['实际需求设计'] %}
-                                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际需求设计'] }}</td>
-                                    {% else %}
-                                        <td style="text-align:center">{{ pj['实际需求设计'] }}</td>
-                                    {% endif %}
-                                    {% if '年' in pj['实际研发测试'] %}
-                                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际研发测试'] }}</td>
-                                    {% else %}
-                                        <td style="text-align:center">{{ pj['实际研发测试'] }}</td>
-                                    {% endif %}
-                                    {% if '年' in pj['实际部署实施'] %}
-                                        <td style="text-align:center; background-color:#0F0;">{{ pj['实际部署实施'] }}</td>
-                                    {% else %}
-                                        <td style="text-align:center">{{ pj['实际部署实施'] }}</td>
-                                    {% endif %}
-                                    {% if '年' in pj['合同交付日期'] %}
-                                        <td style="text-align:center; background-color:#FF0;">{{ pj['合同交付日期'] }}</td>
-                                    {% else %}
-                                        <td style="text-align:center">{{ pj['合同交付日期'] }}</td>
-                                    {% endif %}
-                                </tr>
-                                {% endfor %}
-                            </table>
-                            <b style="color:#F00">注：以上日期为阶段完成的时间点；【合同交付】是合同要求的交付日期。</b>
-                        </div>
-                        <br/>
                         {% if user["role"] <= 2 or user["role"] == 66 %}
                         <div class="container">
                         <h3><b>争取项目：</b></h3>
@@ -132,12 +208,13 @@
                         </div>
                         {% endif %}
                         <div class="container">
-                        <h3><b>重点项目执行情况：</b></h3>
+                        <h3><b>项目执行情况：</b></h3>
                         <hr>
                         <table border="2">
                             <tr>
-                                <th width="300px" style="text-align:center">项目信息</th>
+                                <th width="200px" style="text-align:center">项目信息</th>
                                 <th width="300px" style="text-align:center">任务情况</th>
+                                <th width="240px" style="text-align:center">执行情况</th>
                             </tr>
                             {% for _p in imp_projects %}
                             <tr>
@@ -150,10 +227,13 @@
                                         人均完成任务：{{ _p['ratio'] }}个
                                     </p>
                                 </td>
-                                <td>
+                                <td style="text-align:center">
                                 {% if _p['total_task']>0 %}
                                     <p>{{ _p['pic'] | safe }}</p>
                                 {% endif %}
+                                </td>
+                                <td style="text-align:center">
+                                <p>{{ _p['task_pic'] | safe }}</p>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -162,7 +242,78 @@
                     </dh>
                 </ul>
             </div>
-        </div>
+
+            <div class="container"><h2><b>外包资源情况</b></h2>
+                    <p><h3>资源统计</h3>
+                    </p>
+                    <div id="ext_info">
+                    <table border="2">
+                            <tr style="text-align:center">
+                                <th width="240px" style="text-align:center">项目</th>
+                                <th width="160px" style="text-align:center">负责人</th>
+                                <th width="120px" style="text-align:center">外包人数</th>
+                                <th width="480px" style="text-align:center">备注</th>
+                            </tr>
+                            {% for _v in ext_personals_stat %}
+                            <tr>
+                                <td style="text-align:left">{{ _v['项目名称'] }}</td>
+                                <td style="text-align:center">{{ _v['项目经理'] }}</td>
+                                <td style="text-align:center">{{ _v['外包人员总数量'] }}</td>
+                                <td style="text-align:left">{{ _v['备注'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                        <br/>
+                        <h3>资源明细</h3>
+                        <button id="btn_ext" type="button" v-on:click="say">显示</button>
+                        <div id="ext_personal_list" ref="ext_list" style="display: none;">
+                            <br/>
+                            <table border="2">
+                                <tr style="text-align:center">
+                                    <th width="240px" style="text-align:center">部门</th>
+                                    <th width="160px" style="text-align:center">项目</th>
+                                    <th width="120px" style="text-align:center">负责人</th>
+                                    <th width="120px" style="text-align:center">人员</th>
+                                    <th width="200px" style="text-align:center">期限</th>
+                                    <th width="180px" style="text-align:center">供应商</th>
+                                    <th width="220px" style="text-align:center">岗位</th>
+                                    <th width="100px" style="text-align:center">工作地点</th>
+                                    <th width="120px" style="text-align:center">备注</th>
+                                </tr>
+                                {% for _v in ext_personals %}
+                                <tr>
+                                    <td style="text-align:left">{{ _v['部门'] }}</td>
+                                    <td style="text-align:left">{{ _v['项目'] }}</td>
+                                    <td style="text-align:center">{{ _v['负责人'] }}</td>
+                                    <td style="text-align:center">{{ _v['姓名'] }}</td>
+                                    <td style="text-align:center">{{ _v['使用期限'] }}</td>
+                                    <td style="text-align:center">{{ _v['所属供应商'] }}</td>
+                                    <td style="text-align:center">{{ _v['所任岗位角色'] }}</td>
+                                    <td style="text-align:center">{{ _v['工作地点'] }}</td>
+                                    <td style="text-align:center">{{ _v['备注'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                    <script>
+                        new Vue({
+                            el: '#ext_info',
+                            methods: {
+                                say: function (){
+                                    if (this.$refs.ext_list.style.display=='none'){
+                                        this.$refs.ext_list.style.display='block';
+                                        $("#btn_ext").html('隐藏');
+                                    }else{
+                                        this.$refs.ext_list.style.display='none';
+                                        $("#btn_ext").html('显示');
+                                    }
+                                }
+                            }
+                        })
+                    </script>
+                </div>
+        </div-->
         <br>
         <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
 </div>

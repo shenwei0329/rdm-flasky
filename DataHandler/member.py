@@ -28,8 +28,8 @@
 
 import mongodb_class
 import handler
-import logging
 import sys
+import logging
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -54,6 +54,7 @@ class Member:
         self.ind = None
         self.mongodb = mongodb_class.mongoDB()
         self.email = self._get_email()
+        self.m = []
         # logging.log(logging.WARN, u">>> Member.__init__(%s,%s,%s)" % (self.name, self.dpt, self.email))
 
     def _get_email(self):
@@ -67,6 +68,9 @@ class Member:
         if _email is not None:
             return _email[u'邮箱地址']
         return None
+
+    def get_dpt(self):
+        return self.dpt
 
     def get_name(self):
         """
@@ -157,6 +161,36 @@ class Member:
         self.plan_quota = _quota
         self.ext_plan_quota = _ext_quota
 
+    def cal_plan_quota_for_pj(self, st_date, ed_date):
+        """
+        计算个人的计划工作量
+        :param st_date: 起始日期
+        :param ed_date: 截止日期
+        :return:
+        """
+
+        _ret = {}
+        _quota = 0.
+
+        for _i in self.task:
+
+            _pj_name = _i['issue'].split('-')[0]
+            if _pj_name not in _ret:
+                _ret[_pj_name] = 0.
+
+            _issue_updated_date = _i["created"].split('T')[0]
+            if handler.is_date_bef(_issue_updated_date, st_date) or handler.is_date_aft(_issue_updated_date, ed_date):
+                continue
+
+            if _i['org_time'] is None:
+                continue
+
+            _quota += float(_i['org_time'])
+
+        _ret[_pj_name] = _quota
+        self.plan_quota = _ret
+        self.ext_plan_quota = _ret
+
     def get_plan_quota(self):
         """
         获取个人计划执工作量
@@ -164,21 +198,24 @@ class Member:
         """
         return self.plan_quota, self.ext_plan_quota
 
-    def cal_quota(self, st_date, ed_date):
+    def cal_quota(self, st_date, ed_date, log_enabled=False):
         """
         计算个人完成工作量
         :param st_date: 起始日期
         :param ed_date: 截止日期
+        :param log_enabled: 是否记录日志
         :return:
         """
 
         _quota = 0.
         _ext_quota = 0.
+        _m = []
 
         for _i in self.task:
 
             _issue_updated_date = _i["updated"].split('T')[0]
             if handler.is_date_bef(_issue_updated_date, st_date) or handler.is_date_aft(_issue_updated_date, ed_date):
+                # print("%s:%s:%s" % (st_date, _issue_updated_date, ed_date))
                 continue
 
             """
@@ -201,8 +238,14 @@ class Member:
                     _ext_quota += _org_time
                 else:
                     _quota += _org_time
+                if u'完成' in _i['status']:
+                    _m.append(1.0)
             else:
                 _miu = _org_time / _spent_time
+                if u'完成' in _i['status']:
+                    if _miu > 2:
+                        _miu = 2.2
+                    _m.append(_miu)
                 if _miu > float(handler.conf.get('QUOTA', 'high_ratio_level')):
                     # 预估时间严重失真
                     _miu = float(handler.conf.get('QUOTA', 'high_ratio_value'))
@@ -212,13 +255,88 @@ class Member:
                 elif _miu > handler.conf.get('QUOTA', 'low_ratio_level'):
                     # 经验问题
                     _miu = float(handler.conf.get('QUOTA', 'low_ratio_value'))
+
                 if _i['ext']:
                     _ext_quota += (_spent_time * _miu)
                 else:
                     _quota += (_spent_time * _miu)
 
+        if log_enabled:
+            logging.log(logging.WARN, u">>>个人任务完成记录：<%s>-<%s> [%s]:%s" % (st_date, ed_date, self.name, _m))
+
+        self.m = _m
         self.quota = _quota
         self.ext_quota = _ext_quota
+
+    def cal_quota_for_pj(self, st_date, ed_date, log_enabled=False):
+        """
+        计算个人完成工作量（面向项目资源）
+        :param st_date: 起始日期
+        :param ed_date: 截止日期
+        :param log_enabled: 是否记录日志
+        :return:
+        """
+
+        _ret = {}
+        _quota = 0.
+        _m = []
+
+        for _i in self.task:
+
+            _pj_name = _i['issue'].split('-')[0]
+            if _pj_name not in _ret:
+                _ret[_pj_name] = 0.
+
+            _issue_updated_date = _i["updated"].split('T')[0]
+            if handler.is_date_bef(_issue_updated_date, st_date) or handler.is_date_aft(_issue_updated_date, ed_date):
+                # print("%s:%s:%s" % (st_date, _issue_updated_date, ed_date))
+                continue
+
+            """
+            if u'完成' not in _i['status']:
+                continue
+            """
+            if (_i['org_time'] is None) and (_i['spent_time'] is None):
+                continue
+            if _i['org_time'] is None:
+                _org_time = float(_i['spent_time'])
+                _spent_time = float(_i['spent_time'])
+            elif _i['spent_time'] is None:
+                _org_time = float(_i['org_time'])
+                _spent_time = float(_i['org_time'])
+            else:
+                _org_time = float(_i['org_time'])
+                _spent_time = float(_i['spent_time'])
+            if _spent_time == 0:
+                _quota += _org_time
+                if u'完成' in _i['status']:
+                    _m.append(1.)
+            else:
+                _miu = _org_time / _spent_time
+                if u'完成' in _i['status']:
+                    if _miu > 2:
+                        _miu = 2.2
+                    _m.append(_miu)
+                if _miu > float(handler.conf.get('QUOTA', 'high_ratio_level')):
+                    # 预估时间严重失真
+                    _miu = float(handler.conf.get('QUOTA', 'high_ratio_value'))
+                elif _miu > float(handler.conf.get('QUOTA', 'middle_ratio_level')):
+                    # 预估时间偏离过大
+                    _miu = float(handler.conf.get('QUOTA', 'middle_ratio_value'))
+                elif _miu > handler.conf.get('QUOTA', 'low_ratio_level'):
+                    # 经验问题
+                    _miu = float(handler.conf.get('QUOTA', 'low_ratio_value'))
+
+                _quota += (_spent_time * _miu)
+
+            _ret[_pj_name] = _quota
+
+        if log_enabled:
+            logging.log(logging.WARN, u">>>个人任务完成记录：<%s>-<%s> [%s]:%s" % (st_date, ed_date, self.name, _m))
+
+        self.m = _m
+        self.quota = _ret
+        self.ext_quota = _ret
 
     def get_quota(self):
         """
@@ -226,6 +344,9 @@ class Member:
         :return: 工作量（分本职的和支撑的，例如：针对产品研发人员，分"产品研发的"和"项目支撑的"）
         """
         return self.quota, self.ext_quota
+
+    def get_m(self):
+        return self.m
 
     def cal_ind(self, st_date, ed_date):
         """
@@ -239,6 +360,8 @@ class Member:
         _done = 0
         _spent_doing = 0
         _spent_done = 0
+        _agg_doing = 0
+        _agg_done = 0
         _ind = {}
         for _i in self.task:
 
@@ -258,10 +381,18 @@ class Member:
                 else:
                     _spent_done += _i['spent_time']
 
+            if _i['agg_time'] is not None:
+                if u'完成' not in _i['status']:
+                    _agg_doing += _i['agg_time']
+                else:
+                    _agg_done += _i['agg_time']
+
         _ind['doing'] = _doing / 3600
         _ind['done'] = _done / 3600
         _ind['spent_doing'] = _spent_doing / 3600
         _ind['spent_done'] = _spent_done / 3600
+        _ind['agg_doing'] = _agg_doing / 3600
+        _ind['agg_done'] = _agg_done / 3600
 
         self.ind = _ind
 

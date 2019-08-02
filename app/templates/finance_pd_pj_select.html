@@ -1,0 +1,31 @@
+                    <div id="pd_pj_mx_list" ref="pd_pj_mx_list">
+                        <table border="2">
+                            <tr>
+                                <th width="120px" style="text-align:center">项目</th>
+                                <th width="120px" style="text-align:center">日期</th>
+                                <th width="60px" style="text-align:center">工时</th>
+                                <th width="180px" style="text-align:center">任务</th>
+                                <th width="80px" style="text-align:center">人员</th>
+                            </tr>
+                            {% for _pj_name in sorted(pd_project) %}
+                                <tr>
+                                <td>{{ _pj_name }}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                </tr>
+                                {% for _t in pd_project[_pj_name]['member'] %}
+                                    {% if _t['date'][4:7] in value %}
+                                    <tr>
+                                        <td></td>
+                                        <td>{{ _t['date'] }}</td>
+                                        <td style="text-align:right">{{ _t['spent_time']/3600 }}</td>
+                                        <td>{{ _t['summary'] }}</td>
+                                        <td>{{ _t['member'] }}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        </table>
+                    </div>

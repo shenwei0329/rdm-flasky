@@ -31,4 +31,22 @@
     min-width:66px;
 }
 
+a.pdflink {
+    background: url(images/pdf.png) no-repeat right top;
+    padding-right: 18px;
+}
+
+#div_wrap{
+    display: flex;
+    flex-wrap: nowrap;
+    padding:4px 4px;
+    background:#eee;
+}
+
+#div_menu{
+    float: left;
+    padding:4px 4px;
+    background:#d9edf7
+}
+
 #

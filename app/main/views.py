@@ -2,21 +2,16 @@
 
 from __future__ import unicode_literals
 
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, url_for
 from . import main
 from flask_login import current_user
-from ..auth import server
-import datetime
 from ..models import Role
-from ..auth import handler
 import sys
 from ..auth import redis_class
+import logging
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
-
-my_context = None
-set_time = None
 
 """所有内容的"正文"都通过Redis获取，"正文"由数据分析处理的中间层生成并放入。
    缓存的"正文"数据应该是全集的（由权限控制具体展现内容）
@@ -29,7 +24,8 @@ key_rdm = redis_class.KeyLiveClass('rdm')
 key_product = redis_class.KeyLiveClass('product')
 # 在研产品"正文"缓存
 key_product_ing = redis_class.KeyLiveClass('product_ing')
-key_product_select = redis_class.KeyLiveClass('product_ing_select')
+key_product_select_FAST = redis_class.KeyLiveClass('product_ing_select.FAST')
+key_product_select_HUBBLE = redis_class.KeyLiveClass('product_ing_select.HUBBLE')
 # 项目管理"正文"缓存
 key_project = redis_class.KeyLiveClass('project')
 # 光荣榜"正文"缓存
@@ -37,22 +33,84 @@ key_honor = redis_class.KeyLiveClass('honor')
 key_honor_3m = redis_class.KeyLiveClass('honor_3m')
 # 管理员"正文"缓存
 key_manage = redis_class.KeyLiveClass('manage')
+# 个人档案
+key_personal = redis_class.KeyLiveClass('personal')
+
+"""个人统计数据"""
+key_member_checkon = redis_class.KeyLiveClass('member_checkon')
+
+"""邮箱"""
+key_email = redis_class.KeyLiveClass('email')
 
 
-def get_context(key):
+def get_context(key, data=None):
 
     _context = key.get()
-    _role = Role.query.filter_by(name=current_user.username).first()
+    _email = key_email.get()
+    _context['email'] = _email['email']
+    _role = Role.query.filter_by(name=current_user.email).first()
     print(">>> role.level = %d" % _role.level)
     _context['user'] = {'role': _role.level}
+
+    if current_user.email in _email['email']:
+        _context['username'] = _email['email'][current_user.email]
+    else:
+        _context['username'] = current_user.username
+        if 'userindex' in _context:
+            """清除原有的内容"""
+            _context.pop('userindex')
+
+    _context['reportDate'] = key_index.get()['reportDate']
+    if data is not None:
+        _context['value'] = data
+    print(">>> reportDate[%s]" % _context['reportDate'])
+    _context['len'] = len
+    _context['range'] = range
+    _context['int'] = int
+    _context['sorted'] = sorted
+
+    return _context
+
+
+def get_contexts(keys, data=None):
+
+    _context = keys[0].get()
+    _email = key_email.get()
+    _context['email'] = _email['email']
+    for _key in keys[1:]:
+        __context = _key.get()
+        for _key in __context:
+            print(">>> get_contexts: _key = %s" % _key)
+            _context[_key] = __context[_key]
+
+    _role = Role.query.filter_by(name=current_user.email).first()
+    print(">>> role.level = %d" % _role.level)
+    _context['user'] = {'role': _role.level}
+
+    if current_user.email in _email['email']:
+        _context['username'] = _email['email'][current_user.email]
+    else:
+        _context['username'] = current_user.username
+        if 'userindex' in _context:
+            """清除原有的内容"""
+            _context.pop('userindex')
+
+    _context['reportDate'] = key_index.get()['reportDate']
+    if data is not None:
+        _context['value'] = data
+        if "members" in _context:
+            _context['my'] = _context["members"][int(data)]
+    print(">>> reportDate[%s]" % _context['reportDate'])
+    _context['len'] = len
+    _context['range'] = range
+    _context['int'] = int
+    _context['sorted'] = sorted
 
     return _context
 
 
 @main.route('/')
 def index():
-    global my_context, set_time
-
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
@@ -61,8 +119,6 @@ def index():
 
 @main.route('/rdm')
 def rdm():
-    global my_context, set_time
-
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
@@ -90,22 +146,12 @@ def pd_select(value):
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    """
-    _desc = handler.get_pd_project_desc(value)
-    _context = server.set_pding_context()
-    _context['pd_code'] = value.lower()
-    _context['pd_landmark'] = u"%s" % _desc[u'里程碑']
-    _context['pd_step'] = u"%s" % _desc[u'当前阶段']
-    _context['total_task'] = _desc[u'任务总数']
-    _context['ed_task'] = _desc[u'已完成任务数']
-    _context['ratio'] = _desc[u'任务完成率']
-    _context['personals'] = handler.get_personal_stat(value)
+    print value
 
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
-    _context['user'] = {'role': role.level}
-    """
-    return render_template('product_desc.html', **get_context(key_product_select[value]))
+    if value.upper() == 'FAST':
+        return render_template('product_desc.html', **get_context(key_product_select_FAST))
+    else:
+        return render_template('product_desc.html', **get_context(key_product_select_HUBBLE))
 
 
 @main.route('/project')
@@ -113,73 +159,22 @@ def project():
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    """
-    role = Role.query.filter_by(name=current_user.username).first()
-    _pj = handler.get_project_info('pj_deliver_t')
-    _val = handler.get_project_info('pj_ing_t')
-    _imp_pj = handler.get_imp_projects()
-    _pj_managers = handler.get_pj_managers()
-    context = dict(
-        user={"role": role.level},
-        projects=_pj,
-        pj_count=len(_pj),
-        pre_projects=_val,
-        pre_pj_count=len(_val),
-        pre_quota=handler.get_sum(_val, u'规模'),
-        imp_projects=_imp_pj,
-        pj_managers=_pj_managers,
-        pj_manager_count=len(_pj_managers),
-    )
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
-    context['user'] = {'role': role.level}
-    """
-    return render_template('project.html', **get_context(key_project))
+    return render_template('project.html', **get_contexts([key_project, key_personal]))
 
 
 @main.route('/honor')
 def honor():
-    global my_context, set_time
-
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    """
-    _context = server.set_honor_context(None, None)
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
-    _context['user'] = {'role': role.level}
-    _context['info'] = u"【本年度】"
-    """
     return render_template('honor.html', **get_context(key_honor))
 
 
 @main.route('/honor_select/<value>')
 def honor_select(value):
-
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    """
-    print(">>> value: %s" % value)
-
-    if value in 'yearly':
-        _context = server.set_honor_context(None, None)
-        _context['info'] = u"【本年度】"
-    elif value in 'monthly':
-        _v = handler.cal_date_monthly(3)
-        _st_date = _v['st_date']
-        _ed_date = _v['ed_date']
-        _context = server.set_honor_context(_st_date, _ed_date)
-        _context['info'] = u"【近三个月】"
-    else:
-        _context = server.set_honor_context('2018-06-04', '2018-06-11')
-        _context['info'] = u"【上周】"
-
-    role = Role.query.filter_by(name=current_user.username).first()
-    print(">>> role.level = %d" % role.level)
-    _context['user'] = {'role': role.level}
-    """
     if value in 'yearly':
         return render_template('honor_desc.html', **get_context(key_honor))
     return render_template('honor_desc.html', **get_context(key_honor_3m))
@@ -187,11 +182,69 @@ def honor_select(value):
 
 @main.route('/manager')
 def manager():
-
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    """
-    _context = server.set_manager_context()
-    """
     return render_template('manager.html', **get_context(key_manage))
+
+
+@main.route('/finance')
+def finance():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('finance.html', **get_context(key_rdm))
+
+
+@main.route('/finance_tc_select/<value>')
+def finance_tc_select(value):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    logging.log(logging.WARN, ">>> finance_tc_select <%s>" % value)
+    return render_template('finance_tc_select.html', **get_context(key_rdm, data=value))
+
+
+@main.route('/finance_pd_pj_select/<value>')
+def finance_pd_pj_select(value):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    logging.log(logging.WARN, ">>> finance_pd_pj_select <%s>" % value)
+    return render_template('finance_pd_pj_select.html', **get_context(key_rdm, data=value))
+
+
+@main.route('/finance_select/<value>')
+def finance_select(value):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('honor_desc.html', **get_context(key_rdm))
+
+
+@main.route('/personal')
+def personal():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('personal.html', **get_contexts([key_personal, key_member_checkon, key_project]))
+
+
+@main.route('/member_select/<value>')
+def member_select(value):
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('personal_desc.html', **get_contexts([key_personal, key_member_checkon, key_project], data=value))
+
+
+@main.route('/evaluation')
+def evaluation():
+    """
+    评定与评估
+    :return:
+    """
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    return render_template('evaluation.html', **get_context(key_personal))
+
+

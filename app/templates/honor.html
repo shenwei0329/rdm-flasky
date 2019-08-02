@@ -79,7 +79,7 @@
                                 <td></td>
                                 {% for _p in pj_list[_i] %}
                                 <td style="text-align:center">
-                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=120px height=160px  align="middle">
+                                    <img src="static/personal/{{ _p['name'] }}.jpg" width=120px height=160px align="middle">
                                     <br/><h4 style="text-align:center"><b style="color:#F00">{{ _p['name'] }}</b></h4>
                                     <h5>指标：{{ _p['quota'] }}</h5>
                                 </td>
@@ -104,9 +104,11 @@
                                 <td></td>
                                 {% for _p in rdm_list[_i] %}
                                 <td style="text-align:center">
+                                    {% if _p['quota'] > 0 %}
                                     <img src="static/personal/{{ _p['name'] }}.jpg" width=120px height=160px  align="middle">
                                     <br/><h4 style="text-align:center"><b style="color:#F00">{{ _p['name'] }}</b></h4>
                                     <h5>指标：{{ _p['quota'] }}</h5>
+                                    {% endif %}
                                 </td>
                                 {% endfor %}
                             </tr>

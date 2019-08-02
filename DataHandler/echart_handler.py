@@ -22,7 +22,8 @@ from pyecharts import Sankey,\
     Scatter,\
     Scatter3D,\
     Line,\
-    Pie
+    Pie,\
+    Gauge
 
 
 def get_geo(title, sub_title, addr_data):
@@ -97,6 +98,36 @@ def bar(title, attr, datas):
     return bar.render_embed()
 
 
+def bar_x(title, attr, data):
+
+    bar = Bar(title,
+              width=320,
+              height=180,
+              title_pos="center",
+              # background_color='#b0bab9',
+              )
+    bar.add(attr[0],
+            [attr[0]],
+            [data[0]],
+            # is_stack=False,
+            # legend_top='bottom',
+            is_label_show=True,
+            label_pos='inside',
+            )
+    bar.add(attr[1],
+            [attr[1]],
+            [data[1]],
+            # is_stack=False,
+            # legend_top='bottom',
+            is_label_show=True,
+            label_pos='inside',
+            is_convert=True,
+            )
+
+    bar.options['toolbox']['show'] = False
+    return bar.render_embed()
+
+
 def boxplot(title, x, y, size=None):
 
     if size is None:
@@ -105,7 +136,7 @@ def boxplot(title, x, y, size=None):
                                 width=320,
                                 height=180,
                                 title_pos="center",
-                                background_color='#f0f0f0',
+                                # background_color='#f0f0f0',
                           )
     else:
         scatter = Boxplot(
@@ -113,7 +144,7 @@ def boxplot(title, x, y, size=None):
                                 width=size['width'],
                                 height=size['height'],
                                 title_pos="center",
-                                background_color='#f0f0f0',
+                                # background_color='#f0f0f0',
                           )
     """计算箱体参数
     """
@@ -121,8 +152,8 @@ def boxplot(title, x, y, size=None):
 
     scatter.add("", x, _yaxis,
                 is_visualmap=False,
-                mark_line=['average'],
-                mark_point=['max', 'min'],
+                # mark_line=['average'],
+                # mark_point=['max', 'min'],
                 )
 
     scatter.options['yAxis'][0]['splitArea'] = True
@@ -193,7 +224,7 @@ def effectscatterByInd(title, datas, size=None):
                                 width=320,
                                 height=180,
                                 title_pos="center",
-                                background_color='#f0f0f0',
+                                # background_color='#f0f0f0',
         )
     else:
         scatter = EffectScatter(
@@ -201,7 +232,7 @@ def effectscatterByInd(title, datas, size=None):
                                 width=size['width'],
                                 height=size['height'],
                                 title_pos="center",
-                                background_color='#f0f0f0',
+                                # background_color='#f0f0f0',
         )
 
     for _val in datas:
@@ -220,11 +251,8 @@ def effectscatterByInd(title, datas, size=None):
         scatter.add("", datas[_val]['x'], datas[_val]['y'],
                     is_visualmap=False,
                     visual_range_color=range_color,
-                    mark_line=['average'],
-                    mark_point=['max', 'min'],
                     effect_scale=_effect_scale,
                     symbol_size=_symbol_size,
-                    legend_top='bottom',
                     )
 
     scatter.options['toolbox']['show'] = False
@@ -256,7 +284,7 @@ def scatter(title, range_def, data, size=None):
                           )
 
     scatter.add("", range(len(data)), data,
-                visual_range=range_def,
+                visual_range_size=range_def,
                 is_visualmap=False,
                 visual_range_color=range_color,
                 mark_line=['average'],
@@ -382,3 +410,169 @@ def heatmap_is_calendar(title, year, datas, size=None):
               )
     chart.options['toolbox']['show'] = False
     return chart.render_embed()
+
+
+def gauge(title, ratio):
+
+    chart = Gauge(title, title_pos='center', width=240)
+    chart.add("", "", ratio)
+    chart.options['toolbox']['show'] = False
+    return chart.render_embed()
+
+
+def lines(data, width=None, height=None):
+
+    _max = 0
+    _t = []
+    for _d in data:
+        for _dd in data[_d]:
+            if _dd not in _t:
+                _t.append(_dd)
+            if data[_d][_dd] > _max:
+                _max = data[_d][_dd]
+
+    if (width is None) or (height is None):
+        _width = 1200
+        _height = 600
+    else:
+        _width = width
+        _height = height
+    _line = Line(u"",
+                 width=_width, height=_height,
+                 # background_color='#b0bab9',
+                 title_pos="center"
+                 )
+
+    _title = []
+    for __t in sorted(_t):
+        _title.append(__t)
+    _title = _title[-12:]
+    print _title
+
+    for _d in data:
+        _v = []
+        for _i in range(len(_title)):
+            _v.append(0)
+        for _dd in sorted(data[_d]):
+            if _dd not in _title:
+                continue
+            _idx = _title.index(_dd)
+            _v[_idx] = float(data[_d][_dd])/float(_max)
+
+        print _v
+
+        _line.add(_d, _title, _v,
+                  is_fill=True,
+                  is_stack=True,
+                  line_opacity=0.2,
+                  area_opacity=0.4,
+                  # is_smooth=True,
+                  legend_top='top',
+                  is_label_show=True,
+                  is_focusnode=True,
+                  # mark_line=['average'],
+                  # mark_point=['max', 'min'],
+                  symbol=None)
+    _line.options['toolbox']['show'] = False
+    return _line.render_embed()
+
+
+def lines_by_pj(pj, data):
+    """
+    展示指定项目的分布
+    :param pj: 指定的项目
+    :param data: 数据集
+    :return: 展示图
+    """
+
+    _t = []
+    for _d in data:
+        for _dd in data[_d]:
+            if _dd not in _t:
+                _t.append(_dd)
+
+    _line = Line(u"",
+                 width=100, height=60,
+                 background_color='#b0bab9',
+                 title_pos="center",
+                 )
+
+    _title = []
+    for __t in sorted(_t):
+        _title.append(__t)
+    _title = _title[-12:]
+    print _title
+
+    _v = []
+    for _i in range(len(_title)):
+        _v.append(0)
+    for _dd in sorted(data[pj]):
+        if _dd not in _title:
+            continue
+        _idx = _title.index(_dd)
+        _v[_idx] = data[pj][_dd]
+    print _v
+
+    _line.add(pj, _title, _v,
+              is_fill=True,
+              # is_stack=True,
+              line_opacity=0.2,
+              area_opacity=0.4,
+              # is_smooth=True,
+              is_legend_show=False,
+              # is_label_show=False,
+              is_focusnode=True,
+              symbol=None)
+    _line.options['toolbox']['show'] = False
+    return _line.render_embed()
+
+
+def lines_member_by_pj(pj, data):
+    """
+    展示指定项目的分布
+    :param pj: 指定的项目
+    :param data: 数据集
+    :return: 展示图
+    """
+
+    _t = []
+    for _d in data:
+        for _dd in data[_d]:
+            if _dd not in _t:
+                _t.append(_dd)
+
+    _line = Line(u"",
+                 width=100, height=60,
+                 background_color='#b0bab9',
+                 title_pos="center",
+                 )
+
+    _title = []
+    for __t in sorted(_t):
+        _title.append(__t)
+    _title = _title[-12:]
+    print _title
+
+    _v = []
+    for _i in range(len(_title)):
+        _v.append(0)
+    for _dd in sorted(data[pj]):
+        if _dd not in _title:
+            continue
+        _idx = _title.index(_dd)
+        _v[_idx] = data[pj][_dd]*10
+    print _v
+
+    _line.add(pj, _title, _v,
+              is_fill=True,
+              # is_stack=True,
+              line_opacity=0.2,
+              area_opacity=0.4,
+              # is_smooth=True,
+              is_legend_show=False,
+              # is_label_show=False,
+              is_focusnode=True,
+              symbol=None)
+    _line.options['toolbox']['show'] = False
+    return _line.render_embed()
+

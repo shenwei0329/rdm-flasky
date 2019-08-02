@@ -1,9 +1,13 @@
 #coding=utf-8
 #
+#   维护“研发管理信息系统”的用户账号
+#   ==================================
+#   2019.6.13 by shenwei @Chengdu
 #
 
 from app import db
 from app.models import User, Role
+from DataHandler import handler
 
 password_str = '-' \
                'JhyVJFVg9wdQNkzMdVbduMRWrJVkhsETkUnAqxVvvyNtoo2yi6zXQwpcJjHoegmbMNPEyQfXtYCKE3ajKasjYRsnhbMQqwRb' \
@@ -257,50 +261,46 @@ email_str = {
     'tangxiaoxiao@chinacloud.com.cn': 'user',
     'xulan@chinacloud.com.cn': 'user',
     'zhangjing_cd@chinacloud.com.cn': 'user',
+    'zhangjing_sh@chinacloud.com.cn': 'user',
     'zhaoyibei@chinacloud.com.cn': 'user',
 
     'chenbeibei@chinacloud.com.cn': 'pj_manager',
     'dinghao@chinacloud.com.cn': 'pj_manager',
 }
 
+mongo_db = handler.mongo_db
 
-def init_users():
 
-    import random
+def modify_users():
 
-    pwd_str_len = len(password_str)
-    print pwd_str_len
+    mongo_db.connect_db('ext_system')
+    _rec = mongo_db.handler('member_email_t', 'find', {})
 
-    for _email in email_str:
+    for _r in _rec:
 
-        _idx = random.randint(1, pwd_str_len-12)
-        _password = str(password_str[_idx:_idx+8])
+        if _r[u'邮箱地址'] in email_str:
+            continue
 
-        # db.session.query(User).filter_by(email=_email).delete(synchronize_session=False)
-        # db.session.commit()
-        user = User.query.filter_by(email=_email).first()
+        user = User.query.filter_by(email=_r[u'邮箱地址']).first()
+
         if user is None:
 
             user = User()
-            user.username = _email
-            user.email = _email
-
-            if email_str[_email] == 'user':
-                _password = '12345678'
-
-            user.password = _password
-            db.session.add(user)
-            db.session.commit()
-
-            # db.session.query(Role).filter_by(name=_email).delete(synchronize_session=False)
-            # db.session.commit()
+            user.username = _r[u'用户姓名']
+            user.email = _r[u'邮箱地址']
+            user.password = "12345678"
 
             role = Role()
-            role.name = _email
-            role.level = role_str[email_str[_email]]
+            role.name = _r[u'邮箱地址']
+            role.level = 99
             role.secretkey = '20131226'
+
+            db.session.add(user)
             db.session.add(role)
             db.session.commit()
 
-            print(">>> user: %s , password: %s" % (_email, _password))
+            user = User.query.filter_by(email=_r[u'邮箱地址']).first()
+            if user is not None:
+                print(u">>> user: %s be added at Role" % _r[u'用户姓名'])
+                print user
 

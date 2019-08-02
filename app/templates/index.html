@@ -7,9 +7,10 @@
         <div class="head" id="A1">
             <div class="jumbotron">
                 <div class="container">
-                    <div  style="text-align:center">
+                    <div style="text-align:center">
                         <h1><b>公司综合信息</b></h1>
                     </div>
+                    <p style="text-align:center">数据统计日期：{{ reportDate }}</p>
                     <p>
                         公司在岗{{ checkStat['actUser'] }}人，信息系统在册{{ taskStat["persion_count"] }}人，
                         执行任务总数{{ taskStat["total"] }}个，完成了{{ taskStat["done"] }}个，
@@ -40,8 +41,8 @@
                     </li>
                     <li>
                         <h2>产品综合</h2>
-                            <button onclick="window.location.href='/product'">产品交付详情</button>
-                            <button onclick="window.location.href='/producting'">产品研发详情</button>
+                            <!--button onclick="window.location.href='/product'">产品交付详情</button>
+                            <button onclick="window.location.href='/producting'">产品研发详情</button-->
                         <hr/>
                         <p>
                         到目前为止，公司已有<b style="color:#F00">{{ pdStat["total"] }}</b>个产品版本正式发布，
@@ -64,7 +65,7 @@
                         </p>
                         <div><h3>资源明细：</h3></div>
                         <p>
-                        今年，产品研发中心共有<b style="color:#F00">{{ taskStat["pd_persion"] }}</b>名员工，
+                        一年内，产品研发中心共有<b style="color:#F00">{{ taskStat["pd_persion"] }}</b>名员工，
                         耗费<b style="color:#F00">{{ taskStat["pd_cost_time"] }}</b>个工时，
                         完成<b style="color:#F00">{{ taskStat["pd_count"] }}</b>项任务。
                         在支撑项目上，共投入<b style="color:#F00">{{ hrStat["pd_pj_time"] }}</b>个工时
@@ -108,7 +109,7 @@
                         <hr>
                         {% if user["role"] <= 2 %}
                         <p>
-                        今年，已发生差旅<b style="color:#F00">{{ tripStat["total"] }}</b>人次，
+                        一年内，发生差旅<b style="color:#F00">{{ tripStat["total"] }}</b>人次，
                         差旅借款<b style="color:#F00">{{ tripStat["loan"] }}</b>万元，
                         机票费<b style="color:#F00">{{ tripStat["ticket"] }}</b>万元，
                         总费用<b style="color:#F00">{{ tripStat["totalcost"] }}</b>万元。<br/>
@@ -141,7 +142,7 @@
                         <h2>考勤综合</h2>
                         <hr>
                         <p>
-                        公司到岗<b style="color:#F00">{{ checkStat['actUser'] }}</b>人，
+                        公司近期到岗<b style="color:#F00">{{ checkStat['actUser'] }}</b>人，
                         员工的上、下班及工作时间数据如下：
                         </p>
                         <table>

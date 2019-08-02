@@ -7,20 +7,32 @@
         <div class="head" id="A1">
             <div class="jumbotron">
                 <div class="container">
-                    <div  style="text-align:center">
+                    <div style="text-align:center" id="vueex">
                         <h1><b>研发管理信息系统</b></h1>
+                        <p v-text="msg"></p>
+                        <p>数据统计日期：{{ reportDate }}</p>
                     </div>
+                    <script>
+                        let vm = new Vue({
+                            el: '#vueex',
+                            data: {
+                                msg: 'Vue.js版本'
+                            }
+                        })
+                    </script>
                     <p>
-                        系统共有{{ total }}人，记录了{{ total_worklog }}条工作日志。<br/>
-                        产品研发中心有{{ pd_count }}人，项目开发有{{ pj_count }}人，
-                        研发管理与测试部有{{ rdm_count }}人。<br/>
-                        外包人员有{{ ext_personals_count }}人。
+                        共有{{ total }}人的工作行为进入系统（其中外包{{ ext_total }}人），记录了{{ total_worklog }}条工作日志。<br/>
+                        产品研发中心有{{ pd_count }}人，研发管理与测试部有{{ rdm_count }}人。<br/>
                     </p>
                 </div>
             </div>
             <div class="list">
                 <div class="container">
-                    <p><h2><b>注册人员：</b><b style="color:#F00">{{ total }}</b>（人）</h2></p>
+                    <p>
+                    <h2><b>人员</b><sub>（具有工作行为数据的）</sub></h2>
+                    <h4>&nbsp;&nbsp;<b>员工：</b><b style="color:#F00">{{ total-ext_total }}</b>（人）</h4>
+                    <h4>&nbsp;&nbsp;<b>外包人员：</b><b style="color:#F00">{{ ext_total }}</b>（人）</h4>
+                    </p>
                 </div>
                 <div class="container"><h2><b>基础数据</b></h2>
                     <p>
@@ -34,30 +46,26 @@
                     项目成果数：<b style="color:#F00">{{ total_material }}</b>（项）
                     </p>
                 </div>
-                {% if user["role"] <= 4 or user["role"] == 66 %}
-                <div class="container"><h2><b>近两周的资源池任务分布情况</b></h2>
+
+                <!--div class="container"><h2><b>近两周的资源池任务及效率情况</b></h2>
                     <p>
-                        注：图中每个点表示一个资源个体（员工），情况分三类：<br/>
-                        >：“大圈”表示负载饱和（承担的任务量超过40个工时）；<br/>
-                        >：“中圈”表示负载适中（承担的任务量在24至40个工时之间）；<br/>
-                        >：“小圈”表示负载欠缺（承担的任务量小于24个工时），
-                        两种解释：1）任务分配不足；2）执行效率高，即能快速完成分配的任务。
+                        <b>注1</b>：“任务分配”图中每个点表示一个资源（员工），情况分三类：<br/>
+                        &nbsp;&nbsp;•&nbsp;&nbsp;“大圈”表示负载饱和（承担的任务量超过40个工时）；<br/>
+                        &nbsp;&nbsp;•&nbsp;&nbsp;“中圈”表示负载适中（承担的任务量在24至40个工时之间）；<br/>
+                        &nbsp;&nbsp;•&nbsp;&nbsp;“小圈”表示负载欠缺（承担的任务量小于24个工时）。<br/>
+                        <b>注2</b>：“工作效率”图示了每个资源（员工）的任务执行效率统计特征，效率=估计工时/实际工时。
                     </p>
                     <table border="2">
+                        <tr style="text-align:center">
+                            <th width="400px" style="text-align:center">任务分配情况</th>
+                            <th width="800px" style="text-align:center">执行效率情况</th>
+                        </tr>
                         <tr>
                             <td>
                                 {{ task_ind_pd_org | safe }}
                             </td>
                             <td>
-                                {{ task_ind_pd | safe }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                {{ task_ind_pj_org | safe }}
-                            </td>
-                            <td>
-                                {{ task_ind_pj | safe }}
+                                {{ pd_task_efficiency | safe }}
                             </td>
                         </tr>
                         <tr>
@@ -65,11 +73,11 @@
                                 {{ task_ind_rdm_org | safe }}
                             </td>
                             <td>
-                                {{ task_ind_rdm | safe }}
+                                {{ test_task_efficiency | safe }}
                             </td>
                         </tr>
                     </table>
-                </div>
+                </div-->
                 <div class="container"><h2><b>产品研发中心支撑项目统计</b></h2>
                     <table border="2">
                         <tr style="text-align:center">
@@ -119,165 +127,10 @@
                     </p>
                 </div>
                 <br/>
-                <div class="container"><h3>产品研发资源在非产品类任务的投入明细-总计</h3>
-                    <button id="btn_desc" type="button" value="show" onclick="btn_onclick(this.value)">显示</button>
-                    <div id="producting_list" style="display: none;">（单位：工时）
-                        <table border="2">
-                            <tr>
-                                <th width="300px" style="text-align:center">项目</th>
-                                <th width="120px" style="text-align:center">产品设计组</th>
-                                <th width="120px" style="text-align:center">云产品组</th>
-                                <th width="120px" style="text-align:center">大数据产品组</th>
-                                <th width="120px" style="text-align:center">系统组</th>
-                                <th width="120px" style="text-align:center">合计</th>
-                            </tr>
-                            {% for _pj_name in sorted(pd_project) %}
-                            <tr>
-                                <td>{{ _pj_name }}</td>
-                                {% for _g in ['CPSJ','FAST','HUBBLE','ROOOT','合计'] %}
-                                    <td style="text-align:right">
-                                    {% if _g in pd_project[_pj_name] %}
-                                        <b style="color:#F00">{{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;</b>
-                                    {% else %}
-                                        0&nbsp;&nbsp;
-                                    {% endif %}
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                </div>
-                <br/>
-                <div class="container"><h3>产品研发资源在非产品类任务的投入明细-月计</h3>
-                    <button id="btn_year_desc" type="button" value="year" onclick="btn_onclick(this.value)">显示</button>
-                    <div id="producting_year_list" style="display: none;">（单位：工时）
-                        <table border="2">
-                            <tr>
-                                <th width="300px" style="text-align:center">项目</th>
-                                <th width="120px" style="text-align:center">一月</th>
-                                <th width="120px" style="text-align:center">二月</th>
-                                <th width="120px" style="text-align:center">三月</th>
-                                <th width="120px" style="text-align:center">四月</th>
-                                <th width="120px" style="text-align:center">五月</th>
-                                <th width="120px" style="text-align:center">六月</th>
-                                <th width="120px" style="text-align:center">七月</th>
-                                <th width="120px" style="text-align:center">八月</th>
-                                <th width="120px" style="text-align:center">九月</th>
-                                <th width="120px" style="text-align:center">十月</th>
-                                <th width="120px" style="text-align:center">十一月</th>
-                                <th width="120px" style="text-align:center">十二月</th>
-                                <th width="120px" style="text-align:center">合计</th>
-                            </tr>
-                            {% for _pj_name in sorted(pd_project) %}
-                            <tr>
-                                <td>{{ _pj_name }}</td>
-                                {% for _g in range(1,14) %}
-                                    <td style="text-align:right">
-                                        {% if pd_project[_pj_name][_g]>0 %}
-                                            <b style="color:#F00">{{ pd_project[_pj_name][_g]/3600 }}&nbsp;&nbsp;</b>
-                                        {% else %}
-                                            0&nbsp;&nbsp;
-                                        {% endif %}
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                </div>
-                {% endif %}
-                <div class="container"><h2><b>外包资源情况</b></h2>
-                    <p><h3>资源统计</h3>
-                    </p>
-                    <div>
-                    <table border="2">
-                            <tr style="text-align:center">
-                                <th width="240px" style="text-align:center">项目</th>
-                                <th width="160px" style="text-align:center">负责人</th>
-                                <th width="120px" style="text-align:center">外包人数</th>
-                                <th width="480px" style="text-align:center">备注</th>
-                            </tr>
-                            {% for _v in ext_personals_stat %}
-                            <tr>
-                                <td style="text-align:left">{{ _v['项目名称'] }}</td>
-                                <td style="text-align:center">{{ _v['项目经理'] }}</td>
-                                <td style="text-align:center">{{ _v['已解决'] }}</td>
-                                <td style="text-align:left">{{ _v['备注'] }}</td>
-                            </tr>
-                            {% endfor %}
-                        </table>
-                        {% if user["role"] <= 4 or user["role"] == 66 %}
-                        <br/>
-                        <h3>资源明细</h3>
-                        <button id="btn_ext" type="button" value="show" onclick="btn_onclick_ext(this.value)">显示</button>
-                        <div id="ext_personal_list" style="display: none;">
-                            <br/>
-                            <table border="2">
-                                <tr style="text-align:center">
-                                    <th width="240px" style="text-align:center">部门</th>
-                                    <th width="160px" style="text-align:center">项目</th>
-                                    <th width="120px" style="text-align:center">负责人</th>
-                                    <th width="120px" style="text-align:center">人员</th>
-                                    <th width="200px" style="text-align:center">期限</th>
-                                    <th width="180px" style="text-align:center">供应商</th>
-                                    <th width="220px" style="text-align:center">岗位</th>
-                                    <th width="100px" style="text-align:center">工作地点</th>
-                                    <th width="120px" style="text-align:center">备注</th>
-                                </tr>
-                                {% for _v in ext_personals %}
-                                <tr>
-                                    <td style="text-align:left">{{ _v['部门'] }}</td>
-                                    <td style="text-align:left">{{ _v['项目'] }}</td>
-                                    <td style="text-align:center">{{ _v['负责人'] }}</td>
-                                    <td style="text-align:center">{{ _v['姓名'] }}</td>
-                                    <td style="text-align:center">{{ _v['使用期限'] }}</td>
-                                    <td style="text-align:center">{{ _v['所属供应商'] }}</td>
-                                    <td style="text-align:center">{{ _v['所任岗位角色'] }}</td>
-                                    <td style="text-align:center">{{ _v['工作地点'] }}</td>
-                                    <td style="text-align:center">{{ _v['备注'] }}</td>
-                                </tr>
-                                {% endfor %}
-                            </table>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
             </div>
         </div>
         <br>
         <div style="text-align:center"><b>版权：</b>中电科华云信息技术有限公司</div>
 </div>
-
-<script type="text/javascript">
-    function btn_onclick(value){
-        if (value=='year'){
-            if (document.getElementById("producting_year_list").style.display=='none'){
-                document.getElementById("producting_year_list").style.display='block';
-                $("#btn_year_desc").html('隐藏');
-            }else{
-                document.getElementById("producting_year_list").style.display='none';
-                $("#btn_year_desc").html('显示');
-            }
-        }else{
-            if (document.getElementById("producting_list").style.display=='none'){
-                document.getElementById("producting_list").style.display='block';
-                $("#btn_desc").html('隐藏');
-            }else{
-                document.getElementById("producting_list").style.display='none';
-                $("#btn_desc").html('显示');
-            }
-        }
-    }
-    function btn_onclick_ext(value){
-        if (document.getElementById("ext_personal_list").style.display=='none'){
-            document.getElementById("ext_personal_list").style.display='block';
-            $("#btn_ext").html('隐藏');
-        }else{
-            document.getElementById("ext_personal_list").style.display='none';
-            $("#btn_ext").html('显示');
-        }
-    }
-</script>
 
 {% endblock %}
