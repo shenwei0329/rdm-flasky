@@ -8,6 +8,8 @@
 from datetime import date
 from DataHandler import exceltools
 from DataHandler import redis_class
+from DataHandler import send_email
+import sys
 
 
 # 研发管理“正文”缓存
@@ -203,6 +205,16 @@ Sheets = [
         "sheets": For_Pm_Sheet
     }
 ]
+Emails = {
+    "To": "guchenchen@chinacloud.com.cn, liangkangli@chinacloud.com.cn",
+    "Cc": "zhangjing_sh@chinacloud.com.cn,lianguo@chinacloud.com.cn"
+}
+"""
+Emails = {
+    "To": "shenwei@chinacloud.com.cn",
+    "Cc": "shenwei0329@hotmail.com"
+}
+"""
 
 
 def write_title(_book, _titles):
@@ -233,6 +245,20 @@ def main():
             write_title(book, _sheet_page["title"])
             _sheet_page["func"](book)
         book.close()
+
+    mail = {
+        "Smtp_Server": "smtp.chinacloud.com.cn",
+        "Smtp_Password": sys.argv[1],
+        "Receivers": Emails["To"],
+        "Cc": Emails["Cc"],
+        "From": "RD-MIS@chinacloud.com.cn",
+        "To": Emails["To"],
+        "Msg_Title": "An Auto-Reply email by R&D MIS",
+        "Smtp_Sender": "shenwei@chinacloud.com.cn",
+        "Text": "由R&D MIS系统自动生成的本年度截至%d月前的研发统计数据见附件，请参考。" % end_month,
+        "Files": ["pd_mis_pm.xls"]
+    }
+    send_email.EmailClass(mail).send()
 
 
 if __name__ == '__main__':
