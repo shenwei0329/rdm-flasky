@@ -207,7 +207,7 @@ Sheets = [
 ]
 Emails = {
     "To": "guchenchen@chinacloud.com.cn, liangkangli@chinacloud.com.cn",
-    "Cc": "zhangjing_sh@chinacloud.com.cn,lianguo@chinacloud.com.cn"
+    "Cc": "zhangjing_sh@chinacloud.com.cn,lianguo@chinacloud.com.cn,shenwei@chinacloud.com.cn"
 }
 """
 Emails = {
@@ -253,7 +253,7 @@ def main():
         "Cc": Emails["Cc"],
         "From": "RD-MIS@chinacloud.com.cn",
         "To": Emails["To"],
-        "Msg_Title": "An Auto-Reply email by R&D MIS",
+        "Msg_Title": "An Auto-Send email by R&D MIS ",
         "Smtp_Sender": "shenwei@chinacloud.com.cn",
         "Text": "由R&D MIS系统自动生成的本年度截至%d月前的研发统计数据见附件，请参考。" % end_month,
         "Files": ["pd_mis_pm.xls"]
