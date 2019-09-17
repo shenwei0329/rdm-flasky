@@ -1175,7 +1175,7 @@ def get_table_count(table, search):
 
 def get_imp_projects():
     """
-    获取2018年度重点项目执行情况
+    获取2018/19年度重点项目执行情况
     :return:
     """
     pj_lists = {'JX': u'JX大数据',
@@ -1186,7 +1186,11 @@ def get_imp_projects():
                 'BJXJC': u'BJ新机场',
                 'JTJD': u'金堂禁毒',
                 'HZZ': u'河长制',
+                'DLHZZ': u'大连河长制',
                 'AH2': u'安徽2期',
+                'HLD': u'葫芦岛',
+                'HBJCY': u'湖北检察院',
+                'JDWL': u'嘉定物联',
                 }
     _personal = PersonalStat.Personal()
     _pjs = []
